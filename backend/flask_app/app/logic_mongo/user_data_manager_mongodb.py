@@ -1,4 +1,4 @@
-from bson import json_util, ObjectId
+from bson import ObjectId
 from app.extensions import mongo
 from app.models.user import User
 from app.logic.user_service import UserService
@@ -8,19 +8,31 @@ class UserDataManagerMongoDB(UserService):
     def __init__(self) -> None:
         self.user_collection = mongo.db["users"]    
 
-    def create_user(self, user: User):
-        inserted_obj = self.user_collection.insert_one(user.__dict__)
+    def create_user(self, user: User) -> User:
+        inserted_obj = self.user_collection.insert_one(user.model_dump(exclude={'id'}))
+        user.id = inserted_obj.inserted_id
+        
+        return user
 
-        return inserted_obj._id
+    def get_user_by_id(self, user_id: str) -> User:
+        user_dict = self.user_collection.find_one({"_id":ObjectId(user_id)})
+        user = User(**user_dict)
 
-    def get_user_by_id(self, user_id: str):
-        return json_util.dumps(self.user_collection.find_one({"_id":ObjectId(user_id)}))
+        return user
 
-    def update_user(self, user_id: str):
-        pass
+    def update_user(self, user_id: str, user: User) -> User:
+        self.user_collection.update_one({"_id":ObjectId(user_id)}, 
+                                        user.model_dump(exclude={'id'}))
+        return user
 
-    def get_all_users(self):
-        return json_util.dumps(self.user_collection.find())
+    def get_all_users(self) -> list[User]:
+        user_dicts = self.user_collection.find()
+        user_list = list()
+        
+        for user_dict in user_dicts:
+            user_list.append(User(**user_dict))
+        
+        return user_list
     
-    def delete_all_users(self):
-        pass
+    def delete_all_users(self) -> None:
+        self.user_collection.delete_many({})

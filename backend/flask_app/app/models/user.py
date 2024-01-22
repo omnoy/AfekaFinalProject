@@ -1,12 +1,15 @@
-from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from bson import ObjectId
+from typing import Optional, Annotated
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.models.object_id_pydantic_annotation import ObjectIdPydanticAnnotation
 from app.models.user_role import UserRole
 
 class User(BaseModel):
-    _id: str | None = None
+    model_config = ConfigDict(populate_by_name=True)
+    id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None,  alias = '_id')
     username: str
-    personal_name: str
+    personal_name: Optional[str] = Field(default = None)
     email: EmailStr
-    position: str | None = None
-    role: UserRole = UserRole.BASIC_USER
+    position: Optional[str] = Field(default = None)
+    role: UserRole = Field(default = UserRole.BASIC_USER)
