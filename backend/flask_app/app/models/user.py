@@ -8,7 +8,7 @@ from app.models.user_role import UserRole
 class User(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None,  alias = '_id')
-    username: str
+    username: str = Field(min_length=1)
     personal_name: Optional[str] = Field(default = None)
     email: EmailStr
     position: Optional[str] = Field(default = None)

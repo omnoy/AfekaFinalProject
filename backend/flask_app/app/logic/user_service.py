@@ -1,4 +1,3 @@
-from bson import json_util, ObjectId
 from app.models.user import User
 
 class UserService:

@@ -1,12 +1,12 @@
 from bson import json_util
 from flask import request, make_response
 from pydantic.json import pydantic_encoder
+from pydantic import TypeAdapter
 from app.users import bp, user_service
 from app.models.user import User
 
 # basic commands
 
-# add json
 @bp.route('/users', methods=['POST'])
 def create_user():
     user_data = request.get_json(silent=True)
@@ -27,7 +27,8 @@ def login(user_id):
 @bp.route('/users/<string:user_id>', methods=['PUT'])
 def update_user(user_id):
     user_data = request.get_json(silent=True)
-    user = User(**user_data)
+    ta = TypeAdapter(User)
+    print(ta.validate_python(user_data))
     user = user_service.update_user(user_id, user)
     
     response = make_response((user.model_dump_json(by_alias=True, indent=4), 200))
@@ -46,5 +47,6 @@ def get_all_users():
 def delete_all_users():
     user_service.delete_all_users()
 
-    response = make_response((None, 200))
+    response = make_response()
+    response.status_code = 200
     return response
