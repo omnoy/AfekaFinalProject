@@ -8,10 +8,9 @@ from app.models.social_media import SocialMedia
 class GeneratedPost(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None,  alias = '_id')
-    title: str = Field(default="Untitled Post", min_length=1)
     user_id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None)
     public_official_id: Annotated[ObjectId, ObjectIdPydanticAnnotation] = Field(default = None)
     prompt: str = Field(min_length=1)
-    parameters: Optional[dict]
+    title: str = Field(default="Untitled Post", min_length=1)
     text: str = Field(min_length=1)
     social_media: Optional[SocialMedia]

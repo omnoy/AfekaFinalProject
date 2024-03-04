@@ -6,7 +6,7 @@ class GeneratedPostService:
         "Initialize Generated Posts Database"
         pass   
 
-    def generate_post(self, generation_prompt: GenerationPrompt) -> GeneratedPost:
+    def generate_post(self, generation_prompt: GenerationPrompt, parameters: dict) -> GeneratedPost:
         "Create a User for the Database using prompt"
         pass
     
