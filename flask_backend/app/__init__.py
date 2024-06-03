@@ -14,13 +14,16 @@ def create_app(config_class=Config):
 
     # register blueprints
     from app.main import bp as main_bp
-    from app.users import bp as users_bp
-    from app.publicofficials import bp as publicofficials_bp
-    from app.generatedposts import bp as generatedposts_bp
+    from app.blueprints.auth import bp as auth_bp
+    from app.blueprints.users import bp as users_bp
+    from app.blueprints.publicofficials import bp as publicofficials_bp
+    from app.blueprints.generatedposts import bp as generatedposts_bp
+    
 
     app.register_blueprint(main_bp)
-    app.register_blueprint(users_bp)
-    app.register_blueprint(publicofficials_bp)
-    app.register_blueprint(generatedposts_bp)
+    app.register_blueprint(auth_bp, url_prefix= "/auth")
+    app.register_blueprint(users_bp, url_prefix="/user")
+    app.register_blueprint(publicofficials_bp, url_prefix="/publicofficial")
+    app.register_blueprint(generatedposts_bp, url_prefix="/postgeneration")
 
     return app
