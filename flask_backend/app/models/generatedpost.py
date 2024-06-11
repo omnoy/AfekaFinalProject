@@ -1,13 +1,11 @@
 from bson import ObjectId
 from typing import Optional, Annotated
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
+from pydantic import Field
 from app.models.object_id_pydantic_annotation import ObjectIdPydanticAnnotation
 from app.models.social_media import SocialMedia
+from app.models.base_class import BaseClass
 
-class GeneratedPost(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None,  alias = '_id')
+class GeneratedPost(BaseClass):
     user_id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None)
     public_official_id: Annotated[ObjectId, ObjectIdPydanticAnnotation] = Field(default = None)
     title: str = Field(default="Untitled Post", min_length=1)

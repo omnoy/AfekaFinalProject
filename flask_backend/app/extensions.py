@@ -1,20 +1,22 @@
-from flask_pymongo import PyMongo
-from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
 from app.generation_model.claude_model import ClaudeModel
-from app.models.user import User
-from bson import ObjectId
+import logging
+import traceback
+import sys
 
-mongo = PyMongo()
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='postGenerator.log', encoding='utf-8', level=logging.DEBUG)
 
-login_manager = LoginManager()
+# log uncaught exceptions
+def log_exceptions(type, value, tb):
+    for line in traceback.TracebackException(type, value, tb).format(chain=True):
+        logging.exception(line)
+    logging.exception(value)
 
-@login_manager.user_loader
-def load_user(user_id: str):
-    # user_load should not raise an exception if id is not valid
-    try:
-        user_dict = mongo.db["users"].find_one({"_id":ObjectId(user_id)})
-        return User(**user_dict)
-    except:
-        return None
+    sys.__excepthook__(type, value, tb) # calls default excepthook
+
+sys.excepthook = log_exceptions
+
+jwt = JWTManager()
 
 generation_model = ClaudeModel()
