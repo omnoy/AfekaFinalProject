@@ -13,7 +13,7 @@ def hash_password(password_plaintext: str) -> str:
 class User(BaseClass):
     email: EmailStr
     password_hash: Annotated[str, AfterValidator(hash_password)] = Field(alias = 'password')
-    username: Optional[str] = Field(default = None)
+    username: str 
     position: Optional[str] = Field(default = None)
     role: UserRole = Field(default = UserRole.BASIC_USER)
     is_authenticated: Optional[bool] = Field(default = True)

@@ -2,6 +2,7 @@ from bson import ObjectId
 from app.models.user import User
 from app.logic.user_service import UserService
 from app.logic.mongo.database import get_user_collection
+from app.models.exceptions.user_already_exists_exception import UserAlreadyExistsException
 
 class UserDataManagerMongoDB(UserService):
     
@@ -9,8 +10,8 @@ class UserDataManagerMongoDB(UserService):
         pass
 
     def create_user(self, user: User) -> User:
-        if get_user_collection().collection.count_documents({ 'email': user.email }, limit = 1):
-            raise Exception("User already exists")
+        if get_user_collection().find_one({"email":user.email}):
+            raise UserAlreadyExistsException("User already exists")
         
         inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
         user.id = inserted_obj.inserted_id

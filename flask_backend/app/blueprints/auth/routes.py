@@ -7,6 +7,7 @@ from app.models.user import User
 from app.extensions import logger, jwt
 from app.logic.mongo.database import get_token_blocklist
 from app.models.token_blocked import TokenBlocked
+from app.models.exceptions.user_already_exists_exception import UserAlreadyExistsException
 # basic commands
 
 @jwt.user_identity_loader
@@ -35,6 +36,7 @@ def check_if_token_revoked(_jwt_header, jwt_data: dict) -> bool:
 def register():
     try:
         user_data = request.get_json(silent=True)
+        logger.info(f'{user_data=}')
         if user_data is None:
             logger.error('No JSON input for registration')
             abort(400, "No JSON input")
@@ -49,7 +51,9 @@ def register():
                 "access_token": access_token,
                 "user": user.model_dump_json(by_alias=True, exclude='password')
             }), 200
-    
+    except UserAlreadyExistsException as e:
+        logger.exception(e)
+        abort(400, str(e))
     except ValidationError as e:
         logger.exception(e)
         abort(400,  f"Invalid JSON input: {str(e)}")
@@ -63,6 +67,7 @@ def register():
 def login():
     try:
         login_data = request.get_json()
+        logger.info(f'{login_data=}')
         if login_data is None:
                 logger.exception('No JSON input for login')
                 return abort(400, "No JSON input")
@@ -90,10 +95,15 @@ def login():
 @bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    current_user = get_current_user()
-    jti = get_jwt()["jti"]
+    try:
+        current_user = get_current_user()
+        jti = get_jwt()["jti"]
 
-    get_token_blocklist().insert_one(TokenBlocked(jti=jti).__dict__)
+        get_token_blocklist().insert_one(TokenBlocked(jti=jti).__dict__)
 
-    logger.info(f"User {current_user} logged out.")
-    return jsonify({"message":f"User {current_user.username} logout successful"}), 200 
+        logger.info(f"User {current_user} logged out.")
+        return jsonify({"message":f"User {current_user.username} logout successful"}), 200 
+    
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
