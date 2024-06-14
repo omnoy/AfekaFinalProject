@@ -1,5 +1,5 @@
 def test_login_user(client, auth):
-    login_info = {"email":"test@test.com", "password": "test"}
+    login_info = {"email":"test@test.com", "password": "testtest"}
 
     auth.create(**login_info)
     
@@ -10,7 +10,7 @@ def test_login_user(client, auth):
 def test_login_user_invalid_email(client, auth):
     auth.create()
 
-    login_info = {"email": "invalidemailaddress", "password": "test"}
+    login_info = {"email": "invalidemailaddress", "password": "testtest"}
 
     response = client.post("/auth/login", json=login_info)
 

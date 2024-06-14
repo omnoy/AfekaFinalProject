@@ -36,7 +36,7 @@ class UserDataManagerMongoDB(UserService):
 
     def update_user(self, user_id: str, user: User) -> User:
         get_user_collection().update_one({"_id":ObjectId(user_id)}, 
-                                        user.model_dump(exclude={'id'}))
+                                        {"$set":user.model_dump(exclude={'id'})})
         return user
 
     def get_all_users(self) -> list[User]:
