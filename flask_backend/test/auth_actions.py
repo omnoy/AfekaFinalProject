@@ -14,19 +14,19 @@ class AuthActions():
             json={'email': email, 'password': password}
         )
 
-        self.access_token = 'Bearer ' + login_response.json['access_token']
+        self.access_token = login_response.json['access_token']
 
         result_dict = {"response": login_response, "access_token": self.access_token}
 
         return result_dict
 
-    def create(self, username='testman', password='testtest', email="test@test.com", position="tester"):
+    def create_basic_user(self, username='testman', password='testtest', email="test@test.com", position="tester"):
         response = self.client.post(
             'auth/register',
             json={'username':username, 'password':password, 'email':email, 'position':position}
         )
 
-        self.access_token = 'Bearer ' +  response.json['access_token']
+        self.access_token = response.json['access_token']
         
         result_dict = {"response": response, "access_token": self.access_token}
 
@@ -42,6 +42,11 @@ class AuthActions():
         result_dict= {"response": result, "access_token": self.access_token}
 
         return result_dict
+    
+    def get_auth_header(self, authentication_token = None):
+        if authentication_token is None:
+            authentication_token = self.access_token
+        return {'Authorization': 'Bearer ' + authentication_token}
 
     def logout(self):
         return self.client.get('auth/logout', headers={'Authorization':self.access_token})

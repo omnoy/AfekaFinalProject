@@ -1,13 +1,13 @@
 from app.logic.mongo.database import get_user_collection
 def test_delete_all_users(client, auth):
     # Test deleting all users
-    auth.create(email="one@mail.com")
-    auth.create(email="two@mail.com")
-    auth.create(email="three@mail.com")
+    auth.create_basic_user(email="one@mail.com")
+    auth.create_basic_user(email="two@mail.com")
+    auth.create_basic_user(email="three@mail.com")
 
     auth.create_admin()
 
-    response = client.delete("/user/all", headers={'Authorization': auth.access_token})
+    response = client.delete("/user/all", headers=auth.get_auth_header())
 
     assert response.status_code == 200
 
@@ -15,12 +15,12 @@ def test_delete_all_users(client, auth):
 
 def test_delete_all_users_unauthorized(client, auth):
     # Test deleting all users
-    auth.create(email="one@mail.com")
-    auth.create(email="two@mail.com")
-    auth.create(email="three@mail.com")
+    auth.create_basic_user(email="one@mail.com")
+    auth.create_basic_user(email="two@mail.com")
+    auth.create_basic_user(email="three@mail.com")
 
-    auth.create()
+    auth.create_basic_user()
 
-    response = client.delete("/user/all", headers={'Authorization': auth.access_token})
+    response = client.delete("/user/all", headers=auth.get_auth_header())
 
     assert response.status_code == 403

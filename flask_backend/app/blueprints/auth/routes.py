@@ -6,7 +6,7 @@ from app.models.user import User
 from app.extensions import logger, jwt
 from app.logic.mongo.database import get_token_blocklist
 from app.models.token_blocked import TokenBlocked
-from app.models.exceptions.user_already_exists_exception import UserAlreadyExistsException
+from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
 from app.models.user_role import UserRole
 # basic commands
 
@@ -23,7 +23,6 @@ def user_loader_callback(_jwt_header, jwt_data):
         return None
     
     return user
-
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(_jwt_header, jwt_data: dict) -> bool:
@@ -52,17 +51,17 @@ def register():
 
         user = User(**user_data)
         user = user_service.create_user(user)
-
-        access_token = create_access_token(identity=user)
+        claims = {"is_admin": user.is_admin()}
+        access_token = create_access_token(identity=user, additional_claims=claims)
 
         return jsonify({
                 "message": "User Registered successfully",
                 "access_token": access_token,
-                "user": user.model_dump_json(by_alias=True, indent=4)
+                "user": user.model_dump(exclude='password')
             }), 200
-    except UserAlreadyExistsException as e:
+    except ObjectAlreadyExistsException as e:
         logger.exception(e)
-        abort(400, str(e))
+        abort(409, str(e))
     except ValidationError as e:
         logger.exception(e)
         abort(400,  f"Invalid JSON input: {str(e)}")
@@ -83,12 +82,13 @@ def login():
 
         user = user_service.get_user_by_email(login_data['email'])
         if user and user.check_password(login_data['password']):
-            access_token = create_access_token(identity=user)
+            claims = {"is_admin": user.is_admin()}
+            access_token = create_access_token(identity=user, additional_claims=claims)
 
             return jsonify({
                     "message": "User Logged In successfully",
                     "access_token":  access_token,
-                    "user": user.model_dump_json(by_alias=True, indent=4)
+                    "user": user.model_dump(exclude='password')
                 }), 200
         else:
             logger.error(f'Invalid Username or Password for {login_data}')

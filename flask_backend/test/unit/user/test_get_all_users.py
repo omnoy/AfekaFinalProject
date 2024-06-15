@@ -2,25 +2,36 @@ import json
 
 def test_get_all_users(client, auth):
     # Test getting all users
-    auth.create(email="one@mail.com")
-    auth.create(email="two@mail.com")
-    auth.create(email="three@mail.com")
+    userlist = []
+    response = auth.create_basic_user(email="one@mail.com")["response"]
+    userlist.append(response.json['user'])
 
-    auth.create_admin()
+    response = auth.create_basic_user(email="two@mail.com")["response"]
+    userlist.append(response.json['user'])
 
-    response = client.get("/user/all", headers={'Authorization': auth.access_token})
+    response = auth.create_basic_user(email="three@mail.com")["response"]
+    userlist.append(response.json['user'])
+
+    response = auth.create_admin()["response"]
+    userlist.append(response.json['user'])
+
+    response = client.get("/user/all", headers=auth.get_auth_header())
 
     assert response.status_code == 200
-    assert len(json.loads(response.json['users'])) == 4
+    response_userlist = response.json['users']
+    assert len(userlist) == 4
+    for response_user in response_userlist:
+        response_user = dict(response_user)
+        assert response_user in userlist
 
 def test_get_all_users_unauthorized(client, auth):
     # Test getting all users
-    auth.create(email="one@mail.com")
-    auth.create(email="two@mail.com")
-    auth.create(email="three@mail.com")
+    auth.create_basic_user(email="one@mail.com")
+    auth.create_basic_user(email="two@mail.com")
+    auth.create_basic_user(email="three@mail.com")
 
-    auth.create()
+    auth.create_basic_user()
 
-    response = client.get("/user/all", headers={'Authorization': auth.access_token})
+    response = client.get("/user/all", headers=auth.get_auth_header())
 
     assert response.status_code == 403

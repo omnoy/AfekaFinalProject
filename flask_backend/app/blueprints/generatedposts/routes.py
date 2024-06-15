@@ -1,24 +1,26 @@
 from bson import json_util
 from flask import render_template
+from flask_jwt_extended import jwt_required
 from app.blueprints.generatedposts import bp, generated_post_service
 from flask import request, make_response
 from pydantic.json import pydantic_encoder
 from app.models.generatedpost import GeneratedPost
 
 @bp.route('/generate', methods=['POST'])
+@jwt_required()
 def generate_post():
     prompt_data = request.get_json(silent=True)
 
     generated_post = generated_post_service.generate_post(**prompt_data)
 
-    response = make_response((generated_post.model_dump_json(by_alias=True, indent=4), 200))
+    response = make_response((generated_post.model_dump_json(indent=4), 200))
     return response
 
 @bp.route('/post/<string:post_id>', methods=['GET'])
 def get_generated_post_by_post_id(post_id):
     generated_post = generated_post_service.get_generated_post_by_id(post_id=post_id)
 
-    response = make_response((generated_post.model_dump_json(by_alias=True, indent=4), 200))
+    response = make_response((generated_post.model_dump_json(indent=4), 200))
     return response
 
 @bp.route('/<string:user_id>', methods=['GET'])

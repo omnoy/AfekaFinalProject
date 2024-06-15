@@ -9,7 +9,7 @@ def test_create_user(client):
     
     assert response.status_code == 200
 
-    response_user_dict = json.loads(json.loads(response.data)['user'])
+    response_user_dict = response.json['user']
     assert all(user_item in response_user_dict.items() for user_item in user_dict.items() if user_item[0] != 'password')
     
     db_user_dict = get_user_collection().find_one({"email":"test@test.com"})
@@ -39,10 +39,10 @@ def test_create_user_missing_field(client):
 def test_create_user_existing_email(client, auth):
     # Test case: Attempt to create a user with an existing email
     existing_email = "existing@test.com"
-    auth.create(email=existing_email)
+    auth.create_basic_user(email=existing_email)
     user_dict = {"username": "newuser", "password": "newpassword", "email": existing_email, "position": "test position"}
     response = client.post("/auth/register", json=user_dict)
-    assert response.status_code == 400  # Bad Request
+    assert response.status_code == 409  # Conflict
 
 def test_create_user_missing_username(client):
     # Test case: Attempt to create a user without providing a username

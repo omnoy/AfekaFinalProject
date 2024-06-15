@@ -31,7 +31,7 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix= "/auth")
     app.register_blueprint(users_bp, url_prefix="/user")
-    app.register_blueprint(publicofficials_bp, url_prefix="/publicofficial")
+    app.register_blueprint(publicofficials_bp, url_prefix="/public-official")
     app.register_blueprint(generatedposts_bp, url_prefix="/postgeneration")
     logger.info('Blueprints Registered')
     

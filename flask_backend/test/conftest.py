@@ -1,7 +1,7 @@
 import pytest
 
 from app import create_app
-from app.logic.mongo.database import get_user_collection, get_po_collection, get_generated_post_collection, get_token_blocklist
+from app.logic.mongo.database import get_user_collection, get_public_official_collection, get_generated_post_collection, get_token_blocklist
 from test.auth_actions import AuthActions
 
 
@@ -11,7 +11,7 @@ def app():
     
     #reset database
     get_user_collection().delete_many({})
-    get_po_collection().delete_many({})
+    get_public_official_collection().delete_many({})
     get_generated_post_collection().delete_many({})
     get_token_blocklist().delete_many({})
 

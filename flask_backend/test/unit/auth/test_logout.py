@@ -1,16 +1,14 @@
 def test_logout_user(client, auth):
     # Test case 1: Logout with a valid token
-    user_result = auth.create()
-    headers = {'Authorization': user_result["access_token"]}
-    response = client.post("/auth/logout", headers=headers)
+    user_result = auth.create_basic_user()
+    response = client.post("/auth/logout", headers=auth.get_auth_header())
 
     assert response.status_code == 200
 
-def test_logout_user_invalid_token(client):
+def test_logout_user_invalid_token(client, auth):
     # Test case 2: Logout with an invalid token
     invalid_token = "invalid_token"
-    headers = {'Authorization': 'Bearer ' + invalid_token}
-    response = client.post("/auth/logout", headers=headers)
+    response = client.post("/auth/logout", headers=auth.get_auth_header(invalid_token))
     assert response.status_code == 422 # Unprocessable Entity
 
 def test_logout_user_no_token(client):
@@ -20,20 +18,19 @@ def test_logout_user_no_token(client):
 
 def test_logout_user_double_logout(client, auth):
     # Test case 4: Logout after logging out (double logout)
-    user_result = auth.create()
-    headers = {'Authorization': user_result["access_token"]}
-    response = client.post("/auth/logout", headers=headers)
+    auth.create_basic_user()
+    response = client.post("/auth/logout", headers=auth.get_auth_header())
     assert response.status_code == 200
-    response = client.post("/auth/logout", headers=headers)
+    response = client.post("/auth/logout", headers=auth.get_auth_header())
     assert response.status_code == 401  # Unauthorized
 
 def test_logout_user_expired_token(client, auth):
     # Test case 5: Logout with an expired token
-    user_result = auth.create()
-    headers = {'Authorization': user_result["access_token"]}
-    response = client.post("/auth/logout", headers=headers)
+    response = auth.create_basic_user()
+    expired_token = response['access_token']
+    response = client.post("/auth/logout", headers=auth.get_auth_header())
     assert response.status_code == 200
 
-    user_result = auth.login()
-    response = client.post("/auth/logout", headers=headers)
+    auth.login()
+    response = client.post("/auth/logout", headers=auth.get_auth_header(expired_token))
     assert response.status_code == 401  # Unauthorized

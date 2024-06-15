@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 from typing import Optional, Annotated
 from bson import ObjectId
 from abc import ABC
@@ -11,3 +11,8 @@ class BaseClass(BaseModel, ABC):
     def get_id(self) -> str:
         '''Returns string of Mongos ObjectID'''
         return str(self.id)
+    
+    @field_serializer('id')
+    def serialize_id(self, id: ObjectId) -> str:
+        '''Returns string of Mongos ObjectID'''
+        return str(id)

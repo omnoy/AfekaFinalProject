@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.user_role import UserRole
 from flask_jwt_extended import jwt_required, get_current_user
 from app.extensions import logger
+from app.blueprints.jwt_admin_required import jwt_admin_required
 
 @bp.route('/update', methods=['PUT'])
 @jwt_required()
@@ -33,7 +34,7 @@ def update_user():
         
         return jsonify({
                 "message": "User updated successfully",
-                "user": user.model_dump_json(by_alias=True, indent=4)
+                "user": user.model_dump_json(indent=4)
                 }), 200
          
     except ValidationError as e:
@@ -44,34 +45,31 @@ def update_user():
         abort(500, str(e))
 
 @bp.route('/all', methods=['GET'])
-@jwt_required()
+@jwt_admin_required()
 def get_all_users():
+    logger.info('Getting all users')
     try:
-        user = get_current_user()
-        if user.role != UserRole.ADMIN:
-            logger.error('Unauthorized GET request to /users/all')
-            return make_response({"error": "Unauthorized GET request to /users/all"}, 403)
-        
         user_list = user_service.get_all_users()
+        user_dict_list = [user.model_dump(exclude='password') for user in user_list]
+        response = jsonify({"users":user_dict_list}), 200
 
-        response = make_response({"users":json_util.dumps(user_list, default=pydantic_encoder)}, 200)
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.exception(e)
+        abort(500, str(e))
     
     return response 
 
 @bp.route('/all', methods=['DELETE'])
-@jwt_required()
+@jwt_admin_required()
 def delete_all_users():
+    logger.info('Deleting all users')
     try:
-        user = get_current_user()
-        if user.role != UserRole.ADMIN:
-            logger.error('Unauthorized DELETE request to /users/all')
-            return make_response({"error": "Unauthorized DELETE request to /users/all"}, 403)
-        
         user_service.delete_all_users()
-        response = make_response()
-        response.status_code = 200
+        return jsonify({"message": "All users deleted"}), 200
+    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    return response
+        logger.exception(e)
+        abort(500, str(e))

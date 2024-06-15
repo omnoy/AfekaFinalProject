@@ -1,53 +1,129 @@
 from bson import json_util
-from flask import request, make_response
+from flask import abort, jsonify, request, make_response
 from pydantic.json import pydantic_encoder
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 from app.blueprints.publicofficials import bp, public_official_service
 from app.models.publicofficial import PublicOfficial
+from flask_jwt_extended import jwt_required, get_current_user
+from app.extensions import logger
+from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
+from app.blueprints.jwt_admin_required import jwt_admin_required
 
-@bp.route('/', methods=['POST'])
+@bp.route('/create', methods=['POST'])
+@jwt_required()
 def create_public_official():
+    logger.info("Creating public official")
     try:
+        user = get_current_user()
+        logger.info(f'{user=}')
+        if user is None:
+            logger.error('No user found')
+            return make_response({"error": "No user found"}, 400)
+        
+        if user.role != 'admin':
+            logger.error('Unauthorized POST request to /public-officials')
+            return make_response({"error": "Unauthorized POST request to /public-officials"}, 403)
+
         po_data = request.get_json(silent=True)
         if po_data is None:
+            logger.error('No JSON input for public official creation')
             return make_response({"error": "Invalid JSON input"}, 400)
         
         public_official = PublicOfficial(**po_data)
         public_official = public_official_service.create_public_official(public_official)
 
-        response = make_response((public_official.model_dump_json(by_alias=True, indent=4), 200))
+        return jsonify({
+            "message": f"Public Official {po_data["name_eng"]} successfully created",
+            "public_official": public_official.model_dump()}), 200
+    except ObjectAlreadyExistsException as e:
+        logger.exception(e)
+        abort(409, str(e))
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
     except Exception as e:
-        return make_response({'error': str(e)}, 500)
-    return response
+        logger.exception(e)
+        abort(500, str(e))
 
-@bp.route('/<string:po_id>', methods=['GET'])
-def get_public_official_by_id(po_id):
+@bp.route('/get/<string:po_id>', methods=['GET'])
+def get_public_official_by_id(po_id: str):
+    logger.info(f'Getting public official by ID {po_id}')
     try:
         public_official = public_official_service.get_public_official_by_id(public_official_id=po_id)
-
-        response = make_response((public_official.model_dump_json(by_alias=True, indent=4), 200))
+        if public_official is None:
+            logger.error(f'Public Official with ID {po_id} not found')
+            return jsonify({"error": f"Public Official with ID {po_id} not found"}), 404
+        
+        return jsonify({"public_official": public_official.model_dump()}), 200
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
     except Exception as e:
-        return make_response({'error': str(e)}, 500)
-    return response
+        logger.exception(e)
+        abort(500, str(e))
 
-#TODO this
-@bp.route('/<string:po_id>', methods=['PUT'])
+@bp.route('/update/<string:po_id>', methods=['PUT'])
+@jwt_admin_required()
 def update_public_official(po_id):
-    pass
+    logger.info(f'Updating public official ({po_id=})')
+    try:
+        po_data = request.get_json(silent=True)
+        logger.info(f'{po_data=}')
 
-# admin commands
+        if po_data is None:
+            logger.error('No JSON input for public official update')
+            return make_response({"error": "No JSON input for public official update"}, 400)
+        
+        if "id" in po_data.keys() and po_data["id"] != po_id:
+            logger.error(f'Cannot set id for public official update')
+            return make_response({"error": f"Cannot set id for public official update"}, 400)
+        
+        po = public_official_service.update_public_official(po_id, PublicOfficial(**po_data))
+        
+        if po is None:
+            logger.error(f'Public Official with ID {po_id} not found')
+            return jsonify({"error": f"Public Official with ID {po_id} not found"}), 404
 
-@bp.route('/public-officials', methods=['GET'])
+        return jsonify({
+                "message": "Public Official updated successfully",
+                "public_official": po.model_dump()
+                }), 200
+         
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
+
+@bp.route('/all', methods=['GET'])
 def get_all_public_officials():
-    po_list = public_official_service.get_all_public_officials()
+    logger.info('Getting all public officials')
+    try:
+        po_list = public_official_service.get_all_public_officials()
+        
+        po_dict_list = [po.model_dump() for po in po_list]
 
-    response = make_response((json_util.dumps(po_list, default=pydantic_encoder), 200))
-    return response 
+        response = jsonify({"public_officials": po_dict_list}), 200
+        return response 
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
 
-@bp.route('/public-officials', methods=['DELETE'])
+@bp.route('/all', methods=['DELETE'])
+@jwt_admin_required()
 def delete_all_public_officials():
-    public_official_service.delete_all_public_officials()
+    logger.info("Deleting all public officials")
+    try:
+        public_official_service.delete_all_public_officials()
 
-    response = make_response()
-    response.status_code = 200
-    return response
+        return jsonify(msg="All public officials successfully deleted"), 200
+    except ValidationError as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))

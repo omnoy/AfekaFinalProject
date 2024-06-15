@@ -2,7 +2,7 @@ from bson import ObjectId
 from app.models.user import User
 from app.logic.user_service import UserService
 from app.logic.mongo.database import get_user_collection
-from app.models.exceptions.user_already_exists_exception import UserAlreadyExistsException
+from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
 
 class UserDataManagerMongoDB(UserService):
     
@@ -11,7 +11,7 @@ class UserDataManagerMongoDB(UserService):
 
     def create_user(self, user: User) -> User:
         if get_user_collection().find_one({"email":user.email}):
-            raise UserAlreadyExistsException("User already exists")
+            raise ObjectAlreadyExistsException("User already exists")
         
         inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
         user.id = inserted_obj.inserted_id
@@ -35,8 +35,12 @@ class UserDataManagerMongoDB(UserService):
         return user
 
     def update_user(self, user_id: str, user: User) -> User:
-        get_user_collection().update_one({"_id":ObjectId(user_id)}, 
-                                        {"$set":user.model_dump(exclude={'id'})})
+        "Updates User according to the parameters. Returns User if successful, None otherwise."
+        result = get_user_collection().update_one({"_id":ObjectId(user_id)}, 
+                                            {"$set":user.model_dump(exclude={'id'})})
+        if result.matched_count == 0:
+            return None
+        
         return user
 
     def get_all_users(self) -> list[User]:

@@ -39,4 +39,6 @@ class User(BaseClass):
     def check_password(self, password_plaintext: str):
         return check_password_hash(self.password.removeprefix('__hash__'), password_plaintext)
     
+    def is_admin(self):
+        return self.role == UserRole.ADMIN
     
