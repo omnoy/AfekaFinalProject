@@ -3,7 +3,7 @@ import json
 
 def test_get_all_public_officials(client, auth):
     # Test case: Get all public officials
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict_1 = {
         "name_eng": "testman", 

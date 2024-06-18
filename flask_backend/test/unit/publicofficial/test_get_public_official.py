@@ -3,7 +3,7 @@ import json
 
 def test_get_public_official_byid(client, auth):
     # Find valid Public Official by ID
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -28,7 +28,7 @@ def test_get_public_official_byid(client, auth):
 
 def test_get_public_official_with_invalidid(client, auth):
     # Find valid Public Official by ID
-    response = auth.create_admin()
+    response = auth.create_admin_user()
     invalidid = '666d7c070477c0def6d136c9'
 
     response = client.get(f"/public-official/get/{invalidid}")

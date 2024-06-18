@@ -12,7 +12,7 @@ def test_get_all_users(client, auth):
     response = auth.create_basic_user(email="three@mail.com")["response"]
     userlist.append(response.json['user'])
 
-    response = auth.create_admin()["response"]
+    response = auth.create_admin_user()["response"]
     userlist.append(response.json['user'])
 
     response = client.get("/user/all", headers=auth.get_auth_header())

@@ -1,7 +1,7 @@
 from app.logic.mongo.database import get_public_official_collection
 
 def test_delete_all_public_officials(client, auth):
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict_1 = {
         "name_eng": "testman", 
@@ -38,7 +38,7 @@ def test_delete_all_public_officials(client, auth):
     assert len(list(get_public_official_collection().find({}))) == 0
 
 def test_delete_all_public_officials_invalid_auth(client, auth):
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict_1 = {
         "name_eng": "testman", 

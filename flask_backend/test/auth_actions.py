@@ -5,10 +5,12 @@ class AuthActions():
     def __init__(self, client):
         self.client = client
 
-    def create_admin(self, username='admin', password='admin123', email="admin@test.com"):
+    def create_admin_user(self, username='admin', password='admin123', email="admin@test.com"):
         user_data = {"username": username, "password": password, "email": email, "position": "admin", 'role': 'admin'}
         user = User(**user_data)
-        get_user_collection().insert_one(user.model_dump(exclude={'id'}))
+        inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
+        self.user_id = inserted_obj.inserted_id
+
         login_response = self.client.post(
             'auth/login',
             json={'email': email, 'password': password}
@@ -25,9 +27,11 @@ class AuthActions():
             'auth/register',
             json={'username':username, 'password':password, 'email':email, 'position':position}
         )
-
-        self.access_token = response.json['access_token']
+        if response.status_code != 200:
+            raise Exception("Failed to create user: Email Already Exists")
         
+        self.access_token = response.json['access_token']
+        self.user_id = response.json['user']['id']
         result_dict = {"response": response, "access_token": self.access_token}
 
         return result_dict
@@ -47,6 +51,9 @@ class AuthActions():
         if authentication_token is None:
             authentication_token = self.access_token
         return {'Authorization': 'Bearer ' + authentication_token}
+    
+    def get_user_id(self):
+        return self.user_id
 
     def logout(self):
         return self.client.get('auth/logout', headers={'Authorization':self.access_token})

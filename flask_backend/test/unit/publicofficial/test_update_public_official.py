@@ -3,7 +3,7 @@ from app.logic.mongo.database import get_public_official_collection
 
 def test_update_public_official(client, auth):
     # Test case: Update a public official with valid data
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -35,7 +35,7 @@ def test_update_public_official(client, auth):
 
 def test_update_public_official_missing_fields(client, auth):
     # Test case: Update a public official with missing fields
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -57,7 +57,7 @@ def test_update_public_official_missing_fields(client, auth):
 
 def test_update_public_official_invalidid(client, auth):
     # Test case: Update a public official with missing fields
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -73,7 +73,7 @@ def test_update_public_official_invalidid(client, auth):
 
 def test_update_public_official_invalid_name_eng(client, auth):
     # Test case: Update a public official with invalid English name
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -95,7 +95,7 @@ def test_update_public_official_invalid_name_eng(client, auth):
 
 def test_update_public_official_invalid_name_heb(client, auth):
     # Test case: Update a public official with invalid Hebrew name
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -117,7 +117,7 @@ def test_update_public_official_invalid_name_heb(client, auth):
 
 def test_update_public_official_invalid_position(client, auth):
     # Test case: Update a public official with invalid position
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -139,7 +139,7 @@ def test_update_public_official_invalid_position(client, auth):
 
 def test_update_public_official_invalid_social_media_handles(client, auth):
     # Test case: Update a public official with invalid social media handles
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 

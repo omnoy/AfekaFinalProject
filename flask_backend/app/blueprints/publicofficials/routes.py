@@ -1,5 +1,5 @@
 from bson import json_util
-from flask import abort, jsonify, request, make_response
+from flask import abort, jsonify, request
 from pydantic.json import pydantic_encoder
 from pydantic import TypeAdapter, ValidationError
 from app.blueprints.publicofficials import bp, public_official_service
@@ -7,34 +7,24 @@ from app.models.publicofficial import PublicOfficial
 from flask_jwt_extended import jwt_required, get_current_user
 from app.extensions import logger
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
-from app.blueprints.jwt_admin_required import jwt_admin_required
+from app.blueprints.admin_verification import jwt_admin_required
 
 @bp.route('/create', methods=['POST'])
-@jwt_required()
+@jwt_admin_required()
 def create_public_official():
     logger.info("Creating public official")
     try:
-        user = get_current_user()
-        logger.info(f'{user=}')
-        if user is None:
-            logger.error('No user found')
-            return make_response({"error": "No user found"}, 400)
-        
-        if user.role != 'admin':
-            logger.error('Unauthorized POST request to /public-officials')
-            return make_response({"error": "Unauthorized POST request to /public-officials"}, 403)
-
         po_data = request.get_json(silent=True)
         if po_data is None:
             logger.error('No JSON input for public official creation')
-            return make_response({"error": "Invalid JSON input"}, 400)
+            return jsonify(error="Invalid JSON input"), 400
         
         public_official = PublicOfficial(**po_data)
         public_official = public_official_service.create_public_official(public_official)
 
-        return jsonify({
-            "message": f"Public Official {po_data["name_eng"]} successfully created",
-            "public_official": public_official.model_dump()}), 200
+        return jsonify(msg=f'Public Official {po_data["name_eng"]} successfully created', 
+                       public_official=public_official.model_dump()), 200  
+
     except ObjectAlreadyExistsException as e:
         logger.exception(e)
         abort(409, str(e))
@@ -52,9 +42,9 @@ def get_public_official_by_id(po_id: str):
         public_official = public_official_service.get_public_official_by_id(public_official_id=po_id)
         if public_official is None:
             logger.error(f'Public Official with ID {po_id} not found')
-            return jsonify({"error": f"Public Official with ID {po_id} not found"}), 404
+            return jsonify(error=f"Public Official with ID {po_id} not found"), 404
         
-        return jsonify({"public_official": public_official.model_dump()}), 200
+        return jsonify(public_official=public_official.model_dump()), 200
     except ValidationError as e:
         logger.exception(e)
         abort(400, str(e))
@@ -72,22 +62,20 @@ def update_public_official(po_id):
 
         if po_data is None:
             logger.error('No JSON input for public official update')
-            return make_response({"error": "No JSON input for public official update"}, 400)
+            return jsonify(msg="No JSON input for public official update"), 400
         
         if "id" in po_data.keys() and po_data["id"] != po_id:
             logger.error(f'Cannot set id for public official update')
-            return make_response({"error": f"Cannot set id for public official update"}, 400)
+            return jsonify(error=f"Cannot set id for public official update"), 400
         
         po = public_official_service.update_public_official(po_id, PublicOfficial(**po_data))
         
         if po is None:
             logger.error(f'Public Official with ID {po_id} not found')
-            return jsonify({"error": f"Public Official with ID {po_id} not found"}), 404
+            return jsonify(msg=f"Public Official with ID {po_id} not found"), 404
 
-        return jsonify({
-                "message": "Public Official updated successfully",
-                "public_official": po.model_dump()
-                }), 200
+        return jsonify(msg="Public Official updated successfully", 
+                       public_official=po.model_dump()), 200
          
     except ValidationError as e:
         logger.exception(e)
@@ -104,7 +92,7 @@ def get_all_public_officials():
         
         po_dict_list = [po.model_dump() for po in po_list]
 
-        response = jsonify({"public_officials": po_dict_list}), 200
+        response = jsonify(public_officials=po_dict_list), 200
         return response 
     except ValidationError as e:
         logger.exception(e)

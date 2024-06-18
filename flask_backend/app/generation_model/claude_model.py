@@ -11,7 +11,7 @@ class ClaudeModel(GenerationModel):
     
     def generate_post(self, generation_prompt: str, public_official: PublicOfficial,
                         social_media: Optional[SocialMedia]) -> str:
-        return "my name jeff"
+        return "Jeff: the Post", "my name jeff"
 
     def get_model_type(self) -> str:
         return "Claude"

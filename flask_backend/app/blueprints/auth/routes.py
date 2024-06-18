@@ -39,26 +39,25 @@ def register():
         logger.info(f'{user_data=}')
         if user_data is None:
             logger.error('No JSON input for registration')
-            return jsonify("No JSON input"), 400
+            return jsonify(error="No JSON input"), 400
 
         if "id" in user_data.keys():
             logger.error('Cannot set ID for user registration')
-            return jsonify("Cannot set ID for user registration"), 400
+            return jsonify(error="Cannot set ID for user registration"), 400
 
         if "role" in user_data.keys() and user_data['role'] == 'admin':
             logger.error('Unauthorized role, cannot register as admin')
-            return jsonify("Unauthorized role, cannot register as admin"), 403
+            return jsonify(error="Unauthorized role, cannot register as admin"), 403
 
         user = User(**user_data)
         user = user_service.create_user(user)
         claims = {"is_admin": user.is_admin()}
         access_token = create_access_token(identity=user, additional_claims=claims)
 
-        return jsonify({
-                "message": "User Registered successfully",
-                "access_token": access_token,
-                "user": user.model_dump(exclude='password')
-            }), 200
+        return jsonify(msg="User Registered successfully", 
+                       access_token=access_token, 
+                       user=user.model_dump(exclude='password')), 200
+    
     except ObjectAlreadyExistsException as e:
         logger.exception(e)
         abort(409, str(e))
@@ -77,22 +76,20 @@ def login():
         login_data = request.get_json()
         logger.info(f'{login_data=}')
         if login_data is None:
-                logger.exception('No JSON input for login')
-                return jsonify("No JSON input"), 400
+            logger.exception('No JSON input for login')
+            return jsonify(error="No JSON input"), 400
 
         user = user_service.get_user_by_email(login_data['email'])
         if user and user.check_password(login_data['password']):
             claims = {"is_admin": user.is_admin()}
             access_token = create_access_token(identity=user, additional_claims=claims)
 
-            return jsonify({
-                    "message": "User Logged In successfully",
-                    "access_token":  access_token,
-                    "user": user.model_dump(exclude='password')
-                }), 200
+            return jsonify(msg="User Logged In successfully", 
+                           access_token=access_token, 
+                           user=user.model_dump(exclude='password')), 200
         else:
             logger.error(f'Invalid Username or Password for {login_data}')
-            return jsonify("Invalid Username or Password"), 401
+            return jsonify(error="Invalid Username or Password"), 401
     except Exception as e:
         logger.exception(e)
         abort(500, str(e))
@@ -105,14 +102,14 @@ def logout():
         current_user = get_current_user()
         if current_user is None:
             logger.error('No user found')
-            return jsonify("No user found"), 400
+            return jsonify(error="No user found"), 400
         
         jti = get_jwt()["jti"]
 
         get_token_blocklist().insert_one(TokenBlocked(jti=jti).__dict__)
 
         logger.info(f"User {current_user} logged out.")
-        return jsonify({"message":f"User {current_user.username} logout successful"}), 200 
+        return jsonify(msg=f"User {current_user.username} logout successful"), 200 
     
     except Exception as e:
         logger.exception(e)

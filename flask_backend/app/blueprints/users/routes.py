@@ -1,5 +1,5 @@
 from bson import json_util
-from flask import request, render_template, make_response, jsonify, flash, abort
+from flask import request, render_template, jsonify, flash, abort
 from pydantic.json import pydantic_encoder
 from pydantic import TypeAdapter, ValidationError
 from app.blueprints.users import bp, user_service
@@ -7,7 +7,7 @@ from app.models.user import User
 from app.models.user_role import UserRole
 from flask_jwt_extended import jwt_required, get_current_user
 from app.extensions import logger
-from app.blueprints.jwt_admin_required import jwt_admin_required
+from app.blueprints.admin_verification import jwt_admin_required
 
 @bp.route('/update', methods=['PUT'])
 @jwt_required()
@@ -17,25 +17,22 @@ def update_user():
         user = get_current_user()
         if user is None:
             logger.error('No user found')
-            return make_response({"error": "No user found"}, 400)
+            return jsonify(msg="No user found"), 404
         
         user_data = request.get_json(silent=True)
         logger.info(f'{user_data=}')
         if user_data is None:
             logger.error('No JSON input for user update')
-            return make_response({"error": "No JSON input for user update"}, 400)
+            return jsonify(error="No JSON input for user update"), 400
         
         for invalid_key in ['id', 'email', 'role']:
             if invalid_key in user_data.keys() and user_data[invalid_key] != getattr(user, invalid_key):
                 logger.error(f'Cannot set {invalid_key} for user update')
-                return make_response({"error": f"Cannot set {invalid_key} for user update"}, 400)
+                return jsonify(error=f"Cannot set {invalid_key} for user update"), 400
         
         user = user_service.update_user(user.get_id(), User(**user_data))
         
-        return jsonify({
-                "message": "User updated successfully",
-                "user": user.model_dump_json(indent=4)
-                }), 200
+        return jsonify(msg="User updated successfully", user=user.model_dump()), 200
          
     except ValidationError as e:
         logger.exception(e)
@@ -51,7 +48,7 @@ def get_all_users():
     try:
         user_list = user_service.get_all_users()
         user_dict_list = [user.model_dump(exclude='password') for user in user_list]
-        response = jsonify({"users":user_dict_list}), 200
+        response = jsonify(users=user_dict_list), 200
 
     except ValidationError as e:
         logger.exception(e)
@@ -68,7 +65,7 @@ def delete_all_users():
     logger.info('Deleting all users')
     try:
         user_service.delete_all_users()
-        return jsonify({"message": "All users deleted"}), 200
+        return jsonify(msg="All users deleted"), 200
     
     except Exception as e:
         logger.exception(e)

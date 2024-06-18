@@ -9,7 +9,7 @@ def test_update_username(client, auth):
 
     user_data = {"username": "testman", "password": "testtest", "email": email, "position": "tester"}
 
-    user_result = auth.create_basic_user(**user_data)
+    auth.create_basic_user(**user_data)
 
     user_data['username'] = new_username
 
@@ -17,7 +17,7 @@ def test_update_username(client, auth):
     
     assert response.status_code == 200
 
-    assert loads(response.json['user'])['username'] == new_username
+    assert response.json['user']['username'] == new_username
 
     db_user_dict = get_user_collection().find_one({"email":email})
 
@@ -36,7 +36,7 @@ def test_update_position(client, auth):
     response = client.put("/user/update", json=user_data, headers=auth.get_auth_header())
 
     assert response.status_code == 200
-    assert loads(response.json['user'])['position'] == new_position
+    assert response.json['user']['position'] == new_position
     db_user_dict = get_user_collection().find_one({"email": email})
 
     assert db_user_dict['position'] == new_position

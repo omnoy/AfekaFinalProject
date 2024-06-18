@@ -3,7 +3,7 @@ from app.logic.mongo.database import get_public_official_collection
 
 def test_create_public_official(client, auth):
     # Test case: Create a public official with valid data
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman", 
@@ -29,7 +29,7 @@ def test_create_public_official(client, auth):
 def test_create_public_official_missing_fields(client, auth):
     # Test case: Create a public official with missing required fields
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman",
@@ -43,7 +43,7 @@ def test_create_public_official_missing_fields(client, auth):
 def test_create_public_official_invalid_name_eng(client, auth):
     # Test case: Create a public official with invalid name_eng
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "test123",
@@ -58,7 +58,7 @@ def test_create_public_official_invalid_name_eng(client, auth):
 def test_create_public_official_invalid_name_heb(client, auth):
     # Test case: Create a public official with invalid name_heb
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman",
@@ -73,7 +73,7 @@ def test_create_public_official_invalid_name_heb(client, auth):
 def test_create_public_official_invalid_position(client, auth):
     # Test case: Create a public official with invalid position
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman",
@@ -88,7 +88,7 @@ def test_create_public_official_invalid_position(client, auth):
 def test_create_public_official_invalid_social_media_handles(client, auth):
     # Test case: Create a public official with invalid social_media_handles
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman",
@@ -103,7 +103,7 @@ def test_create_public_official_invalid_social_media_handles(client, auth):
 def test_create_existing_public_official(client, auth):
     # Test case: Create a public official with invalid social_media_handles
 
-    auth.create_admin()
+    auth.create_admin_user()
 
     po_dict = {
         "name_eng": "testman",
