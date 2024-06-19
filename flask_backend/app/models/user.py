@@ -1,9 +1,9 @@
-from typing import Optional, Annotated
+from typing import Dict, List, Optional, Annotated
 from pydantic import BaseModel, EmailStr, Field, AfterValidator, field_validator
 from app.models.user_role import UserRole
 from app.models.base_class import BaseClass
+from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.extensions import logger
 
 class User(BaseClass):
     email: EmailStr
@@ -11,7 +11,8 @@ class User(BaseClass):
     username: str = Field(min_length=5)
     position: Optional[str] = Field(default = None, min_length=5)
     role: UserRole = Field(default = UserRole.BASIC_USER)
-    
+    favorites: Dict[str, List[str]] = Field(default = {})
+
     @field_validator('username')
     @classmethod
     def name_must_be_alphanumeric(cls, v: str) -> str:
@@ -36,6 +37,16 @@ class User(BaseClass):
             assert all(c.isalnum() or c.isspace() for c in v), 'must be alphabetic'
         return v
     
+    @field_validator('favorites')
+    @classmethod
+    def favorite_list_validator(cls, d: Dict[str, List[str]]):
+        assert all(k in ['public_official', 'generated_post'] for k in d.keys()), 'must be favorites of public_official or generated_post'
+        
+        for k in d.keys():
+            assert all(ObjectId.is_valid(favorite) for favorite in d[k]), 'must be a list of valid ObjectIds'
+        
+        return d
+
     def check_password(self, password_plaintext: str):
         return check_password_hash(self.password.removeprefix('__hash__'), password_plaintext)
     

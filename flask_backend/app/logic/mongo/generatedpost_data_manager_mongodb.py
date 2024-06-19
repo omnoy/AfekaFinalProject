@@ -5,7 +5,7 @@ from app.generation_model.generation_model import GenerationModel
 from app.models.generatedpost import GeneratedPost
 from app.models.social_media import SocialMedia
 from app.logic.generatedpost_service import GeneratedPostService
-from app.logic.mongo.database import get_user_collection, get_public_official_collection, get_generated_post_collection
+from app.logic.mongo.database import get_public_official_collection, get_generated_post_collection
 
 class GeneratedPostDataManagerMongoDB(GeneratedPostService):
     def __init__(self) -> None:

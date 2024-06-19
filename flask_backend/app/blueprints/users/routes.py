@@ -3,6 +3,7 @@ from flask import request, render_template, jsonify, flash, abort
 from pydantic.json import pydantic_encoder
 from pydantic import TypeAdapter, ValidationError
 from app.blueprints.users import bp, user_service
+from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
 from app.models.user import User
 from app.models.user_role import UserRole
 from flask_jwt_extended import jwt_required, get_current_user
@@ -37,6 +38,70 @@ def update_user():
     except ValidationError as e:
         logger.exception(e)
         abort(400, str(e))
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
+
+@bp.route('/favorites/<string:favorite_type>', methods=['PUT'])
+@jwt_required()
+def add_to_favorites(favorite_type: str):
+    logger.info('Add user')
+    try:
+        user = get_current_user()
+        if user is None:
+            logger.error('No user found')
+            return jsonify(msg="No user found"), 404
+        
+        if favorite_type not in ['public_official', 'generated_post']:
+            logger.error('Invalid favorite type')
+            return jsonify(error="Invalid favorite type"), 400
+        
+        object_id = request.args.get('object_id')
+
+        user_service.add_favorite(favorite_type, user.get_id(), object_id)
+        
+        return jsonify(msg=f"Favorite {favorite_type} added to user_id={user.get_id()}successfully"), 200
+    except ObjectIDNotFoundException as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except KeyError as e:
+        logger.exception(f"Invalid favorite type given: {favorite_type}")
+        abort(400, f"Invalid favorite type given: {favorite_type}")
+    except ValueError as e:
+        logger.exception(f"User does not have permission to favorite this post")
+        abort(403, f"User does not have permission to favorite this post")
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
+
+@bp.route('/favorites/<string:favorite_type>', methods=['DELETE'])
+@jwt_required()
+def remove_from_favorites(favorite_type: str):
+    logger.info('Add user')
+    try:
+        user = get_current_user()
+        if user is None:
+            logger.error('No user found')
+            return jsonify(msg="No user found"), 404
+        
+        if favorite_type not in ['public_official', 'generated_post']:
+            logger.error('Invalid favorite type')
+            return jsonify(error="Invalid favorite type"), 400
+        
+        object_id = request.args.get('object_id')
+
+        user_service.remove_favorite(favorite_type, user.get_id(), object_id)
+        
+        return jsonify(msg=f"Favorite {favorite_type} added to user_id={user.get_id()}successfully"), 200
+    except ObjectIDNotFoundException as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except KeyError as e:
+        logger.exception(f"Invalid favorite type given: {favorite_type}")
+        abort(400, f"Invalid favorite type given: {favorite_type}")
+    except ValueError as e:
+        logger.exception(f"User does not have permission to favorite this post")
+        abort(403, f"User does not have permission to favorite this post")
     except Exception as e:
         logger.exception(e)
         abort(500, str(e))

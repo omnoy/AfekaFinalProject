@@ -2,9 +2,7 @@ from bson import json_util
 from flask import jsonify, abort
 from flask_jwt_extended import get_current_user, jwt_required
 from app.blueprints.generatedposts import bp, generated_post_service
-from flask import request, make_response
-from pydantic.json import pydantic_encoder
-from app.models.generatedpost import GeneratedPost
+from flask import request
 from app.extensions import logger
 from pydantic import ValidationError
 from app.blueprints.admin_verification import jwt_admin_required

@@ -24,6 +24,16 @@ class UserService(ABC):
         pass
 
     @abstractmethod
+    def add_favorite(self, favorite_type: str, user_id: str, object_id: str) -> None:
+        "Add a favorite public_official or generated_post to a User"
+        pass
+
+    @abstractmethod
+    def remove_favorite(self, favorite_type: str, user_id: str, object_id: str) -> None:
+        "Remove a favorite public_official or generated_post from a User"
+        pass
+
+    @abstractmethod
     def get_all_users(self) -> list[User]:
         "Get all users from the database"
         pass
