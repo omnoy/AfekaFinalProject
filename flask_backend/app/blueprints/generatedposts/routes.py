@@ -1,10 +1,8 @@
-from bson import json_util
-from flask import jsonify, abort
+from flask import Response, jsonify, abort
 from flask_jwt_extended import get_current_user, jwt_required
 from app.blueprints.generatedposts import bp, generated_post_service
 from flask import request
 from app.extensions import logger
-from pydantic import ValidationError
 from app.blueprints.admin_verification import jwt_admin_required
 
 @bp.route('/generate', methods=['POST'])
@@ -21,7 +19,7 @@ def generate_post():
     except KeyError as e:
         logger.exception(e)
         abort(404, str(e))
-    except ValidationError as e:
+    except ValueError as e:
         logger.exception(e)
         abort(400, str(e))
     except Exception as e:
@@ -30,7 +28,7 @@ def generate_post():
 
 @bp.route('/posts/<string:post_id>', methods=['GET'])
 @jwt_required()
-def get_generated_post_by_post_id(post_id):
+def get_generated_post_by_post_id(post_id: str):
     logger.info(f'Getting generated post by post id {post_id}')
     try:
         current_user = get_current_user()
@@ -54,20 +52,17 @@ def get_generated_post_by_post_id(post_id):
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/posts/history/<string:user_id>', methods=['GET'])
+@bp.route('/posts/user', methods=['GET'])
 @jwt_required()
-def get_user_generated_post_history(user_id):
-    logger.info(f'Getting generated posts by user id {user_id}')
+def get_user_generated_post_history():
+    logger.info(f'Getting generated posts by user id')
     try:
         current_user = get_current_user()
         if current_user is None:
-                    logger.error('No user found')
-                    return jsonify(error="No user found"), 400
-        if current_user.get_id() != user_id and not current_user.is_admin():
-            logger.error(f'User with ID {current_user.get_id()} does not have access to Generated Post for user ID {user_id}')
-            return jsonify(error=f"User with ID {current_user.get_id()} does not have access to Generated Post for user ID {user_id}"), 403
-        
-        post_list = generated_post_service.get_generated_posts_by_user_id(user_id=user_id)
+            logger.error('No user found')
+            return jsonify(error="No user found"), 400
+
+        post_list = generated_post_service.get_generated_posts_by_user_id(user_id=current_user.get_id())
         
         return jsonify(generated_posts=[post.model_dump() for post in post_list]), 200
     except Exception as e:
@@ -76,7 +71,7 @@ def get_user_generated_post_history(user_id):
         
 # admin commands
 
-@bp.route('/posts/history/all', methods=['GET'])
+@bp.route('/posts/all', methods=['GET'])
 @jwt_admin_required()
 def get_all_generated_posts():
     logger.info('Getting all generated posts')
@@ -89,14 +84,14 @@ def get_all_generated_posts():
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/posts/history/all', methods=['DELETE'])
+@bp.route('/posts/all', methods=['DELETE'])
 @jwt_admin_required()
 def delete_all_generated_posts():
     logger.info('Deleting all generated posts')
     try:
         generated_post_service.delete_all_generated_posts()
 
-        return jsonify(msg="All generated posts deleted successfully"), 200
+        return Response(status=200)
     
     except Exception as e:
         logger.exception(e)

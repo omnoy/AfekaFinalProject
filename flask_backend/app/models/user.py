@@ -11,7 +11,7 @@ class User(BaseClass):
     username: str = Field(min_length=5)
     position: Optional[str] = Field(default = None, min_length=5)
     role: UserRole = Field(default = UserRole.BASIC_USER)
-    favorites: Dict[str, List[str]] = Field(default = {})
+    favorites: Optional[Dict[str, List[str]]] = Field(default = {'public_official': [], 'generated_post': []})
 
     @field_validator('username')
     @classmethod
@@ -40,7 +40,9 @@ class User(BaseClass):
     @field_validator('favorites')
     @classmethod
     def favorite_list_validator(cls, d: Dict[str, List[str]]):
-        assert all(k in ['public_official', 'generated_post'] for k in d.keys()), 'must be favorites of public_official or generated_post'
+        assert set(d) == {'public_official', 'generated_post'}, 'must be favorites of public_official or generated_post'
+        
+        assert all(isinstance(k, list) for k in d.values()), 'must be a list'
         
         for k in d.keys():
             assert all(ObjectId.is_valid(favorite) for favorite in d[k]), 'must be a list of valid ObjectIds'
@@ -51,5 +53,5 @@ class User(BaseClass):
         return check_password_hash(self.password.removeprefix('__hash__'), password_plaintext)
     
     def is_admin(self):
-        return self.role == UserRole.ADMIN
+        return self.role == UserRole.ADMIN_USER
     

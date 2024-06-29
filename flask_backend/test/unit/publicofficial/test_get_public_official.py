@@ -15,9 +15,9 @@ def test_get_public_official_byid(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
     
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
-    response = client.get(f"/public-official/get/{po_id}")
+    response = client.get(f"/public-official/get/{public_official_id}")
 
     assert response.status_code == 200
     

@@ -22,17 +22,15 @@ def create_app(config_class=Config):
 
     # register blueprints
     logger.info('Registering Blueprints...')
-    from app.main import bp as main_bp
     from app.blueprints.auth import bp as auth_bp
     from app.blueprints.users import bp as users_bp
     from app.blueprints.publicofficials import bp as publicofficials_bp
     from app.blueprints.generatedposts import bp as generatedposts_bp    
 
-    app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix= "/auth")
     app.register_blueprint(users_bp, url_prefix="/user")
     app.register_blueprint(publicofficials_bp, url_prefix="/public-official")
-    app.register_blueprint(generatedposts_bp, url_prefix="/postgeneration")
+    app.register_blueprint(generatedposts_bp, url_prefix="/post-generation")
     logger.info('Blueprints Registered')
     
     return app

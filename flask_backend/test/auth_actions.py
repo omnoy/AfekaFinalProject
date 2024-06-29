@@ -5,8 +5,8 @@ class AuthActions():
     def __init__(self, client):
         self.client = client
 
-    def create_admin_user(self, username='admin', password='admin123', email="admin@test.com"):
-        user_data = {"username": username, "password": password, "email": email, "position": "admin", 'role': 'admin'}
+    def create_admin_user(self, username="admin", password='admin123', email="admin@test.com"):
+        user_data = {"username": username, "password": password, "email": email, "position": "admin", "role": "admin_user"}
         user = User(**user_data)
         inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
         self.user_id = inserted_obj.inserted_id
@@ -52,7 +52,7 @@ class AuthActions():
             authentication_token = self.access_token
         return {'Authorization': 'Bearer ' + authentication_token}
     
-    def get_user_id(self):
+    def get_user_id(self) -> str:
         return self.user_id
 
     def logout(self):

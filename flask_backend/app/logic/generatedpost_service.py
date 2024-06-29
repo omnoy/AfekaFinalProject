@@ -11,7 +11,7 @@ class GeneratedPostService(ABC):
         pass   
     
     @abstractmethod
-    def generate_post(self, generation_prompt: str, po_id: str, 
+    def generate_post(self, generation_prompt: str, public_official_id: str, 
                       user_id: Optional[str] = None, social_media: Optional[SocialMedia] = None) -> GeneratedPost:
         "Create a Generated Post using a prompt"
         pass
@@ -24,11 +24,6 @@ class GeneratedPostService(ABC):
     @abstractmethod
     def get_generated_posts_by_user_id(self, user_id: str) -> list[GeneratedPost]:
         "Get Generated Posts by User ID of creator"
-        pass
-
-    @abstractmethod
-    def get_generated_posts_by_public_official_id(self, po_id: str) -> list[GeneratedPost]:
-        "Get Generated Posts by Public official ID"
         pass
 
     @abstractmethod

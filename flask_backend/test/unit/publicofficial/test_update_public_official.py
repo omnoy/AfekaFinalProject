@@ -15,12 +15,12 @@ def test_update_public_official(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict['name_eng'] = 'newname'
     po_dict['name_heb'] = 'שםחדש'
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 200
 
@@ -47,11 +47,11 @@ def test_update_public_official_missing_fields(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict.pop('position')
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 400
 
@@ -85,11 +85,11 @@ def test_update_public_official_invalid_name_eng(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict['name_eng'] = 'newname123'
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 400
 
@@ -107,11 +107,11 @@ def test_update_public_official_invalid_name_heb(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict['name_heb'] = 'טסטי134man'
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 400
 
@@ -129,11 +129,11 @@ def test_update_public_official_invalid_position(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict['position'] = 'myposition123'
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 400
 
@@ -151,10 +151,10 @@ def test_update_public_official_invalid_social_media_handles(client, auth):
 
     response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
 
-    po_id = response.json['public_official']['id']
+    public_official_id = response.json['public_official']['id']
 
     po_dict['social_media_handles']['myspace'] = 'myhandle'
 
-    response = client.put(f"/public-official/update/{po_id}", json=po_dict, headers=auth.get_auth_header())
+    response = client.put(f"/public-official/update/{public_official_id}", json=po_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 400

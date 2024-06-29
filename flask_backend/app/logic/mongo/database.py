@@ -13,7 +13,7 @@ def init_db(app):
     mongo.init_app(app)
     user_collection = mongo.db["users"]
     public_official_collection = mongo.db["public_officials"]
-    generated_post_collection = mongo.db["generatedposts"]
+    generated_post_collection = mongo.db["generated_posts"]
     token_blocklist = mongo.db["token_blocklist"]
     
 def get_user_collection() -> Collection:

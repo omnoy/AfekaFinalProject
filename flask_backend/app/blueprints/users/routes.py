@@ -1,11 +1,8 @@
-from bson import json_util
-from flask import request, render_template, jsonify, flash, abort
-from pydantic.json import pydantic_encoder
-from pydantic import TypeAdapter, ValidationError
+from flask import Response, request, jsonify, abort
+from pydantic import ValidationError
 from app.blueprints.users import bp, user_service
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
 from app.models.user import User
-from app.models.user_role import UserRole
 from flask_jwt_extended import jwt_required, get_current_user
 from app.extensions import logger
 from app.blueprints.admin_verification import jwt_admin_required
@@ -33,7 +30,7 @@ def update_user():
         
         user = user_service.update_user(user.get_id(), User(**user_data))
         
-        return jsonify(msg="User updated successfully", user=user.model_dump()), 200
+        return jsonify(user=user.model_dump()), 200
          
     except ValidationError as e:
         logger.exception(e)
@@ -42,9 +39,9 @@ def update_user():
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/favorites/<string:favorite_type>', methods=['PUT'])
+@bp.route('/favorites/<string:favorite_type>', methods=['GET'])
 @jwt_required()
-def add_to_favorites(favorite_type: str):
+def get_user_favorites(favorite_type: str):
     logger.info('Add user')
     try:
         user = get_current_user()
@@ -56,11 +53,36 @@ def add_to_favorites(favorite_type: str):
             logger.error('Invalid favorite type')
             return jsonify(error="Invalid favorite type"), 400
         
-        object_id = request.args.get('object_id')
+        favorites = [favorite.model_dump() for favorite in user_service.get_favorites(favorite_type, user.get_id())]
+        
+        return jsonify(favorites=favorites), 200
+    except ObjectIDNotFoundException as e:
+        logger.exception(e)
+        abort(400, str(e))
+    except KeyError as e:
+        logger.exception(f"Invalid favorite type given: {favorite_type}")
+        abort(400, f"Invalid favorite type given: {favorite_type}")
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
+
+@bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['PUT'])
+@jwt_required()
+def add_to_favorites(favorite_type: str, object_id: str):
+    logger.info('Add favorite to user')
+    try:
+        user = get_current_user()
+        if user is None:
+            logger.error('No user found')
+            return jsonify(msg="No user found"), 404
+        
+        if favorite_type not in ['public_official', 'generated_post']:
+            logger.error('Invalid favorite type')
+            return jsonify(error="Invalid favorite type"), 400
 
         user_service.add_favorite(favorite_type, user.get_id(), object_id)
         
-        return jsonify(msg=f"Favorite {favorite_type} added to user_id={user.get_id()}successfully"), 200
+        return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
         abort(400, str(e))
@@ -74,10 +96,10 @@ def add_to_favorites(favorite_type: str):
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/favorites/<string:favorite_type>', methods=['DELETE'])
+@bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['DELETE'])
 @jwt_required()
-def remove_from_favorites(favorite_type: str):
-    logger.info('Add user')
+def remove_from_favorites(favorite_type: str, object_id: str):
+    logger.info('Removing favorite from user')
     try:
         user = get_current_user()
         if user is None:
@@ -87,12 +109,10 @@ def remove_from_favorites(favorite_type: str):
         if favorite_type not in ['public_official', 'generated_post']:
             logger.error('Invalid favorite type')
             return jsonify(error="Invalid favorite type"), 400
-        
-        object_id = request.args.get('object_id')
 
         user_service.remove_favorite(favorite_type, user.get_id(), object_id)
         
-        return jsonify(msg=f"Favorite {favorite_type} added to user_id={user.get_id()}successfully"), 200
+        return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
         abort(400, str(e))
@@ -113,7 +133,7 @@ def get_all_users():
     try:
         user_list = user_service.get_all_users()
         user_dict_list = [user.model_dump(exclude='password') for user in user_list]
-        response = jsonify(users=user_dict_list), 200
+        return jsonify(users=user_dict_list), 200
 
     except ValidationError as e:
         logger.exception(e)
@@ -121,8 +141,6 @@ def get_all_users():
     except Exception as e:
         logger.exception(e)
         abort(500, str(e))
-    
-    return response 
 
 @bp.route('/all', methods=['DELETE'])
 @jwt_admin_required()
@@ -130,7 +148,7 @@ def delete_all_users():
     logger.info('Deleting all users')
     try:
         user_service.delete_all_users()
-        return jsonify(msg="All users deleted"), 200
+        return Response(status=200)
     
     except Exception as e:
         logger.exception(e)

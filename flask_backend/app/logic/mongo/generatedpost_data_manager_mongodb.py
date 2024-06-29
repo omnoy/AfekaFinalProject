@@ -3,27 +3,37 @@ from typing import Optional
 from app.extensions import generation_model
 from app.generation_model.generation_model import GenerationModel
 from app.models.generatedpost import GeneratedPost
+from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.logic.generatedpost_service import GeneratedPostService
 from app.logic.mongo.database import get_public_official_collection, get_generated_post_collection
+from app.extensions import logger
 
 class GeneratedPostDataManagerMongoDB(GeneratedPostService):
     def __init__(self) -> None:
-        self.generation_model = generation_model
+        pass
 
-    def generate_post(self, generation_prompt: str, po_id: str, 
+    def generate_post(self, generation_prompt: str, public_official_id: str, 
                       user_id: str, social_media: Optional[SocialMedia] = None) -> GeneratedPost:
-        
-        public_official = get_public_official_collection().find_one({"_id": ObjectId(po_id)})
-        if public_official is None:
-            raise KeyError(f"Public Official with ID {po_id} not found")
-        
-        generated_title, generated_text = self.generation_model.generate_post(generation_prompt=generation_prompt,
-                                                                              public_official=public_official,
-                                                                              social_media=social_media)
+        if len(generation_prompt) == 0 or generation_prompt.isspace():
+            raise ValueError("Generation prompt cannot be empty")
+        if social_media is not None and social_media not in SocialMedia:
+            raise ValueError("Invalid social media type")
 
+        public_official = get_public_official_collection().find_one({"_id": ObjectId(public_official_id)})
+        if public_official is None:
+            raise KeyError(f"Public Official with ID {public_official_id} not found")
+        
+        generated_title, generated_text = generation_model.generate_post(generation_prompt=generation_prompt,
+                                                                              public_official=PublicOfficial(**public_official),
+                                                                              social_media=social_media)
+        
+        if not generated_title:
+            generated_title = "Untitled"
+
+        logger.info(f"Generated Post Title: {generated_title}, Text: {generated_text}")
         generated_post = GeneratedPost(user_id=ObjectId(user_id), 
-                                       public_official_id=ObjectId(po_id),
+                                       public_official_id=ObjectId(public_official_id),
                                        title=generated_title,
                                        text=generated_text,
                                        prompt=generation_prompt,
@@ -44,19 +54,9 @@ class GeneratedPostDataManagerMongoDB(GeneratedPostService):
         return generated_post
 
     def get_generated_posts_by_user_id(self, user_id: str) -> list[GeneratedPost]:
-        post_dicts = get_generated_post_collection().find({"user_id":ObjectId(user_id)})
+        post_dicts = get_generated_post_collection().find({"user_id":user_id})
         post_list = list()
-        if post_dicts is None:
-            return post_list #return empty list if no posts found
         
-        for post_dict in post_dicts:
-            post_list.append(GeneratedPost(**post_dict))
-        
-        return post_list
-
-    def get_generated_posts_by_public_official_id(self, po_id: str) -> list[GeneratedPost]:
-        post_dicts = get_generated_post_collection().find({"public_official_id":ObjectId(po_id)})
-        post_list = list()
         if post_dicts is None:
             return post_list #return empty list if no posts found
         

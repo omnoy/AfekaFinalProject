@@ -9,7 +9,7 @@ class PublicOfficial(BaseClass):
     name_heb: str = Field(min_length=3)
     position: str = Field(min_length=3)
     political_party: Optional[str] = Field(default = None)
-    social_media_handles: Optional[dict[SocialMedia, str]] = Field(default = None)
+    social_media_handles: Optional[dict[SocialMedia, str]] = Field(default = {social_media:None for social_media in SocialMedia})
 
     @field_validator('name_eng')
     @classmethod
@@ -32,6 +32,7 @@ class PublicOfficial(BaseClass):
     @field_validator('social_media_handles')
     @classmethod
     def social_media_handles_validator(cls, d):
+        assert all(social_media_name in SocialMedia for social_media_name in d.keys()), 'Social media handle must be one of the following: ' + ', '.join(SocialMedia)
         for v in d.values():
             assert len(v) > 3, 'Social media handle must be at least 3 characters long'
             assert all(c.isalnum() or c == '_' for c in v), 'Social media handle must contain only alphanumeric characters and underscores'

@@ -1,7 +1,5 @@
-from app.logic.mongo.database import get_user_collection
-from app.models.user import User
-from app.models.publicofficial import PublicOfficial
 from app.logic.mongo.database import get_public_official_collection
+from app.models.publicofficial import PublicOfficial
 
 class PublicOfficialActions():
     def __init__(self, client):
@@ -22,3 +20,6 @@ class PublicOfficialActions():
         po_dict["_id"] = inserted_obj.inserted_id
         self.public_official = PublicOfficial(**po_dict)
         return self.public_official
+    
+    def get_public_official_id(self) -> str:
+        return self.public_official.get_id()

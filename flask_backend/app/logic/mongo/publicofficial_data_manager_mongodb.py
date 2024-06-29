@@ -28,7 +28,6 @@ class PublicOfficialDataManagerMongoDB(PublicOfficialService):
 
         return public_official
 
-    #TODO this
     def update_public_official(self, public_official_id: str, public_official: PublicOfficial) -> PublicOfficial:
         "Update a PublicOfficial according to the parameters"
         result = get_public_official_collection().update_one({"_id":ObjectId(public_official_id)}, 

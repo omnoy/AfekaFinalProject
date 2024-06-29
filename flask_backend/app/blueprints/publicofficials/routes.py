@@ -1,5 +1,5 @@
 from bson import json_util
-from flask import abort, jsonify, request
+from flask import Response, abort, jsonify, request
 from pydantic.json import pydantic_encoder
 from pydantic import TypeAdapter, ValidationError
 from app.blueprints.publicofficials import bp, public_official_service
@@ -22,8 +22,7 @@ def create_public_official():
         public_official = PublicOfficial(**po_data)
         public_official = public_official_service.create_public_official(public_official)
 
-        return jsonify(msg=f'Public Official {po_data["name_eng"]} successfully created', 
-                       public_official=public_official.model_dump()), 200  
+        return jsonify(public_official=public_official.model_dump()), 200  
 
     except ObjectAlreadyExistsException as e:
         logger.exception(e)
@@ -35,14 +34,14 @@ def create_public_official():
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/get/<string:po_id>', methods=['GET'])
-def get_public_official_by_id(po_id: str):
-    logger.info(f'Getting public official by ID {po_id}')
+@bp.route('/get/<string:public_official_id>', methods=['GET'])
+def get_public_official_by_id(public_official_id: str):
+    logger.info(f'Getting public official by ID {public_official_id}')
     try:
-        public_official = public_official_service.get_public_official_by_id(public_official_id=po_id)
+        public_official = public_official_service.get_public_official_by_id(public_official_id=public_official_id)
         if public_official is None:
-            logger.error(f'Public Official with ID {po_id} not found')
-            return jsonify(error=f"Public Official with ID {po_id} not found"), 404
+            logger.error(f'Public Official with ID {public_official_id} not found')
+            return jsonify(error=f"Public Official with ID {public_official_id} not found"), 404
         
         return jsonify(public_official=public_official.model_dump()), 200
     except ValidationError as e:
@@ -52,10 +51,10 @@ def get_public_official_by_id(po_id: str):
         logger.exception(e)
         abort(500, str(e))
 
-@bp.route('/update/<string:po_id>', methods=['PUT'])
+@bp.route('/update/<string:public_official_id>', methods=['PUT'])
 @jwt_admin_required()
-def update_public_official(po_id):
-    logger.info(f'Updating public official ({po_id=})')
+def update_public_official(public_official_id):
+    logger.info(f'Updating public official ({public_official_id=})')
     try:
         po_data = request.get_json(silent=True)
         logger.info(f'{po_data=}')
@@ -64,18 +63,17 @@ def update_public_official(po_id):
             logger.error('No JSON input for public official update')
             return jsonify(msg="No JSON input for public official update"), 400
         
-        if "id" in po_data.keys() and po_data["id"] != po_id:
+        if "id" in po_data.keys() and po_data["id"] != public_official_id:
             logger.error(f'Cannot set id for public official update')
             return jsonify(error=f"Cannot set id for public official update"), 400
         
-        po = public_official_service.update_public_official(po_id, PublicOfficial(**po_data))
+        po = public_official_service.update_public_official(public_official_id, PublicOfficial(**po_data))
         
         if po is None:
-            logger.error(f'Public Official with ID {po_id} not found')
-            return jsonify(msg=f"Public Official with ID {po_id} not found"), 404
+            logger.error(f'Public Official with ID {public_official_id} not found')
+            return jsonify(msg=f"Public Official with ID {public_official_id} not found"), 404
 
-        return jsonify(msg="Public Official updated successfully", 
-                       public_official=po.model_dump()), 200
+        return jsonify(public_official=po.model_dump()), 200
          
     except ValidationError as e:
         logger.exception(e)
@@ -108,7 +106,8 @@ def delete_all_public_officials():
     try:
         public_official_service.delete_all_public_officials()
 
-        return jsonify(msg="All public officials successfully deleted"), 200
+        return Response(status=200)
+    
     except ValidationError as e:
         logger.exception(e)
         abort(400, str(e))

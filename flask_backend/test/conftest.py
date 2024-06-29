@@ -2,6 +2,7 @@ import pytest
 
 from app import create_app
 from app.logic.mongo.database import get_user_collection, get_public_official_collection, get_generated_post_collection, get_token_blocklist
+from test.generated_post_actions import GeneratedPostActions
 from test.public_official_actions import PublicOfficialActions
 from test.auth_actions import AuthActions
 
@@ -26,6 +27,9 @@ def auth(client):
 def public_official_actions(client):
     return PublicOfficialActions(client)
 
+@pytest.fixture
+def generated_post_actions(client):
+    return GeneratedPostActions(client)
 
 @pytest.fixture()
 def client(app):

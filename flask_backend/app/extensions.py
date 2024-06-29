@@ -3,7 +3,14 @@ from app.generation_model.claude_model import ClaudeModel
 import logging
 import traceback
 import sys
+import os
+from dotenv import load_dotenv, find_dotenv
 
+# dotenv extension
+load_dotenv(find_dotenv())
+os.environ['ANTHROPIC_API_KEY'] = os.getenv('ANTHROPIC_API_KEY')
+
+# logger extension
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='postGenerator.log', encoding='utf-8', level=logging.DEBUG)
 
@@ -17,6 +24,8 @@ def log_exceptions(type, value, tb):
 
 sys.excepthook = log_exceptions
 
+# jwt extension
 jwt = JWTManager()
 
-generation_model = ClaudeModel()
+# generation model extension
+generation_model = ClaudeModel

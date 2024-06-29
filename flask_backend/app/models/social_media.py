@@ -5,3 +5,5 @@ class SocialMedia(StrEnum):
     FACEBOOK = "facebook"
     INSTAGRAM = "instagram"
     LINKEDIN = "linkedin"
+
+    

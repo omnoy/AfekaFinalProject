@@ -89,7 +89,7 @@ def test_update_user_role_not_changeable(client, auth):
     email = "test@test.com"
     user_data = {"username": "testman", "password": "testtest", "email": email, "position": "tester"}
     user_result = auth.create_basic_user(**user_data)
-    new_role = "admin"
+    new_role = "admin_user"
     user_data['role'] = new_role
     response = client.put("/user/update", json=user_data, headers=auth.get_auth_header())
 

@@ -1,4 +1,7 @@
+from typing import List, Optional
 from bson import ObjectId
+from app.models.generatedpost import GeneratedPost
+from app.models.publicofficial import PublicOfficial
 from app.models.user import User
 from app.logic.user_service import UserService
 from app.logic.mongo.database import get_user_collection, get_public_official_collection, get_generated_post_collection
@@ -13,6 +16,10 @@ class UserDataManagerMongoDB(UserService):
     def create_user(self, user: User) -> User:
         if get_user_collection().find_one({"email":user.email}):
             raise ObjectAlreadyExistsException("User already exists")
+        
+        for favorite_type in ['public_official', 'generated_post']:
+            if favorite_type not in user.favorites.keys():
+                user.favorites[favorite_type] = []
         
         inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
         user.id = inserted_obj.inserted_id
@@ -43,6 +50,33 @@ class UserDataManagerMongoDB(UserService):
             return None
         
         return user
+    
+    def get_favorites(self, favorite_type: str, user_id: str) -> List[PublicOfficial] | List[GeneratedPost]:
+        if favorite_type == 'public_official':
+            collection = get_public_official_collection()
+            obj_class = PublicOfficial
+        elif favorite_type == 'generated_post':
+            collection = get_generated_post_collection()
+            obj_class = GeneratedPost
+        else:
+            raise KeyError("Invalid favorite type")
+        
+        user_dict = get_user_collection().find_one({"_id":ObjectId(user_id)})
+        if not user_dict:
+            raise ObjectIDNotFoundException(f"User {user_id} not found")
+        
+        favorites = user_dict["favorites"][favorite_type]
+        
+        favorite_objs = []
+        
+        for favorite in favorites:
+            favorite_obj = collection.find_one({"_id":ObjectId(favorite)})
+            if favorite_obj is None:
+                raise ObjectIDNotFoundException(f"Favorite {favorite_type} id not found")
+            
+            favorite_objs.append(obj_class(**favorite_obj))
+        
+        return favorite_objs
     
     def add_favorite(self, favorite_type: str, user_id: str, object_id: str) -> None:
         if favorite_type == 'public_official':
@@ -94,6 +128,8 @@ class UserDataManagerMongoDB(UserService):
         else:
             raise ObjectIDNotFoundException(f"Favorite {favorite_type} id not in user favorites")
 
+    
+    
     def get_all_users(self) -> list[User]:
         user_dicts = get_user_collection().find()
         user_list = list()

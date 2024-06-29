@@ -1,13 +1,11 @@
-from flask import request, jsonify, abort
+from flask import Response, request, jsonify, abort
 from flask_jwt_extended import get_current_user, create_access_token, jwt_required, get_jwt
 from pydantic import ValidationError
-from app.blueprints.auth import bp, user_service
+from app.blueprints.auth import bp, user_service, token_blocklist_service
 from app.models.user import User
 from app.extensions import logger, jwt
-from app.logic.mongo.database import get_token_blocklist
 from app.models.token_blocked import TokenBlocked
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
-from app.models.user_role import UserRole
 # basic commands
 
 @jwt.user_identity_loader
@@ -27,9 +25,10 @@ def user_loader_callback(_jwt_header, jwt_data):
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(_jwt_header, jwt_data: dict) -> bool:
     jti = jwt_data["jti"]
-    token = get_token_blocklist().find_one({"jti": jti})
 
-    return token is not None
+    is_revoked = token_blocklist_service.is_token_in_blocklist(TokenBlocked(jti=jti))
+    
+    return is_revoked
 
 @bp.route('/register', methods=['POST'])
 def register():
@@ -45,7 +44,7 @@ def register():
             logger.error('Cannot set ID for user registration')
             return jsonify(error="Cannot set ID for user registration"), 400
 
-        if "role" in user_data.keys() and user_data['role'] == 'admin':
+        if "role" in user_data.keys() and user_data['role'] == "admin_user":
             logger.error('Unauthorized role, cannot register as admin')
             return jsonify(error="Unauthorized role, cannot register as admin"), 403
 
@@ -54,8 +53,7 @@ def register():
         claims = {"is_admin": user.is_admin()}
         access_token = create_access_token(identity=user, additional_claims=claims)
 
-        return jsonify(msg="User Registered successfully", 
-                       access_token=access_token, 
+        return jsonify(access_token=access_token, 
                        user=user.model_dump(exclude='password')), 200
     
     except ObjectAlreadyExistsException as e:
@@ -69,7 +67,7 @@ def register():
         abort(500, str(e))
     
 
-@bp.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['POST'])
 def login():
     logger.info('Logging in user')
     try:
@@ -84,8 +82,7 @@ def login():
             claims = {"is_admin": user.is_admin()}
             access_token = create_access_token(identity=user, additional_claims=claims)
 
-            return jsonify(msg="User Logged In successfully", 
-                           access_token=access_token, 
+            return jsonify(access_token=access_token, 
                            user=user.model_dump(exclude='password')), 200
         else:
             logger.error(f'Invalid Username or Password for {login_data}')
@@ -106,10 +103,10 @@ def logout():
         
         jti = get_jwt()["jti"]
 
-        get_token_blocklist().insert_one(TokenBlocked(jti=jti).__dict__)
+        token_blocklist_service.add_token_to_blocklist(TokenBlocked(jti=jti))
 
         logger.info(f"User {current_user} logged out.")
-        return jsonify(msg=f"User {current_user.username} logout successful"), 200 
+        return Response(status=200)
     
     except Exception as e:
         logger.exception(e)
