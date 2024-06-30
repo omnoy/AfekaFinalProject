@@ -33,18 +33,34 @@ def test_remove_favorite_generated_post(client, auth, public_official_actions, g
     user = auth.login()['response'].json['user']
     assert generated_post_id not in user['favorites']['generated_post']
 
-def test_remove_favorite_public_official_invalid_id(client, auth):
+def test_remove_favorite_public_official_id_not_in_favorites(client, auth, public_official_actions):
     # Test removing public official to favorites with an invalid id
     auth.create_basic_user()
 
-    response = client.delete(f'user/favorites/public_official/667197af047f22ff2e4054bd', headers=auth.get_auth_header())
+    public_official_id = public_official_actions.create_public_official().get_id()
 
-    assert response.status_code == 400
+    response = client.delete(f'user/favorites/public_official/{public_official_id}', headers=auth.get_auth_header())
 
-def test_remove_favorite_generated_post_invalid_id(client, auth):
-    # Test removing public official to favorites with an invalid
+    assert response.status_code == 404 # Not Found
+
+def test_remove_favorite_generated_post_id_not_in_favorites(client, auth, public_official_actions, generated_post_actions):
+    # Test removing public official to favorites with an invalid id
     auth.create_basic_user()
 
-    response = client.delete(f'user/favorites/generated_post/667197af047f22ff2e4054bd', headers=auth.get_auth_header())
+    user_id = auth.get_user_id()
 
-    assert response.status_code == 400
+    public_official_id = public_official_actions.create_public_official().get_id()
+    
+    generated_post_id = generated_post_actions.create_generated_post(user_id=user_id, public_official_id=public_official_id).get_id()
+
+    response = client.delete(f'user/favorites/generated_post/{generated_post_id}', headers=auth.get_auth_header())
+
+    assert response.status_code == 404 # Not Found
+    
+def test_delete_invalid_favorite_type(client, auth):
+    # Test deleting invalid favorite type
+    auth.create_basic_user()
+
+    response = client.delete(f'user/favorites/invalid/667197af047f22ff2e4054bd', headers=auth.get_auth_header())
+
+    assert response.status_code == 404 # Not Found

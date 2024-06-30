@@ -70,3 +70,10 @@ def test_get_favorite_generated_post_empty(client, auth, public_official_actions
     
     assert response.json['favorites'] == []
 
+def test_get_invalid_favorite_type(client, auth):
+    # Test getting invalid favorite type
+    auth.create_basic_user()
+
+    response = client.get(f'user/favorites/invalid', headers=auth.get_auth_header())
+
+    assert response.status_code == 404 # Not Found

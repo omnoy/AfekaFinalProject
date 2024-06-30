@@ -33,7 +33,7 @@ def test_get_all_public_officials(client, auth):
     client.post("/public-official/create", json=po_dict_2, headers=auth.get_auth_header())
     client.post("/public-official/create", json=po_dict_3, headers=auth.get_auth_header())
 
-    response = client.get("/public-official/all")
+    response = client.get("/public-official/all", headers=auth.get_auth_header())
 
     assert response.status_code == 200
 
@@ -46,11 +46,20 @@ def test_get_all_public_officials(client, auth):
         po.pop('id')
         assert po in [po_dict_1, po_dict_2, po_dict_3]
 
-def test_get_all_public_officials_empty(client):
-    response = client.get("/public-official/all")
+def test_get_all_public_officials_empty(client, auth):
+    auth.create_admin_user()
+    
+    response = client.get("/public-official/all", headers=auth.get_auth_header())
 
     assert response.status_code == 200
 
     response_po_list = response.json['public_officials']
 
     assert len(response_po_list) ==  0
+
+def test_get_all_public_officials_unauthorized(client, auth):
+    auth.create_basic_user()
+
+    response = client.get("/public-official/all", headers=auth.get_auth_header())
+
+    assert response.status_code == 401

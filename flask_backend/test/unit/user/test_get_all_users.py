@@ -25,7 +25,7 @@ def test_get_all_users(client, auth):
         assert response_user in userlist
 
 def test_get_all_users_unauthorized(client, auth):
-    # Test getting all users
+    # Test getting all users as a basic user
     auth.create_basic_user(email="one@mail.com")
     auth.create_basic_user(email="two@mail.com")
     auth.create_basic_user(email="three@mail.com")
@@ -34,4 +34,4 @@ def test_get_all_users_unauthorized(client, auth):
 
     response = client.get("/user/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 403
+    assert response.status_code == 401 # Forbidden

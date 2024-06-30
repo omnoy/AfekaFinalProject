@@ -7,7 +7,7 @@ from app.models.publicofficial import PublicOfficial
 from flask_jwt_extended import jwt_required, get_current_user
 from app.extensions import logger
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
-from app.blueprints.admin_verification import jwt_admin_required
+from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
 
 @bp.route('/create', methods=['POST'])
 @jwt_admin_required()
@@ -35,6 +35,7 @@ def create_public_official():
         abort(500, str(e))
 
 @bp.route('/get/<string:public_official_id>', methods=['GET'])
+@jwt_user_required()
 def get_public_official_by_id(public_official_id: str):
     logger.info(f'Getting public official by ID {public_official_id}')
     try:
@@ -83,6 +84,7 @@ def update_public_official(public_official_id):
         abort(500, str(e))
 
 @bp.route('/all', methods=['GET'])
+@jwt_admin_required()
 def get_all_public_officials():
     logger.info('Getting all public officials')
     try:

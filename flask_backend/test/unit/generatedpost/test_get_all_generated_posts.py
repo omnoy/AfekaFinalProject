@@ -34,5 +34,5 @@ def test_get_user_generated_post_history_unauthorized(client, auth):
 
     response = client.get(f"/post-generation/posts/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 403
+    assert response.status_code == 401
 

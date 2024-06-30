@@ -1,34 +1,12 @@
 from flask import Response, request, jsonify, abort
-from flask_jwt_extended import get_current_user, create_access_token, jwt_required, get_jwt
+from flask_jwt_extended import get_current_user, create_access_token, get_jwt
 from pydantic import ValidationError
-from app.blueprints.auth import bp, user_service, token_blocklist_service
+from app.blueprints.auth import bp, token_blocklist_service, user_service
+from app.blueprints.jwt_user_verification import jwt_user_required
 from app.models.user import User
-from app.extensions import logger, jwt
+from app.extensions import logger
 from app.models.token_blocked import TokenBlocked
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
-# basic commands
-
-@jwt.user_identity_loader
-def user_identity_lookup(user: User):
-    return user.get_id()
-
-@jwt.user_lookup_loader
-def user_loader_callback(_jwt_header, jwt_data):
-    logger.info(f'{jwt_data=}{_jwt_header=}')
-    user_id = jwt_data['sub']
-    user = user_service.get_user_by_id(user_id)
-    if not user:
-        return None
-    
-    return user
-
-@jwt.token_in_blocklist_loader
-def check_if_token_revoked(_jwt_header, jwt_data: dict) -> bool:
-    jti = jwt_data["jti"]
-
-    is_revoked = token_blocklist_service.is_token_in_blocklist(TokenBlocked(jti=jti))
-    
-    return is_revoked
 
 @bp.route('/register', methods=['POST'])
 def register():
@@ -92,14 +70,11 @@ def login():
         abort(500, str(e))
         
 @bp.route('/logout', methods=['POST'])
-@jwt_required()
+@jwt_user_required()
 def logout():
     logger.info('Logging out user')
     try:
         current_user = get_current_user()
-        if current_user is None:
-            logger.error('No user found')
-            return jsonify(error="No user found"), 400
         
         jti = get_jwt()["jti"]
 

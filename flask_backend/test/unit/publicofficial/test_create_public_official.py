@@ -26,6 +26,22 @@ def test_create_public_official(client, auth):
 
     assert db_po_dict == po_dict
 
+def test_create_public_official_unauthorized(client, auth):
+    # Test case: Create a public official with valid data
+    auth.create_basic_user()
+
+    po_dict = {
+        "name_eng": "testman", 
+        "name_heb": "טסטמן", 
+        "position": "ראש הטסטים", 
+        "political_party": "טסט פארטי", 
+        "social_media_handles": {"twitter": "testman", "facebook": "testman"}
+    }
+
+    response = client.post("/public-official/create", json=po_dict, headers=auth.get_auth_header())
+
+    assert response.status_code == 401
+
 def test_create_public_official_missing_fields(client, auth):
     # Test case: Create a public official with missing required fields
 

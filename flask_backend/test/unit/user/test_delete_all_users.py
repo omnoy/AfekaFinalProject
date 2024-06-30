@@ -23,4 +23,4 @@ def test_delete_all_users_unauthorized(client, auth):
 
     response = client.delete("/user/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 403
+    assert response.status_code == 401 # Unauthorized

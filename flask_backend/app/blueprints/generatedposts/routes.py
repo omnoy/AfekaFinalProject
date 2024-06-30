@@ -3,14 +3,15 @@ from flask_jwt_extended import get_current_user, jwt_required
 from app.blueprints.generatedposts import bp, generated_post_service
 from flask import request
 from app.extensions import logger
-from app.blueprints.admin_verification import jwt_admin_required
+from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
 
 @bp.route('/generate', methods=['POST'])
-@jwt_required()
+@jwt_user_required()
 def generate_post():
     logger.info('Generating post')
     try:
         user = get_current_user()
+        
         prompt_data = request.get_json(silent=True)
         prompt_data['user_id'] = user.get_id()
         generated_post = generated_post_service.generate_post(**prompt_data)
@@ -27,15 +28,11 @@ def generate_post():
         abort(500, str(e))
 
 @bp.route('/posts/<string:post_id>', methods=['GET'])
-@jwt_required()
+@jwt_user_required()
 def get_generated_post_by_post_id(post_id: str):
     logger.info(f'Getting generated post by post id {post_id}')
     try:
         current_user = get_current_user()
-        
-        if current_user is None:
-            logger.error('No user found')
-            return jsonify(error="No user found"), 400
         
         generated_post = generated_post_service.get_generated_post_by_id(post_id=post_id)
         logger.info(f'{generated_post=}')
@@ -53,14 +50,11 @@ def get_generated_post_by_post_id(post_id: str):
         abort(500, str(e))
 
 @bp.route('/posts/user', methods=['GET'])
-@jwt_required()
+@jwt_user_required()
 def get_user_generated_post_history():
     logger.info(f'Getting generated posts by user id')
     try:
         current_user = get_current_user()
-        if current_user is None:
-            logger.error('No user found')
-            return jsonify(error="No user found"), 400
 
         post_list = generated_post_service.get_generated_posts_by_user_id(user_id=current_user.get_id())
         

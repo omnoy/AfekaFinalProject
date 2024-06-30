@@ -33,6 +33,24 @@ def test_update_public_official(client, auth):
 
     assert db_po_dict == po_dict
 
+def test_update_public_official_unauthorized(client, auth, public_official_actions):
+    auth.create_basic_user()
+    
+    public_official_actions.create_public_official()
+    
+    po_dict = {
+        "name_eng": "testman", 
+        "name_heb": "טסטמן", 
+        "position": "ראש הטסטים", 
+        "political_party": "טסט פארטי", 
+        "social_media_handles": {"twitter": "testman", "facebook": "testman"}
+    }
+    
+    response = client.put(f"/public-official/update/{public_official_actions.get_public_official_id()}", json={}, headers=auth.get_auth_header())
+    
+    assert response.status_code == 401
+
+
 def test_update_public_official_missing_fields(client, auth):
     # Test case: Update a public official with missing fields
     auth.create_admin_user()

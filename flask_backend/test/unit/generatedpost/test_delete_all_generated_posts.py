@@ -42,7 +42,7 @@ def test_get_user_generated_post_history_unauthorized(client, auth, public_offic
 
     response = client.delete(f"/post-generation/posts/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 403
+    assert response.status_code == 401
 
     assert len(list(get_generated_post_collection().find({}))) == 1
 

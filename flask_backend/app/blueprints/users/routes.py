@@ -3,12 +3,28 @@ from pydantic import ValidationError
 from app.blueprints.users import bp, user_service
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
 from app.models.user import User
-from flask_jwt_extended import jwt_required, get_current_user
+from flask_jwt_extended import get_current_user
 from app.extensions import logger
-from app.blueprints.admin_verification import jwt_admin_required
+from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
+
+@bp.route('/get', methods=['GET'])
+@jwt_user_required()
+def get_user():
+    logger.info('Getting user')
+    try:
+        user = get_current_user()
+        if user is None:
+            logger.error('No user found')
+            return jsonify(msg="No user found"), 404
+        
+        return jsonify(user=user.model_dump(exclude='password')), 200
+    except Exception as e:
+        logger.exception(e)
+        abort(500, str(e))
+
 
 @bp.route('/update', methods=['PUT'])
-@jwt_required()
+@jwt_user_required()
 def update_user():
     logger.info('Updating user')
     try:
@@ -40,7 +56,7 @@ def update_user():
         abort(500, str(e))
 
 @bp.route('/favorites/<string:favorite_type>', methods=['GET'])
-@jwt_required()
+@jwt_user_required()
 def get_user_favorites(favorite_type: str):
     logger.info('Add user')
     try:
@@ -51,14 +67,14 @@ def get_user_favorites(favorite_type: str):
         
         if favorite_type not in ['public_official', 'generated_post']:
             logger.error('Invalid favorite type')
-            return jsonify(error="Invalid favorite type"), 400
+            return jsonify(error="Invalid favorite type"), 404
         
         favorites = [favorite.model_dump() for favorite in user_service.get_favorites(favorite_type, user.get_id())]
         
         return jsonify(favorites=favorites), 200
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(400, str(e))
+        abort(404, str(e))
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
         abort(400, f"Invalid favorite type given: {favorite_type}")
@@ -67,7 +83,7 @@ def get_user_favorites(favorite_type: str):
         abort(500, str(e))
 
 @bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['PUT'])
-@jwt_required()
+@jwt_user_required()
 def add_to_favorites(favorite_type: str, object_id: str):
     logger.info('Add favorite to user')
     try:
@@ -78,14 +94,14 @@ def add_to_favorites(favorite_type: str, object_id: str):
         
         if favorite_type not in ['public_official', 'generated_post']:
             logger.error('Invalid favorite type')
-            return jsonify(error="Invalid favorite type"), 400
+            return jsonify(error="Invalid favorite type"), 404
 
         user_service.add_favorite(favorite_type, user.get_id(), object_id)
         
         return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(400, str(e))
+        abort(404, str(e))
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
         abort(400, f"Invalid favorite type given: {favorite_type}")
@@ -97,7 +113,7 @@ def add_to_favorites(favorite_type: str, object_id: str):
         abort(500, str(e))
 
 @bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['DELETE'])
-@jwt_required()
+@jwt_user_required()
 def remove_from_favorites(favorite_type: str, object_id: str):
     logger.info('Removing favorite from user')
     try:
@@ -108,14 +124,14 @@ def remove_from_favorites(favorite_type: str, object_id: str):
         
         if favorite_type not in ['public_official', 'generated_post']:
             logger.error('Invalid favorite type')
-            return jsonify(error="Invalid favorite type"), 400
+            return jsonify(error="Invalid favorite type"), 404
 
         user_service.remove_favorite(favorite_type, user.get_id(), object_id)
         
         return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(400, str(e))
+        abort(404, str(e))
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
         abort(400, f"Invalid favorite type given: {favorite_type}")

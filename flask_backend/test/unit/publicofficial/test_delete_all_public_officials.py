@@ -37,7 +37,7 @@ def test_delete_all_public_officials(client, auth):
 
     assert len(list(get_public_official_collection().find({}))) == 0
 
-def test_delete_all_public_officials_invalid_auth(client, auth):
+def test_delete_all_public_officials_unauthorized(client, auth):
     auth.create_admin_user()
 
     po_dict_1 = {
@@ -72,6 +72,6 @@ def test_delete_all_public_officials_invalid_auth(client, auth):
 
     response = client.delete("/public-official/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 403
+    assert response.status_code == 401
 
     assert len(list(get_public_official_collection().find({}))) == 3
