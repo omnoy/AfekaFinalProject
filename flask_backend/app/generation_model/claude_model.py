@@ -3,6 +3,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 import re
 from os import getenv
+from app.models.exceptions.post_generation_failure_exception import PostGenerationFailureException
 from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.generation_model.generation_model import GenerationModel
@@ -26,8 +27,11 @@ class ClaudeModel(GenerationModel):
 
         response = ClaudeModel._get_api_response(chain, generation_prompt, public_official, social_media)
 
-        if(response.response_metadata["stop_reason"] != "stop_sequence" or response.response_metadata["stop_sequence"] != "[GENERATION_SUCCESSFUL]"):
-            raise Exception("Post generation failed")
+        if response.response_metadata["stop_reason"] != "stop_sequence":
+            raise PostGenerationFailureException("No Stop Sequence Found in Response")
+        elif response.response_metadata["stop_sequence"] != "[GENERATION_SUCCESSFUL]":
+            raise PostGenerationFailureException("Generation Failed (Unknown)")
+            
 
         post_title, post_text = ClaudeModel._process_response(response.content)
 

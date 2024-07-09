@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from app.extensions import jwt
 from app.config import Config
 from app.logic.mongo.database import init_db
@@ -8,6 +9,7 @@ def create_app(config_class=Config):
     logger.info('Starting app...')
     app = Flask(__name__)
     app.config.from_object(config_class)
+    CORS(app)
     logger.info('App started')
 
     # Initialize MongoDB extension

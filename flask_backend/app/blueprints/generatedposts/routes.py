@@ -1,9 +1,10 @@
-from flask import Response, jsonify, abort
+from flask import Response, jsonify
 from flask_jwt_extended import get_current_user, jwt_required
 from app.blueprints.generatedposts import bp, generated_post_service
 from flask import request
 from app.extensions import logger
 from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
+from app.models.exceptions.post_generation_failure_exception import PostGenerationFailureException
 
 @bp.route('/generate', methods=['POST'])
 @jwt_user_required()
@@ -19,13 +20,16 @@ def generate_post():
         return jsonify(generated_post=generated_post.model_dump()), 200
     except KeyError as e:
         logger.exception(e)
-        abort(404, str(e))
+        return jsonify(error=str(e)), 404
     except ValueError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
+    except PostGenerationFailureException as e:
+        logger.exception(e)
+        return jsonify(error=str(e)), 422
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/posts/<string:post_id>', methods=['GET'])
 @jwt_user_required()
@@ -47,7 +51,7 @@ def get_generated_post_by_post_id(post_id: str):
         return jsonify(generated_post=generated_post.model_dump()), 200
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/posts/user', methods=['GET'])
 @jwt_user_required()
@@ -61,7 +65,7 @@ def get_user_generated_post_history():
         return jsonify(generated_posts=[post.model_dump() for post in post_list]), 200
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
         
 # admin commands
 
@@ -76,7 +80,7 @@ def get_all_generated_posts():
 
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/posts/all', methods=['DELETE'])
 @jwt_admin_required()
@@ -89,4 +93,4 @@ def delete_all_generated_posts():
     
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500

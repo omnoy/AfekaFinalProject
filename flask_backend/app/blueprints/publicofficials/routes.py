@@ -1,5 +1,5 @@
 from bson import json_util
-from flask import Response, abort, jsonify, request
+from flask import Response, jsonify, request
 from pydantic.json import pydantic_encoder
 from pydantic import TypeAdapter, ValidationError
 from app.blueprints.publicofficials import bp, public_official_service
@@ -26,13 +26,13 @@ def create_public_official():
 
     except ObjectAlreadyExistsException as e:
         logger.exception(e)
-        abort(409, str(e))
+        return jsonify(error=str(e)), 409
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/get/<string:public_official_id>', methods=['GET'])
 @jwt_user_required()
@@ -47,10 +47,10 @@ def get_public_official_by_id(public_official_id: str):
         return jsonify(public_official=public_official.model_dump()), 200
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/update/<string:public_official_id>', methods=['PUT'])
 @jwt_admin_required()
@@ -78,10 +78,10 @@ def update_public_official(public_official_id):
          
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/all', methods=['GET'])
 @jwt_admin_required()
@@ -96,10 +96,10 @@ def get_all_public_officials():
         return response 
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/all', methods=['DELETE'])
 @jwt_admin_required()
@@ -112,7 +112,7 @@ def delete_all_public_officials():
     
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500

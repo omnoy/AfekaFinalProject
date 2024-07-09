@@ -10,6 +10,10 @@ from test.actions.auth_actions import AuthActions
 @pytest.fixture()
 def app():
     app  = create_app()
+    app.config.update({
+        "MONGO_URI": "mongodb://localhost:27017/statementGenDBTest",
+        "TESTING": True,
+    })
     
     #reset database
     get_user_collection().delete_many({})

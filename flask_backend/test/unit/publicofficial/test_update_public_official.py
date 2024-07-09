@@ -50,7 +50,6 @@ def test_update_public_official_unauthorized(client, auth, public_official_actio
     
     assert response.status_code == 401
 
-
 def test_update_public_official_missing_fields(client, auth):
     # Test case: Update a public official with missing fields
     auth.create_admin_user()
@@ -73,7 +72,7 @@ def test_update_public_official_missing_fields(client, auth):
 
     assert response.status_code == 400
 
-def test_update_public_official_invalidid(client, auth):
+def test_update_public_official_invalid_id(client, auth):
     # Test case: Update a public official with missing fields
     auth.create_admin_user()
 

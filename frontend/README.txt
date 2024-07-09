@@ -1,4 +1,5 @@
 how to run:
+cd ./vite-project
 npm run dev
 
 https://tanstack.com/

@@ -1,6 +1,5 @@
-from os import getenv
-from pytest_httpx import HTTPXMock
-import responses
+from app.logic.mongo.database import get_user_collection
+from bson import ObjectId
 
 def test_add_favorite_public_official(client, auth, public_official_actions):
     # Test adding public official to favorites
@@ -13,7 +12,13 @@ def test_add_favorite_public_official(client, auth, public_official_actions):
     assert response.status_code == 200
 
     user = auth.login()['response'].json['user']
+    
     assert public_official_id in user['favorites']['public_official']
+    
+    user = get_user_collection().find_one({"_id": ObjectId(auth.get_user_id())})
+    
+    assert public_official_id in user['favorites']['public_official']
+    
 
 def test_add_favorite_generated_post(client, auth, public_official_actions, generated_post_actions):
     # Test adding generated post to favorites
@@ -30,6 +35,11 @@ def test_add_favorite_generated_post(client, auth, public_official_actions, gene
     assert response.status_code == 200
 
     user = auth.login()['response'].json['user']
+    
+    assert generated_post_id in user['favorites']['generated_post']
+    
+    user = get_user_collection().find_one({"_id": ObjectId(auth.get_user_id())})
+    
     assert generated_post_id in user['favorites']['generated_post']
 
 def test_add_invalid_favorite_type(client, auth):

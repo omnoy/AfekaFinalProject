@@ -1,4 +1,4 @@
-from flask import Response, request, jsonify, abort
+from flask import Response, request, jsonify
 from pydantic import ValidationError
 from app.blueprints.users import bp, user_service
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
@@ -20,7 +20,7 @@ def get_user():
         return jsonify(user=user.model_dump(exclude='password')), 200
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 
 @bp.route('/update', methods=['PUT'])
@@ -50,10 +50,10 @@ def update_user():
          
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/favorites/<string:favorite_type>', methods=['GET'])
 @jwt_user_required()
@@ -74,13 +74,13 @@ def get_user_favorites(favorite_type: str):
         return jsonify(favorites=favorites), 200
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(404, str(e))
+        return jsonify(error=str(e)), 404
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
-        abort(400, f"Invalid favorite type given: {favorite_type}")
+        return jsonify(error=f"Invalid favorite type given: {favorite_type}"), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['PUT'])
 @jwt_user_required()
@@ -101,16 +101,16 @@ def add_to_favorites(favorite_type: str, object_id: str):
         return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(404, str(e))
+        return jsonify(error=str(e)), 404
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
-        abort(400, f"Invalid favorite type given: {favorite_type}")
+        return jsonify(error=f"Invalid favorite type given: {favorite_type}")
     except ValueError as e:
         logger.exception(f"User does not have permission to favorite this post")
-        abort(403, f"User does not have permission to favorite this post")
+        return jsonify(error=f"User does not have permission to favorite this post"), 403
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/favorites/<string:favorite_type>/<string:object_id>', methods=['DELETE'])
 @jwt_user_required()
@@ -131,16 +131,16 @@ def remove_from_favorites(favorite_type: str, object_id: str):
         return Response(status=200)
     except ObjectIDNotFoundException as e:
         logger.exception(e)
-        abort(404, str(e))
+        return jsonify(error=str(e)), 404
     except KeyError as e:
         logger.exception(f"Invalid favorite type given: {favorite_type}")
-        abort(400, f"Invalid favorite type given: {favorite_type}")
+        return jsonify(error=f"Invalid favorite type given: {favorite_type}"), 400
     except ValueError as e:
-        logger.exception(f"User does not have permission to favorite this post")
-        abort(403, f"User does not have permission to favorite this post")
+        logger.exception(f"User does not have permission to remove this post from favorites")
+        return jsonify(error=f"User does not have permission to remove this post from favorites"), 403
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/all', methods=['GET'])
 @jwt_admin_required()
@@ -153,10 +153,10 @@ def get_all_users():
 
     except ValidationError as e:
         logger.exception(e)
-        abort(400, str(e))
+        return jsonify(error=str(e)), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
 
 @bp.route('/all', methods=['DELETE'])
 @jwt_admin_required()
@@ -168,4 +168,4 @@ def delete_all_users():
     
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500

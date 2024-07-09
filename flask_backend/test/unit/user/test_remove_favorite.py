@@ -1,3 +1,7 @@
+from bson import ObjectId
+from app.logic.mongo.database import get_user_collection
+
+
 def test_removing_favorite_public_official(client, auth, public_official_actions):
     # Test removing a public official from favorites
     public_official_id = public_official_actions.create_public_official().get_id()
@@ -9,9 +13,12 @@ def test_removing_favorite_public_official(client, auth, public_official_actions
     response = client.delete(f'user/favorites/public_official/{public_official_id}', headers=auth.get_auth_header())
 
     assert response.status_code == 200
-
-    user = auth.login()['response'].json['user']
+    
+    user = get_user_collection().find_one({"_id": ObjectId(auth.get_user_id())})
+    
     assert public_official_id not in user['favorites']['public_official']
+    
+    
 
 def test_remove_favorite_generated_post(client, auth, public_official_actions, generated_post_actions):
     # Test removing generated post from favorites
@@ -30,8 +37,9 @@ def test_remove_favorite_generated_post(client, auth, public_official_actions, g
 
     assert response.status_code == 200
 
-    user = auth.login()['response'].json['user']
-    assert generated_post_id not in user['favorites']['generated_post']
+    user = get_user_collection().find_one({"_id": ObjectId(auth.get_user_id())})
+    
+    assert public_official_id not in user['favorites']['generated_post']
 
 def test_remove_favorite_public_official_id_not_in_favorites(client, auth, public_official_actions):
     # Test removing public official to favorites with an invalid id

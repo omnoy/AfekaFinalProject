@@ -1,4 +1,4 @@
-from flask import Response, request, jsonify, abort
+from flask import Response, request, jsonify
 from flask_jwt_extended import get_current_user, create_access_token, get_jwt
 from pydantic import ValidationError
 from app.blueprints.auth import bp, token_blocklist_service, user_service
@@ -36,13 +36,13 @@ def register():
     
     except ObjectAlreadyExistsException as e:
         logger.exception(e)
-        abort(409, str(e))
+        return jsonify(error=str(e)), 409
     except ValidationError as e:
         logger.exception(e)
-        abort(400,  f"Invalid JSON input: {str(e)}")
+        return jsonify(error=f"Invalid JSON input: {str(e)}"), 400
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
     
 
 @bp.route('/login', methods=['POST'])
@@ -56,18 +56,22 @@ def login():
             return jsonify(error="No JSON input"), 400
 
         user = user_service.get_user_by_email(login_data['email'])
-        if user and user.check_password(login_data['password']):
-            claims = {"is_admin": user.is_admin()}
-            access_token = create_access_token(identity=user, additional_claims=claims)
+        if user:
+            if user.check_password(login_data['password']):
+                claims = {"is_admin": user.is_admin()}
+                access_token = create_access_token(identity=user, additional_claims=claims)
+            else:
+                logger.error(f'Invalid Password for {login_data}')
+                return jsonify(error="Invalid Password"), 401
 
             return jsonify(access_token=access_token, 
                            user=user.model_dump(exclude='password')), 200
         else:
-            logger.error(f'Invalid Username or Password for {login_data}')
-            return jsonify(error="Invalid Username or Password"), 401
+            logger.error(f'Invalid Email for {login_data}')
+            return jsonify(error="Invalid Email"), 401
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
         
 @bp.route('/logout', methods=['POST'])
 @jwt_user_required()
@@ -85,4 +89,4 @@ def logout():
     
     except Exception as e:
         logger.exception(e)
-        abort(500, str(e))
+        return jsonify(error=str(e)), 500
