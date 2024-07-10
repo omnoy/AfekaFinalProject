@@ -10,7 +10,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, currentRoute }) => (
   <Anchor
     href={href}
     c={currentRoute === href ? 'blue' : 'dimmed'}
-    font-weight={currentRoute === href ? 'bold' : 'normal'}
+    fontWeight={currentRoute === href ? 'bold' : 'normal'}
   >
     {label}
   </Anchor>

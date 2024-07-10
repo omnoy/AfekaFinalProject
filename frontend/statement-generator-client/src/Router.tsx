@@ -6,6 +6,7 @@ import { PostGeneratorPage } from './pages/PostGenerator.page';
 import { PostHistoryPage } from './pages/PostHistory.page';
 import { UserProfilePage } from './pages/UserProfile.page';
 import { NavigationHeader } from './components/NavigationHeader/NavigationHeader';
+import { ErrorPage } from './pages/Error.page';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
         <UserProfilePage />
       </>
     )
+  },
+  {
+    path: '*',
+    element: <ErrorPage errorCode={404} errorMessage={'Page not found'}/>,
   }
 ]);
 

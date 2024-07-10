@@ -1,6 +1,7 @@
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Group } from '@mantine/core';
+import { Text, TextInput, PasswordInput, Button, Group } from '@mantine/core';
 import api from '../../services/api';
+import { useState } from 'react';
 
 interface LoginFormValues {
     email: string;
@@ -9,6 +10,8 @@ interface LoginFormValues {
 
 
 function LoginForm() {
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<LoginFormValues>({
     mode: 'uncontrolled',
     initialValues: {
@@ -31,13 +34,22 @@ function LoginForm() {
 
   const handleSubmit = async (values: LoginFormValues) => {
     try {
-        window.location.href = '/generate';
-        const response = await api.post('/login', values);
-        console.log('Login successful:', response.data);
-      // Handle successful login (e.g., save token, redirect user)
-    } catch (error) {
+        const response = await api.post('/auth/login', values);
+        if (response.status === 200) {
+            console.log('Login successful:', response.data);
+            window.location.href = '/generate';
+        }
+        else if(response.status == 401){
+            setError(response.data.error);
+        }
+    } catch (error: any) {
       console.error('Login failed:', error);
-      // Handle login error (e.g., show error message to user)
+      if(error.response){
+        setError(error.response.data.error);
+      }
+      else {
+        setError('Login failed, please try again');
+      }
     }
   };
 
@@ -61,6 +73,9 @@ function LoginForm() {
       <Group justify="flex-end" mt="md">
         <Button type="submit">Submit</Button>
       </Group>
+      <Text ta='center' mt='md' c='red'>
+        Error: {error}
+      </Text>
     </form>
   );
 }

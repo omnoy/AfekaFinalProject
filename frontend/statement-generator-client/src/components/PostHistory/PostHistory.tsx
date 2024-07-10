@@ -58,7 +58,7 @@ export const PostHistory: React.FC = () => {
           <Card key={post.id} shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="center">
-                <Text font-weight={500}>{post.title}</Text>
+                <Text fontWeight={500}>{post.title}</Text>
                 <Badge color="blue">{post.socialMedia}</Badge>
               </Group>
             </Card.Section>

@@ -56,14 +56,22 @@ export const UserProfileComponent: React.FC = () => {
             styles={getInputStyles(theme, false)}
             />
             <TextInput
+            label="Role"
+            {...form.getInputProps('role')}
+            readOnly
+            mb="md"
+            styles={getInputStyles(theme, false)}
+            />
+            
+        </Group>
+        <Group mt="md">
+            <TextInput
             label="Username"
             {...form.getInputProps('username')}
             readOnly={!isEditing}
             mb="md"
             styles={getInputStyles(theme, isEditing)}
             />
-        </Group>
-        <Group mt="md">
             <TextInput
             label="Position"
             {...form.getInputProps('position')}
@@ -71,17 +79,11 @@ export const UserProfileComponent: React.FC = () => {
             mb="md"
             styles={getInputStyles(theme, isEditing)}
             />
-            <TextInput
-            label="Role"
-            {...form.getInputProps('role')}
-            readOnly
-            mb="md"
-            styles={getInputStyles(theme, false)}
-            />
+            
         </Group>
 
         {successMessage && (
-          <Text color="teal" mb="md">{successMessage}</Text>
+          <Text c="teal" mb="md">{successMessage}</Text>
         )}
 
         <Group justify="space-between" mt="xl">

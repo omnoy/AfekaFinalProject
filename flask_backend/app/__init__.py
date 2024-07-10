@@ -8,8 +8,8 @@ from app.extensions import logger
 def create_app(config_class=Config):
     logger.info('Starting app...')
     app = Flask(__name__)
-    app.config.from_object(config_class)
     CORS(app)
+    app.config.from_object(config_class)
     logger.info('App started')
 
     # Initialize MongoDB extension

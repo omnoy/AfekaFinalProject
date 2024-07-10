@@ -10411,3 +10411,79 @@ INFO:app.extensions:Logging in user
 INFO:app.extensions:login_data={'email': 'asdsa@asa.com', 'password': 'asasasadsda'}
 ERROR:app.extensions:Invalid Email for {'email': 'asdsa@asa.com', 'password': 'asasasadsda'}
 INFO:werkzeug:127.0.0.1 - - [06/Jul/2024 23:11:53] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:app.extensions:Starting app...
+INFO:app.extensions:App started
+INFO:app.extensions:Initializing Database...
+INFO:app.extensions:Database Initialized
+INFO:app.extensions:Initializing JWTManager...
+INFO:app.extensions:JWTManager Initialized
+INFO:app.extensions:Registering Blueprints...
+INFO:app.extensions:Blueprints Registered
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:app.extensions:Starting app...
+INFO:app.extensions:App started
+INFO:app.extensions:Initializing Database...
+INFO:app.extensions:Database Initialized
+INFO:app.extensions:Initializing JWTManager...
+INFO:app.extensions:JWTManager Initialized
+INFO:app.extensions:Registering Blueprints...
+INFO:app.extensions:Blueprints Registered
+INFO:werkzeug: * Detected change in 'C:\\Users\\dnoy1\\OneDrive\\Documents\\Afeka College\\Final Project\\Code\\flask_backend\\app\\__init__.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:app.extensions:Starting app...
+INFO:app.extensions:App started
+INFO:app.extensions:Initializing Database...
+INFO:app.extensions:Database Initialized
+INFO:app.extensions:Initializing JWTManager...
+INFO:app.extensions:JWTManager Initialized
+INFO:app.extensions:Registering Blueprints...
+INFO:app.extensions:Blueprints Registered
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:15] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'asdada@gmail.com', 'password': 'aaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'asdada@gmail.com', 'password': 'aaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:15] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:30] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:30] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:59] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:30:59] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:32:37] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:32:37] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:33:55] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:33:55] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:35:27] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:35:27] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:36:49] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:36:49] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+ERROR:app.extensions:Invalid Email for {'email': 'aaa@aaa.com', 'password': 'aaaaaaaaaaaaaaaaaaaaa'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 16:36:54] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+INFO:app.extensions:Registering user
+INFO:app.extensions:user_data={'username': 'joejtheman', 'password': 'joejjoej', 'email': 'joej@gmail.com', 'position': 'joej master', 'role': 'basic_user'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 17:04:01] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 17:04:13] "OPTIONS /auth/login HTTP/1.1" 200 -
+INFO:app.extensions:Logging in user
+INFO:app.extensions:login_data={'email': 'joej@gmail.com', 'password': 'joejjoej'}
+INFO:werkzeug:127.0.0.1 - - [10/Jul/2024 17:04:13] "POST /auth/login HTTP/1.1" 200 -
