@@ -1,5 +1,5 @@
-import { Anchor, Group, Title } from "@mantine/core";
-
+import { Text, Group } from "@mantine/core";
+import { Link } from "react-router-dom";
 interface NavLinkProps {
   href: string;
   label: string;
@@ -7,13 +7,12 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ href, label, currentRoute }) => (
-  <Anchor
-    href={href}
+  <Text
     c={currentRoute === href ? 'blue' : 'dimmed'}
-    fontWeight={currentRoute === href ? 'bold' : 'normal'}
+    fw={currentRoute === href ? 'bold' : 'normal'}
   >
-    {label}
-  </Anchor>
+    <Link to={href}>{label}</Link>
+  </Text>
 );
 
 export function NavigationHeader({route}: {route: string}) {

@@ -5,7 +5,11 @@ from abc import ABC
 from app.models.object_id_pydantic_annotation import ObjectIdPydanticAnnotation
 
 class BaseClass(BaseModel, ABC):
-    model_config = ConfigDict(populate_by_name=True, extra='forbid')
+    model_config = ConfigDict(
+        populate_by_name=True, 
+        extra='forbid',
+        revalidate_instances='always',
+        validate_assignment=True)
     id: Optional[Annotated[ObjectId, ObjectIdPydanticAnnotation]] = Field(default = None,  alias = '_id')
 
     def get_id(self) -> str:

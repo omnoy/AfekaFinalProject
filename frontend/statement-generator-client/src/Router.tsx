@@ -7,6 +7,7 @@ import { PostHistoryPage } from './pages/PostHistory.page';
 import { UserProfilePage } from './pages/UserProfile.page';
 import { NavigationHeader } from './components/NavigationHeader/NavigationHeader';
 import { ErrorPage } from './pages/Error.page';
+import RequireAuth from './components/RequireAuth/RequireAuth';
 
 const router = createBrowserRouter([
   {
@@ -25,30 +26,30 @@ const router = createBrowserRouter([
     path: '/generate',
     element: 
     (
-      <>
-        <NavigationHeader route='/generate'/>
-        <PostGeneratorPage />
-      </>
+        <RequireAuth>
+            <NavigationHeader route='/generate'/>
+            <PostGeneratorPage />
+        </RequireAuth>
     )
   },
   {
     path: '/history',
     element: 
     (
-      <>
-        <NavigationHeader route='/history'/>
-        <PostHistoryPage />
-      </>
+        <RequireAuth>
+            <NavigationHeader route='/history'/>
+            <PostHistoryPage />
+        </RequireAuth>
     )
   },
   {
     path: '/profile',
     element: 
     (
-      <>
+      <RequireAuth>
         <NavigationHeader route='/profile'/>
         <UserProfilePage />
-      </>
+      </RequireAuth>
     )
   },
   {

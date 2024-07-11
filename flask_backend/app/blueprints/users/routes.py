@@ -33,18 +33,25 @@ def update_user():
             logger.error('No user found')
             return jsonify(msg="No user found"), 404
         
-        user_data = request.get_json(silent=True)
-        logger.info(f'{user_data=}')
-        if user_data is None:
+        user_update_data = request.get_json(silent=True)
+        logger.info(f'{user_update_data=}')
+        if user_update_data is None:
             logger.error('No JSON input for user update')
             return jsonify(error="No JSON input for user update"), 400
         
-        for invalid_key in ['id', 'email', 'role']:
-            if invalid_key in user_data.keys() and user_data[invalid_key] != getattr(user, invalid_key):
+        if all([user_update_item in user.model_dump().items() for user_update_item in user_update_data.items()]):
+            return jsonify(user=user.model_dump()), 200
+        
+        for invalid_key in ['id', 'password', 'email', 'role']:
+            if invalid_key in user_update_data.keys() and user_update_data[invalid_key] != getattr(user, invalid_key):
                 logger.error(f'Cannot set {invalid_key} for user update')
                 return jsonify(error=f"Cannot set {invalid_key} for user update"), 400
         
-        user = user_service.update_user(user.get_id(), User(**user_data))
+        updated_user = user.model_copy(update=user_update_data)
+        updated_user.model_validate(updated_user, strict=True)
+        
+        logger.info(f'{updated_user=}')
+        user = user_service.update_user(user.get_id(), updated_user)
         
         return jsonify(user=user.model_dump()), 200
          

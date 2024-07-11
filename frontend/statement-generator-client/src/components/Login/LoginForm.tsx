@@ -1,7 +1,9 @@
 import { useForm } from '@mantine/form';
 import { Text, TextInput, PasswordInput, Button, Group } from '@mantine/core';
 import api from '../../services/api';
-import { useState } from 'react';
+import { useState} from 'react';
+import { useAuth } from '../../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormValues {
     email: string;
@@ -10,8 +12,10 @@ interface LoginFormValues {
 
 
 function LoginForm() {
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  
   const form = useForm<LoginFormValues>({
     mode: 'uncontrolled',
     initialValues: {
@@ -36,16 +40,22 @@ function LoginForm() {
     try {
         const response = await api.post('/auth/login', values);
         if (response.status === 200) {
+            login(response.data.user, 
+                  response.data.user.role, 
+                  response.data.access_token);
             console.log('Login successful:', response.data);
-            window.location.href = '/generate';
+            navigate('/generate');
         }
         else if(response.status == 401){
-            setError(response.data.error);
+            setError('Error' + response.data.error);
         }
     } catch (error: any) {
       console.error('Login failed:', error);
       if(error.response){
-        setError(error.response.data.error);
+        setError('Error' + error.response.data.error);
+      }
+      else if(error.request){
+        setError('Error: No response from server');
       }
       else {
         setError('Login failed, please try again');
@@ -74,7 +84,7 @@ function LoginForm() {
         <Button type="submit">Submit</Button>
       </Group>
       <Text ta='center' mt='md' c='red'>
-        Error: {error}
+        {error}
       </Text>
     </form>
   );

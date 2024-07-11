@@ -10,7 +10,7 @@ class User(BaseClass):
     password: str = Field(min_length=8, description='Password must be at least 8 characters long.')
     username: str = Field(min_length=5)
     position: Optional[str] = Field(default = None, min_length=5)
-    role: UserRole = Field(default = UserRole.BASIC_USER)
+    role: UserRole | str = Field(default = UserRole.BASIC_USER)
     favorites: Optional[Dict[str, List[str]]] = Field(default = {'public_official': [], 'generated_post': []})
 
     @field_validator('username')
@@ -36,6 +36,15 @@ class User(BaseClass):
         if isinstance(v, str):
             assert all(c.isalnum() or c.isspace() for c in v), 'must be alphabetic'
         return v
+    
+    @field_validator('role')
+    @classmethod
+    def role_must_be_enum(cls, v):
+        if isinstance(v, str):
+            assert v in str(UserRole.__members__), 'must be a valid UserRole'
+            return UserRole(v)
+        else:
+            return v
     
     @field_validator('favorites')
     @classmethod

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Box, TextInput, Button, Title, Text, Group, MantineTheme, useMantineTheme } from '@mantine/core';
 import { useForm } from '@mantine/form';
-
+import { useAuth } from '../../context/AuthProvider';
+import api, { createAuthApi } from '@/services/api';
 interface UserProfile {
   email: string;
   username: string;
@@ -9,38 +10,84 @@ interface UserProfile {
   role: string;
 }
 
-const initialUserProfile: UserProfile = {
-  email: 'user@example.com',
-  username: 'johndoe',
-  position: 'Software Developer',
-  role: 'User',
-};
-
 export const UserProfileComponent: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
+  const [errorMessage, setErrorMessage] = useState('');
+  const { user, updateUser, accessToken } = useAuth();
+  const authApi = createAuthApi(accessToken);
+  
   const theme = useMantineTheme();
 
+  const loadUserProfile = (user_data: UserProfile | null) => {
+    return {
+      email: user_data?.email || '',
+      username: user_data?.username || '',
+      position: user_data?.position || '',
+      role: user_data?.role || '',
+    };
+  }
+
   const form = useForm<UserProfile>({
-    initialValues: initialUserProfile,
+    initialValues: loadUserProfile(user),
     validate: {
       username: (value) => (value.length < 3 ? 'Username must have at least 3 characters' : null),
       position: (value) => (value.length < 2 ? 'Position must have at least 2 characters' : null),
     },
   });
 
-  const handleSubmit = (values: UserProfile) => {
-    console.log('Updated profile:', values);
-    setIsEditing(false);
-    setSuccessMessage('Profile updated successfully!');
-    setTimeout(() => setSuccessMessage(''), 3000);
+  const handleSubmit = async (values: UserProfile) => {
+    try {
+      const response = await authApi.put('/user/update', values);
+      if (response.status === 200) {
+          console.log('Updated Profile:', response.data);
+          updateUser(response.data.user);
+          form.setValues(loadUserProfile(response.data.user));
+
+          setIsEditing(false);
+          setErrorMessage('');
+          setSuccessMessage('Profile updated successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+      }
+      else if(response.status == 400){
+          console.log('Error' + response.data.error);
+          setErrorMessage('Error: Invalid request');
+      }
+      else if(response.status == 401){
+          console.log('Error' + response.data.error);
+          setErrorMessage('Error: Unauthorized access');
+      }
+  } catch (error: any) {
+    console.error('Profile Update failed:', error);
+    if(error.response){
+      if(error.response.status == 400){
+        console.log('Error' + error.response.data.error);
+        setErrorMessage('Error: Invalid request');
+      }
+      else if(error.response.status == 401){
+          console.log('Error' + error.response.data.error);
+          setErrorMessage('Error: Unauthorized access');
+      }
+      else {
+        console.log('Error' + error.response.data.error);
+        setErrorMessage('Error: Invalid request');
+      }
+    }
+    else if(error.request){
+      console.log('Error: No response from server' + error);
+      setErrorMessage('Error: No response from server');
+    }
+    else {
+      console.log('Login failed, please try again' + error);
+      setErrorMessage('Error: Login failed, please try again');
+    }
+  }
   };
   
   const getInputStyles = (theme: MantineTheme, editable: boolean) => ({
     input: {
-      color: editable ? theme.colors.gray[9] : theme.colors.gray[6], // Blue for editable, Gray for non-editable
-      backgroundColor: theme.colors.gray[0], // White for editable, Light gray for non-editable
+      color: editable ? theme.colors.gray[9] : theme.colors.gray[6], 
+      backgroundColor: theme.colors.gray[0], 
     },
   });
 
@@ -82,9 +129,8 @@ export const UserProfileComponent: React.FC = () => {
             
         </Group>
 
-        {successMessage && (
-          <Text c="teal" mb="md">{successMessage}</Text>
-        )}
+        {successMessage && (<Text c="teal" mb="md">{successMessage}</Text>)} 
+        {errorMessage && (<Text c="red" mb="md">{errorMessage}</Text>)}
 
         <Group justify="space-between" mt="xl">
           {!isEditing ? (
@@ -92,6 +138,7 @@ export const UserProfileComponent: React.FC = () => {
                 {
                     setIsEditing(true); 
                     setSuccessMessage('');
+                    setErrorMessage('');
                 }
             }>
             Edit Profile
@@ -103,6 +150,7 @@ export const UserProfileComponent: React.FC = () => {
                 {
                     setIsEditing(false);
                     setSuccessMessage('');
+                    setErrorMessage('');
                 }
             }>
                 Cancel
