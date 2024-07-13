@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select, Textarea, Button, Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { GeneratedPost } from './GeneratedPost';
+import { createAuthApi } from '@/services/api';
+import { useAuth } from '@/context/AuthProvider';
+import { useHttpError } from '@/hooks/useHttpError';
+import { usePublicOfficials } from '@/hooks/usePublicOfficials';
 
 interface SocialMediaPostFormValues {
   public_official: string;
   prompt: string;
   social_media: string;
 }
-
-const publicOfficials = [
-  { value: 'po_id_1', label: 'Benjamin Netanyahu' },
-  { value: 'po_id_2', label: 'Ehud Olmert' },
-  { value: 'po_id_3', label: 'Naftali Bennett' },
-  // Add more officials as needed
-];
 
 const socialMediaPlatforms = [
   { value: 'twitter', label: 'Twitter' },
@@ -24,8 +21,18 @@ const socialMediaPlatforms = [
 ];
 
 export const PostGenerator: React.FC = () => {
+    const [generatedPostTitle, setGeneratedPostTitle] = useState<string | null>(null);
     const [generatedPost, setGeneratedPost] = useState<string | null>(null);
-
+    const { accessToken } = useAuth();
+    const authApi = createAuthApi(accessToken);
+    const {error, setError, handleError, clearError} = useHttpError();
+    const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
+    
+    const poDropDown = publicOfficials.map((official: any) => ({
+        value: official.id,
+        label: official.name_eng,
+    }));
+    
     const form = useForm<SocialMediaPostFormValues>({
     mode: 'uncontrolled',
     initialValues: {
@@ -40,10 +47,30 @@ export const PostGenerator: React.FC = () => {
     },
     });
 
-    const handleSubmit = (values: SocialMediaPostFormValues) => {
+    const handleSubmit = async (values: SocialMediaPostFormValues) => {
         console.log('Form values:', values);
-        const post = `${values.public_official} says: "${values.prompt}" (Posted on ${values.social_media})`;
-        setGeneratedPost(post);
+        const public_official = publicOfficials.find((official) => official.id === values.public_official);
+        const post_generation_data = {
+            public_official_id: public_official?.id,
+            generation_prompt: values.prompt,
+            social_media: values.social_media,
+        };
+
+        try {
+            const response = await authApi.post('/post-generation/generate', post_generation_data);
+            if (response.status === 200) {
+                console.log('Post Generated: ', response.data);
+                clearError();
+                setGeneratedPostTitle(response.data.generated_post.title);
+                setGeneratedPost(response.data.generated_post.text);
+            }
+            else {
+                handleError(new Error('Unknown Error'));
+            }
+
+        } catch(error: any){ 
+            handleError(error);
+        }
     };
 
     return (
@@ -52,7 +79,7 @@ export const PostGenerator: React.FC = () => {
         <Select
             label="Public Official"
             placeholder="Select a public official"
-            data={publicOfficials}
+            data={poDropDown}
             {...form.getInputProps('public_official')}
         />
         <Textarea
@@ -72,7 +99,8 @@ export const PostGenerator: React.FC = () => {
             Generate Post
         </Button>
         </form>
-        <GeneratedPost post={generatedPost} />
+        {error && <Box mt="md" c="red">{error}</Box>}
+        {generatedPost && <GeneratedPost title={generatedPostTitle} post={generatedPost} />}
     </Box>
     );
 };

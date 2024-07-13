@@ -4,6 +4,7 @@ import api from '../../services/api';
 import { useState} from 'react';
 import { useAuth } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { useHttpError } from '@/hooks/useHttpError';
 
 interface LoginFormValues {
     email: string;
@@ -13,8 +14,8 @@ interface LoginFormValues {
 
 function LoginForm() {
   const { login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const {error, setError, handleError} = useHttpError(); 
   
   const form = useForm<LoginFormValues>({
     mode: 'uncontrolled',
@@ -46,19 +47,15 @@ function LoginForm() {
             console.log('Login successful:', response.data);
             navigate('/generate');
         }
-        else if(response.status == 401){
-            setError('Error' + response.data.error);
+        else{
+          handleError(new Error('Unknown Error'))
         }
     } catch (error: any) {
-      console.error('Login failed:', error);
-      if(error.response){
-        setError('Error' + error.response.data.error);
-      }
-      else if(error.request){
-        setError('Error: No response from server');
+      if (error.response?.status === 401) {
+        setError('Invalid Username or Password');
       }
       else {
-        setError('Login failed, please try again');
+        handleError(error);
       }
     }
   };

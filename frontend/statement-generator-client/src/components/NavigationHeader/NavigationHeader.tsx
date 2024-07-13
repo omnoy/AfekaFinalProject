@@ -22,7 +22,7 @@ export function NavigationHeader({route}: {route: string}) {
       <NavLink href="/generate" label="Generate Post" currentRoute={route} />
       <NavLink href="/history" label="Post History" currentRoute={route} />
       <NavLink href="/profile" label="User Profile" currentRoute={route} />
-      <NavLink href="/" label="Logout" currentRoute={route} />
+      <NavLink href="/logout" label="Logout" currentRoute={route} />
     </Group>
     );
 }

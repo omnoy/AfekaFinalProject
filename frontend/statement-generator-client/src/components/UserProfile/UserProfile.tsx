@@ -3,6 +3,7 @@ import { Box, TextInput, Button, Title, Text, Group, MantineTheme, useMantineThe
 import { useForm } from '@mantine/form';
 import { useAuth } from '../../context/AuthProvider';
 import api, { createAuthApi } from '@/services/api';
+import { useHttpError } from '@/hooks/useHttpError';
 interface UserProfile {
   email: string;
   username: string;
@@ -13,10 +14,10 @@ interface UserProfile {
 export const UserProfileComponent: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const { user, updateUser, accessToken } = useAuth();
   const authApi = createAuthApi(accessToken);
-  
+  const { error, handleError, clearError } = useHttpError();
+
   const theme = useMantineTheme();
 
   const loadUserProfile = (user_data: UserProfile | null) => {
@@ -45,42 +46,15 @@ export const UserProfileComponent: React.FC = () => {
           form.setValues(loadUserProfile(response.data.user));
 
           setIsEditing(false);
-          setErrorMessage('');
+          clearError();
           setSuccessMessage('Profile updated successfully!');
           setTimeout(() => setSuccessMessage(''), 3000);
       }
-      else if(response.status == 400){
-          console.log('Error' + response.data.error);
-          setErrorMessage('Error: Invalid request');
-      }
-      else if(response.status == 401){
-          console.log('Error' + response.data.error);
-          setErrorMessage('Error: Unauthorized access');
+      else {
+          handleError(new Error('Unknown Error'));
       }
   } catch (error: any) {
-    console.error('Profile Update failed:', error);
-    if(error.response){
-      if(error.response.status == 400){
-        console.log('Error' + error.response.data.error);
-        setErrorMessage('Error: Invalid request');
-      }
-      else if(error.response.status == 401){
-          console.log('Error' + error.response.data.error);
-          setErrorMessage('Error: Unauthorized access');
-      }
-      else {
-        console.log('Error' + error.response.data.error);
-        setErrorMessage('Error: Invalid request');
-      }
-    }
-    else if(error.request){
-      console.log('Error: No response from server' + error);
-      setErrorMessage('Error: No response from server');
-    }
-    else {
-      console.log('Login failed, please try again' + error);
-      setErrorMessage('Error: Login failed, please try again');
-    }
+    handleError(error);
   }
   };
   
@@ -130,7 +104,7 @@ export const UserProfileComponent: React.FC = () => {
         </Group>
 
         {successMessage && (<Text c="teal" mb="md">{successMessage}</Text>)} 
-        {errorMessage && (<Text c="red" mb="md">{errorMessage}</Text>)}
+        {error && (<Text c="red" mb="md">{error}</Text>)}
 
         <Group justify="space-between" mt="xl">
           {!isEditing ? (
@@ -138,7 +112,7 @@ export const UserProfileComponent: React.FC = () => {
                 {
                     setIsEditing(true); 
                     setSuccessMessage('');
-                    setErrorMessage('');
+                    clearError();
                 }
             }>
             Edit Profile
@@ -150,7 +124,7 @@ export const UserProfileComponent: React.FC = () => {
                 {
                     setIsEditing(false);
                     setSuccessMessage('');
-                    setErrorMessage('');
+                    clearError();
                 }
             }>
                 Cancel

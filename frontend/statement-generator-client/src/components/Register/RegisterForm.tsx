@@ -1,6 +1,9 @@
 import { useForm } from '@mantine/form';
 import { TextInput, PasswordInput, Button, Group, Box } from '@mantine/core';
 import api from '../../services/api';
+import { useAuth } from '@/context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+import { useHttpError } from '@/hooks/useHttpError';
 
 interface RegisterFormValues {
     email: string;
@@ -11,6 +14,11 @@ interface RegisterFormValues {
 }
 
 export const RegisterForm: React.FC = () => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const { error, setError, handleError } = useHttpError();
+
+
     const form = useForm<RegisterFormValues>({
         mode: 'uncontrolled',
         initialValues: {
@@ -52,20 +60,27 @@ export const RegisterForm: React.FC = () => {
         },
     });
 
-    const handleSubmit = async (values: {
-        email: string;
-        password: string;
-        username: string;
-        position: string;
-    }) => {
+    const handleSubmit = async (values: RegisterFormValues) => {
         try {
-            window.location.href = '/generate';
-            const response = await api.post('auth/register', values);
+            const register_values = {
+                email: values.email,
+                password: values.password,
+                username: values.username,
+                position: values.position
+            }
+
+            const response = await api.post('auth/register', register_values);
             console.log('Registration successful:', response.data);
-            // Handle successful registration (e.g., save token, redirect user)
+            if (response.status === 200) {
+                login(response.data.user, 
+                        response.data.user.role, response.data.access_token);
+                navigate('/generate');
+            }
+            else {
+                handleError(new Error('Unknown Error'));
+            }
         } catch (error) {
-            console.error('Registration failed:', error);
-            // Handle registration error (e.g., show error message to user)
+            handleError(new Error('Unknown Error'));
         }
     };
 

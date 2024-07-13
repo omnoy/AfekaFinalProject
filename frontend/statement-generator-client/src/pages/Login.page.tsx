@@ -1,5 +1,6 @@
 import LoginForm from "@/components/Login/LoginForm";
 import { Container, Text, Title } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 export function LoginPage() {
   return (
@@ -10,7 +11,7 @@ export function LoginPage() {
             </Title>
             <LoginForm />
             <Text ta="center" mt="xl">
-                Don't have an account? <a href="/register">Register here.</a>
+                Don't have an account? <Link to="/register">Register here.</Link>
             </Text>
         </Container>
     </>

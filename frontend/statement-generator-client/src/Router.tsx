@@ -8,6 +8,7 @@ import { UserProfilePage } from './pages/UserProfile.page';
 import { NavigationHeader } from './components/NavigationHeader/NavigationHeader';
 import { ErrorPage } from './pages/Error.page';
 import RequireAuth from './components/RequireAuth/RequireAuth';
+import { LogoutPage } from './pages/Logout.page';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,16 @@ const router = createBrowserRouter([
       <RequireAuth>
         <NavigationHeader route='/profile'/>
         <UserProfilePage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: '/logout',
+    element: 
+    (
+      <RequireAuth>
+        <NavigationHeader route='/logout'/>
+        <LogoutPage />
       </RequireAuth>
     )
   },

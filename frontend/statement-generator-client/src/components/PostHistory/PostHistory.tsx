@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
-import { Box, Text, Card, Stack, Group, Badge, Title, Button } from '@mantine/core';
+import React, { useEffect, useState } from 'react';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink } from '@mantine/core';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
+import { useHttpError } from '@/hooks/useHttpError';
+import { useAuth } from '@/context/AuthProvider';
+import { createAuthApi } from '@/services/api';
+import { getDateFromObjectId } from '@/services/getDateFromObjectId';
+import { usePublicOfficials } from '@/hooks/usePublicOfficials';
+import { Link } from 'react-router-dom';
 
 interface Post {
   id: string;
@@ -11,35 +17,62 @@ interface Post {
   createdAt: Date;
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    title: 'Climate Change Initiative',
-    text: "We're taking bold steps to address climate change. Our new initiative aims to reduce carbon emissions by 30% over the next five years.",
-    publicOfficial: 'Benyamin Netanyahu',
-    socialMedia: 'Twitter',
-    createdAt: new Date('2024-07-08T10:30:00'),
-  },
-  {
-    id: '2',
-    title: 'Education Budget Increase',
-    text: "I'm proud to announce a significant increase in our education budget. This will support our teachers and provide better resources for our students.",
-    publicOfficial: 'Mr. Frog',
-    socialMedia: 'Facebook',
-    createdAt: new Date('2024-07-07T14:45:00'),
-  },
-  {
-    id: '3',
-    title: 'New Job Creation Program',
-    text: "Our administration is launching a new job creation program aimed at boosting employment in key sectors. Let's build a stronger economy together!",
-    publicOfficial: 'President Jimble',
-    socialMedia: 'LinkedIn',
-    createdAt: new Date('2024-07-06T09:15:00'),
-  },
-];
-
 export const PostHistory: React.FC = () => {
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
+  const [posts, setPosts] = useState<Post[]>([]);
+  const { accessToken } = useAuth();
+  const authApi = createAuthApi(accessToken); 
+  const {error, handleError, clearError} = useHttpError();
+  const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
+  const [poNames, setPONames] = useState<{id: string, name: string}[]>([]);
+  const [isPONamesLoaded, setIsPONamesLoaded] = useState(false);
+
+  const getPostHistory = async () => {
+    // Fetch post history from the backend
+    try {
+      const response = await authApi.get('/post-generation/posts/user');
+      if (response.status === 200) {
+        console.log('Post History:', response.data);
+        const generated_posts = Array.from(response.data.generated_posts);
+        const post_data = generated_posts.map((generated_post: any) =>
+          ({ 
+            id: generated_post.id,
+            title: generated_post.title,
+            text: generated_post.text,
+            publicOfficial: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
+            socialMedia: generated_post.social_media,
+            createdAt: getDateFromObjectId(generated_post.id)
+          } as Post));
+          return post_data;
+      } else {
+        console.log('Error' + response.data.error);
+        handleError(new Error('Error: Unknown Error loading Post History'));
+      }
+    } catch (error: any) {
+      handleError(error);
+    }
+    return [];
+  };
+
+  useEffect(() => {
+    if (publicOfficials.length > 0) {
+      const names = publicOfficials.map((official: any) => ({id: official.id, name: official.name_eng}));
+      setPONames(names);
+      setIsPONamesLoaded(true);
+    }
+  }, [publicOfficials]);
+
+  useEffect(() => {
+    const fetchPostHistory = async () => {
+        if (isPONamesLoaded) {
+          const posts = await getPostHistory();
+
+          setPosts(posts);
+        }
+    };
+
+    fetchPostHistory();
+}, [isPONamesLoaded]);
 
   const handleCopy = (postId: string, text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -54,11 +87,12 @@ export const PostHistory: React.FC = () => {
     <Box p="md">
       <Title order={2} mb="xl">Your Generated Posts</Title>
       <Stack gap="lg">
-        {mockPosts.map((post) => (
+        {posts.length ? 
+        posts.map((post) => (
           <Card key={post.id} shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="center">
-                <Text fontWeight={500}>{post.title}</Text>
+                <Text fw={500} dir='rtl'>{post.title}</Text>
                 <Badge color="blue">{post.socialMedia}</Badge>
               </Group>
             </Card.Section>
@@ -67,7 +101,7 @@ export const PostHistory: React.FC = () => {
               Created for: {post.publicOfficial}
             </Text>
             
-            <Text size="sm">{post.text}</Text>
+            <Text size="sm" dir='rtl' ta='right'>{post.text}</Text>
             <Group mt="md" justify="space-between">
               <Text mt="md" size="xs" color="dimmed">
                 Created on: {post.createdAt.toLocaleString()}
@@ -81,7 +115,9 @@ export const PostHistory: React.FC = () => {
               </Button>
             </Group>
           </Card>
-        ))}
+        ))
+      :
+        <Text>No posts found! Go to <Link to='/generate'>the post generator</Link> to get started!</Text>}
       </Stack>
     </Box>
   );

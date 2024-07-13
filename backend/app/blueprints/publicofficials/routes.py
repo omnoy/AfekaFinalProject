@@ -84,7 +84,7 @@ def update_public_official(public_official_id):
         return jsonify(error=str(e)), 500
 
 @bp.route('/all', methods=['GET'])
-@jwt_admin_required()
+@jwt_user_required()
 def get_all_public_officials():
     logger.info('Getting all public officials')
     try:

@@ -1,5 +1,6 @@
 import { RegisterForm } from "@/components/Register/RegisterForm";
 import { Text, Container, Title } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 export function RegisterPage() { 
     return (
@@ -9,7 +10,7 @@ export function RegisterPage() {
             </Title>
             <RegisterForm />
             <Text ta="center" mt="xl">
-                Already registered? <a href="/login">Log in here.</a>
+                Already registered? <Link to="/login">Log in here.</Link>
             </Text>
         </Container>
     );

@@ -1,4 +1,5 @@
 import { Title, Text, Anchor, Button, Group } from '@mantine/core';
+import { Link } from 'react-router-dom';
 export function HomePage() {
   return (
     <>
@@ -9,16 +10,16 @@ export function HomePage() {
         To begin, please log in or register.
       </Text>
       <Group justify="center" mt="xl">
-      <Anchor href="/login">
+      <Link to="/login">
           <Button>
               Login
           </Button>
-        </Anchor>
-        <Anchor href="/register">
+        </Link>
+        <Link to="/register">
           <Button>
               Register
           </Button>
-        </Anchor>
+        </Link>
       </Group>
     </>
   );
