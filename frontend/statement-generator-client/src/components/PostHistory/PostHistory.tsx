@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink } from '@mantine/core';
-import { IconCheck, IconCopy } from '@tabler/icons-react';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader } from '@mantine/core';
+import { IconCheck, IconCopy, IconArrowUp , IconArrowDown  } from '@tabler/icons-react';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { createAuthApi } from '@/services/api';
@@ -26,9 +26,13 @@ export const PostHistory: React.FC = () => {
   const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
   const [poNames, setPONames] = useState<{id: string, name: string}[]>([]);
   const [isPONamesLoaded, setIsPONamesLoaded] = useState(false);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [loadingPosts, setLoadingPosts] = useState<boolean>(false);
+  const [arePostsLoaded, setArePostsLoaded] = useState<boolean>(false);
+  const [postsEmpty, setPostsEmpty] = useState<boolean>(false);
 
   const getPostHistory = async () => {
-    // Fetch post history from the backend
+    setLoadingPosts(true);
     try {
       const response = await authApi.get('/post-generation/posts/user');
       if (response.status === 200) {
@@ -51,6 +55,9 @@ export const PostHistory: React.FC = () => {
     } catch (error: any) {
       handleError(error);
     }
+    finally {
+      setLoadingPosts(false);
+    }
     return [];
   };
 
@@ -66,13 +73,31 @@ export const PostHistory: React.FC = () => {
     const fetchPostHistory = async () => {
         if (isPONamesLoaded) {
           const posts = await getPostHistory();
-
+          posts.reverse(); //default sort by descending order
           setPosts(posts);
+          setArePostsLoaded(true);
         }
     };
 
     fetchPostHistory();
 }, [isPONamesLoaded]);
+
+useEffect(()=> {
+  const sortPosts = () => {
+    const sortedPosts = posts.reverse();
+    setPosts([...sortedPosts]);
+  }
+  sortPosts();
+}, [sortDirection]);
+
+useEffect(() => {
+  const checkPostsEmpty = () => {
+    const postsEmpty = posts.length === 0;
+    setPostsEmpty(postsEmpty);
+  }
+  checkPostsEmpty();
+}, [posts]);
+
 
   const handleCopy = (postId: string, text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -85,9 +110,20 @@ export const PostHistory: React.FC = () => {
   
   return (
     <Box p="md">
-      <Title order={2} mb="xl">Your Generated Posts</Title>
+      <Group justify="space-between" mb='md'>
+        <Title order={2}>Your Generated Posts</Title>
+          <Button onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')} variant='subtle'>
+            {sortDirection === 'asc' ? 
+              <IconArrowUp stroke={2}/>
+              : 
+              <IconArrowDown stroke={2}/>}
+          </Button>
+      </Group>
+      {loadingPosts || loading || !arePostsLoaded ? 
+      null
+      :
       <Stack gap="lg">
-        {posts.length ? 
+        {!postsEmpty ? 
         posts.map((post) => (
           <Card key={post.id} shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section withBorder inheritPadding py="xs">
@@ -119,6 +155,7 @@ export const PostHistory: React.FC = () => {
       :
         <Text>No posts found! Go to <Link to='/generate'>the post generator</Link> to get started!</Text>}
       </Stack>
+    } 
     </Box>
   );
 };

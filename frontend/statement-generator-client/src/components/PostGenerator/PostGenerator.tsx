@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Textarea, Button, Box } from '@mantine/core';
+import { Text, Loader, Select, Textarea, Button, Box, Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { GeneratedPost } from './GeneratedPost';
 import { createAuthApi } from '@/services/api';
@@ -27,6 +27,7 @@ export const PostGenerator: React.FC = () => {
     const authApi = createAuthApi(accessToken);
     const {error, setError, handleError, clearError} = useHttpError();
     const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
+    const [postLoading, setPostLoading] = useState<boolean>(false);
     
     const poDropDown = publicOfficials.map((official: any) => ({
         value: official.id,
@@ -48,6 +49,7 @@ export const PostGenerator: React.FC = () => {
     });
 
     const handleSubmit = async (values: SocialMediaPostFormValues) => {
+        setPostLoading(true);
         console.log('Form values:', values);
         const public_official = publicOfficials.find((official) => official.id === values.public_official);
         const post_generation_data = {
@@ -71,36 +73,51 @@ export const PostGenerator: React.FC = () => {
         } catch(error: any){ 
             handleError(error);
         }
+        finally
+        {
+            setPostLoading(false);
+        }
     };
 
     return (
-    <Box maw={400} mx="auto">
+    <Box maw={600} mx="auto">
+        
         <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Select
-            label="Public Official"
-            placeholder="Select a public official"
-            data={poDropDown}
-            {...form.getInputProps('public_official')}
-        />
-        <Textarea
-            label="Prompt"
-            placeholder="Enter your prompt here"
-            minRows={4}
-            autosize
-            {...form.getInputProps('prompt')}
-        />
-        <Select
-            label="Social Media Platform"
-            placeholder="Select a social media platform"
-            data={socialMediaPlatforms}
-            {...form.getInputProps('social_media')}
-        />
-        <Button type="submit" mt="md">
-            Generate Post
-        </Button>
+            <Group mt="md" justify='center'>
+                <Select
+                    label="Public Official"
+                    placeholder="Select a public official"
+                    data={poDropDown}
+                    {...form.getInputProps('public_official')}
+                />
+                <Select
+                    label="Social Media Platform"
+                    placeholder="Select a social media platform"
+                    data={socialMediaPlatforms}
+                    {...form.getInputProps('social_media')}
+                />
+            </Group>
+            <Textarea
+                label="Prompt"
+                placeholder="Enter your prompt here"
+                mt='md'
+                minRows={4}
+                autosize
+                {...form.getInputProps('prompt')}
+            />
+            
+            <Button type="submit" mt="md">
+                Generate Post
+            </Button>
         </form>
+        {postLoading ? 
+        <Stack align='center' gap='md' justify='center'>
+            <Text mt="md">Generating...</Text>
+            <Loader mt="md" c='blue' type='bars'/>
+        </Stack>
+        : <GeneratedPost title={generatedPostTitle} post={generatedPost} />
+        }
         {error && <Box mt="md" c="red">{error}</Box>}
-        {generatedPost && <GeneratedPost title={generatedPostTitle} post={generatedPost} />}
     </Box>
     );
 };

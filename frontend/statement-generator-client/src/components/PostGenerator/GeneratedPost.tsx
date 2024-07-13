@@ -22,7 +22,7 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post }) => 
 
   return (
     <Box mt="xl">
-      <Text fw={700} mb="md" dir='rtl'>{title  || 'Post Title'}</Text>
+      <Text fw={700} mah={600} mb="md" dir='rtl'>{title  || 'Post Title'}</Text>
       <Textarea
         value={post || ''}
         placeholder="Post output here"
