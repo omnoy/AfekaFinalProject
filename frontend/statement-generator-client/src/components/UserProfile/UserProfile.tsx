@@ -4,6 +4,7 @@ import { useForm } from '@mantine/form';
 import { useAuth } from '../../context/AuthProvider';
 import api, { createAuthApi } from '@/services/api';
 import { useHttpError } from '@/hooks/useHttpError';
+import { useTranslation } from 'react-i18next';
 interface UserProfile {
   email: string;
   username: string;
@@ -16,8 +17,8 @@ export const UserProfileComponent: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const { user, updateUser, accessToken } = useAuth();
   const authApi = createAuthApi(accessToken);
-  const { error, handleError, clearError } = useHttpError();
-
+  const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
+  const { t } = useTranslation('user_forms');
   const theme = useMantineTheme();
 
   const loadUserProfile = (user_data: UserProfile | null) => {
@@ -47,7 +48,7 @@ export const UserProfileComponent: React.FC = () => {
 
           setIsEditing(false);
           clearError();
-          setSuccessMessage('Profile updated successfully!');
+          setSuccessMessage(t('profile.update_success'));
           setTimeout(() => setSuccessMessage(''), 3000);
       }
       else {
@@ -70,14 +71,14 @@ export const UserProfileComponent: React.FC = () => {
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Group mt="md">
             <TextInput
-            label="Email"
+            label={t('form.email')}
             {...form.getInputProps('email')}
             readOnly
             mb="md"
             styles={getInputStyles(theme, false)}
             />
             <TextInput
-            label="Role"
+            label={t('form.role')}
             {...form.getInputProps('role')}
             readOnly
             mb="md"
@@ -87,14 +88,14 @@ export const UserProfileComponent: React.FC = () => {
         </Group>
         <Group mt="md">
             <TextInput
-            label="Username"
+            label={t('form.username')}
             {...form.getInputProps('username')}
             readOnly={!isEditing}
             mb="md"
             styles={getInputStyles(theme, isEditing)}
             />
             <TextInput
-            label="Position"
+            label={t('form.position')}
             {...form.getInputProps('position')}
             readOnly={!isEditing}
             mb="md"
@@ -104,8 +105,7 @@ export const UserProfileComponent: React.FC = () => {
         </Group>
 
         {successMessage && (<Text c="teal" mb="md">{successMessage}</Text>)} 
-        {error && (<Text c="red" mb="md">{error}</Text>)}
-
+        <HTTPErrorComponent />
         <Group justify="space-between" mt="xl">
           {!isEditing ? (
             <Button onClick={() => 
@@ -115,11 +115,11 @@ export const UserProfileComponent: React.FC = () => {
                     clearError();
                 }
             }>
-            Edit Profile
+            {t('profile.edit_button')}
             </Button>
           ) : (
             <>
-              <Button type="submit" color="blue">Save Changes</Button>
+              <Button type="submit" color="blue">{t('profile.save_changes_button')}</Button>
               <Button color="gray" onClick={() => 
                 {
                     setIsEditing(false);
@@ -127,7 +127,7 @@ export const UserProfileComponent: React.FC = () => {
                     clearError();
                 }
             }>
-                Cancel
+                {t('profile.cancel_button')}
             </Button>
             </>
           )}

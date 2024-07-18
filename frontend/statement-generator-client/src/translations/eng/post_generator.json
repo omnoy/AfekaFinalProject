@@ -1,0 +1,51 @@
+{
+    "post_generator":
+    {
+        "title": "Generate a Post",
+        "public_official_error": "Please select a public official",
+        "public_official_placeholder": "Select a public official",
+        "social_media_error": "Please select a social media platform",
+        "social_media_placeholder": "Select a social media platform",
+        "language_error": "Please select a language",
+        "language_placeholder": "Select a language",
+        "prompt_error": "Prompt cannot be empty",
+        "prompt_placeholder": "Enter your prompt here",
+        "generate_post_button": "Generate Post",
+        "generation_loading": "Generating...",
+        "nothing_found": "Nothing found..."
+        
+    },
+    "post_history":
+    {
+        "title": "Post History",
+        "post_history_title": "Your Generated Posts",
+        "no_posts_text": "No posts found! Go to",
+        "no_posts_link": "the post generator",
+        "no_posts_suffix": "to get started!"
+    },
+    "generated_post":
+    {
+        "public_official": "Public Official",
+        "social_media": "Social Media Platform",
+        "language": "Language",
+        "prompt": "Prompt",
+        "post_title_placeholder": "Post Title",
+        "post_text_placeholder": "Post Output Here",
+        "copy_button": "Copy to Clipboard",
+        "copy_button_copied": "Copied!",
+        "created_for": "Created for: ",
+        "created_on": "Created on: "
+    },
+    "social_media": {
+        "twitter": "Twitter",
+        "facebook": "Facebook",
+        "instagram": "Instagram",
+        "linkedin": "LinkedIn"
+    },
+    "languages": {
+        "english": "English",
+        "hebrew": "Hebrew",
+        "eng": "English",
+        "heb": "Hebrew"
+    }
+}

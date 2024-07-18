@@ -12,6 +12,7 @@ class GeneratedPostActions():
             "title": title, 
             "text": text, 
             "prompt": prompt, 
+            "language": "heb",
             "social_media": social_media
         }
 

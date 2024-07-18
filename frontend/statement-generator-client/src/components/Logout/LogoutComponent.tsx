@@ -2,13 +2,15 @@ import { useAuth } from "@/context/AuthProvider";
 import { useHttpError } from "@/hooks/useHttpError";
 import { createAuthApi } from "@/services/api";
 import { Button, Group, Text } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 export const LogoutComponent: React.FC = () => {
     const navigate = useNavigate();
     const { accessToken, logout } = useAuth();
     const authApi = createAuthApi(accessToken);
-    const { error, handleError, clearError } = useHttpError();
+    const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
+    const { t } = useTranslation('logout');
 
     const handleLogout = async () => {
         try {
@@ -31,9 +33,9 @@ export const LogoutComponent: React.FC = () => {
     return (
         <Group justify="center" mt="xl">
             <Button onClick={() => handleLogout()} color="blue" variant="light">
-                Logout
+                {t('logout_button')}
             </Button>
-            {error && (<Text c="red" mb="md">{error}</Text>)}
+            <HTTPErrorComponent />
         </Group>
     )
 }

@@ -7,11 +7,12 @@ from app.models.exceptions.post_generation_failure_exception import PostGenerati
 from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.generation_model.generation_model import GenerationModel
+from app.models.language import Language
 
 
 class ClaudeModel(GenerationModel):
     @staticmethod    
-    def generate_post(generation_prompt: str, public_official: PublicOfficial,
+    def generate_post(generation_prompt: str, public_official: PublicOfficial, language: Language,
                         social_media: Optional[SocialMedia]) -> str:
         llm = ChatAnthropic(model=getenv("CLAUDE_MODEL_NAME"),
                             max_tokens=4096, 
@@ -25,7 +26,7 @@ class ClaudeModel(GenerationModel):
         if social_media is None:
             social_media = "social media"
 
-        response = ClaudeModel._get_api_response(chain, generation_prompt, public_official, social_media)
+        response = ClaudeModel._get_api_response(chain, generation_prompt, public_official, language, social_media)
 
         if response.response_metadata["stop_reason"] != "stop_sequence":
             raise PostGenerationFailureException("No Stop Sequence Found in Response")
@@ -48,7 +49,7 @@ class ClaudeModel(GenerationModel):
                 (
                     "system",
                     '''
-                    As a {SOCIAL_MEDIA} post generator for posts in the Hebrew language, your task is to write a {SOCIAL_MEDIA} post in Hebrew for {PUBLIC_OFFICIAL_ROLE} {PUBLIC_OFFICIAL}’s {SOCIAL_MEDIA}, according to the prompt passed to you, contained within the following tags: <prompt> </prompt>.
+                    As a {SOCIAL_MEDIA} post generator for posts in the {LANGUAGE} language, your task is to write a {SOCIAL_MEDIA} post in {LANGUAGE} for {PUBLIC_OFFICIAL_ROLE} {PUBLIC_OFFICIAL}’s {SOCIAL_MEDIA}, according to the prompt passed to you, contained within the following tags: <prompt> </prompt>.
 
                     {PUBLIC_OFFICIAL} is a/the {PUBLIC_OFFICIAL_ROLE}.
                     {PUBLIC_OFFICIAL_INFORMATION} 
@@ -69,13 +70,14 @@ class ClaudeModel(GenerationModel):
         )
     
     @staticmethod
-    def _get_api_response(chain, generation_prompt: str, public_official: PublicOfficial, social_media: Optional[SocialMedia]) -> str:
+    def _get_api_response(chain, generation_prompt: str, public_official: PublicOfficial, language: Language, social_media: Optional[SocialMedia]) -> str:
         response = chain.invoke(
             {
                 "SOCIAL_MEDIA": str(social_media),
                 "PUBLIC_OFFICIAL_ROLE": public_official.position,
                 "PUBLIC_OFFICIAL": public_official.name_eng,
                 "PUBLIC_OFFICIAL_INFORMATION": f"{public_official.name_eng} is a member of the {public_official.political_party}.",
+                "LANGUAGE": language.get_full_name(),
                 "input": generation_prompt
             }
         )

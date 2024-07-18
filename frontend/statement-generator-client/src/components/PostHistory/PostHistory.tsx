@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader } from '@mantine/core';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea } from '@mantine/core';
 import { IconCheck, IconCopy, IconArrowUp , IconArrowDown  } from '@tabler/icons-react';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
@@ -7,12 +7,15 @@ import { createAuthApi } from '@/services/api';
 import { getDateFromObjectId } from '@/services/getDateFromObjectId';
 import { usePublicOfficials } from '@/hooks/usePublicOfficials';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Post {
   id: string;
   title: string;
   text: string;
   publicOfficial: string;
+  language: string;
   socialMedia: string;
   createdAt: Date;
 }
@@ -22,7 +25,7 @@ export const PostHistory: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const { accessToken } = useAuth();
   const authApi = createAuthApi(accessToken); 
-  const {error, handleError, clearError} = useHttpError();
+  const {error, handleError, clearError, HTTPErrorComponent} = useHttpError();
   const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
   const [poNames, setPONames] = useState<{id: string, name: string}[]>([]);
   const [isPONamesLoaded, setIsPONamesLoaded] = useState(false);
@@ -30,6 +33,7 @@ export const PostHistory: React.FC = () => {
   const [loadingPosts, setLoadingPosts] = useState<boolean>(false);
   const [arePostsLoaded, setArePostsLoaded] = useState<boolean>(false);
   const [postsEmpty, setPostsEmpty] = useState<boolean>(false);
+  const { t } = useTranslation('post_generator');
 
   const getPostHistory = async () => {
     setLoadingPosts(true);
@@ -44,13 +48,14 @@ export const PostHistory: React.FC = () => {
             title: generated_post.title,
             text: generated_post.text,
             publicOfficial: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
+            language: generated_post.language,
             socialMedia: generated_post.social_media,
             createdAt: getDateFromObjectId(generated_post.id)
           } as Post));
           return post_data;
       } else {
         console.log('Error' + response.data.error);
-        handleError(new Error('Error: Unknown Error loading Post History'));
+        handleError(new Error('Error: Unknown Error Loading Post History'));
       }
     } catch (error: any) {
       handleError(error);
@@ -111,7 +116,7 @@ useEffect(() => {
   return (
     <Box p="md">
       <Group justify="space-between" mb='md'>
-        <Title order={2}>Your Generated Posts</Title>
+        <Title order={2}>{t('post_history.post_history_title')}</Title>
           <Button onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')} variant='subtle'>
             {sortDirection === 'asc' ? 
               <IconArrowUp stroke={2}/>
@@ -119,6 +124,8 @@ useEffect(() => {
               <IconArrowDown stroke={2}/>}
           </Button>
       </Group>
+      <HTTPErrorComponent />
+      <ScrollArea h={600} type='always'>
       {loadingPosts || loading || !arePostsLoaded ? 
       null
       :
@@ -128,34 +135,41 @@ useEffect(() => {
           <Card key={post.id} shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="center">
-                <Text fw={500} dir='rtl'>{post.title}</Text>
+                <Text fw={500} dir={post.language === 'eng' ? 'ltr' : 'rtl'}>{post.title}</Text>
                 <Badge color="blue">{post.socialMedia}</Badge>
               </Group>
             </Card.Section>
-
-            <Text mt="md" mb="xs" size="sm" color="dimmed">
-              Created for: {post.publicOfficial}
+            <Group justify="space-between">
+              <Text mt="md" mb="xs" size="sm" c="dimmed">
+                {t('generated_post.created_for')} {post.publicOfficial}
+              </Text>
+              <Text mt="md" mb="xs" size="sm" c="dimmed">
+                {t('generated_post.language')}: {t('languages.' + post.language)}
+              </Text>
+            </Group>
+            <Text size="sm" dir={post.language === 'eng' ? 'ltr' : 'rtl'} ta={post.language === 'eng' ? 'left' : 'right'}>
+              {post.text}
             </Text>
             
-            <Text size="sm" dir='rtl' ta='right'>{post.text}</Text>
             <Group mt="md" justify="space-between">
-              <Text mt="md" size="xs" color="dimmed">
-                Created on: {post.createdAt.toLocaleString()}
+              <Text mt="md" size="xs" c="dimmed">
+                {t('generated_post.created_on')} {post.createdAt.toLocaleString()}
               </Text>
               <Button
                 onClick={() => handleCopy(post.id, post.text)}
                 leftSection={copiedStates[post.id] ? <IconCheck size={16} /> : <IconCopy size={16} />}
                 color={copiedStates[post.id] ? 'teal' : 'blue'}
               >
-                {copiedStates[post.id] ? 'Copied!' : 'Copy to Clipboard'}
+                {copiedStates[post.id] ? t('generated_post.copy_button_copied') : t('generated_post.copy_button')}
               </Button>
             </Group>
           </Card>
         ))
       :
-        <Text>No posts found! Go to <Link to='/generate'>the post generator</Link> to get started!</Text>}
+        <Text>{t('post_history.no_posts_text')} <Link to='/generate'>{t('post_history.no_posts_link')}</Link> {t('post_history.no_posts_suffix')}</Text>}
       </Stack>
-    } 
+      } 
+    </ScrollArea>
     </Box>
   );
 };

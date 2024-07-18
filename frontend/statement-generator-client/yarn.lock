@@ -6490,6 +6490,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"country-flag-icons@npm:^1.5.13":
+  version: 1.5.13
+  resolution: "country-flag-icons@npm:1.5.13"
+  checksum: 10c0/beee2fe225469507d6c8df90376e031f08a5f103f65cd68e1db0679e82d4ffb2fbb27a3bb19defd112745b5c19d1972df615df21813c8c2074062dd5eb08eabb
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
@@ -10016,6 +10023,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^7.13.1"
     "@vitejs/plugin-react": "npm:^4.3.1"
     axios: "npm:^1.7.2"
+    country-flag-icons: "npm:^1.5.13"
     eslint: "npm:^8.57.0"
     eslint-config-airbnb: "npm:19.0.4"
     eslint-config-airbnb-typescript: "npm:^18.0.0"

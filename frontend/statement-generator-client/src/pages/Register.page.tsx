@@ -1,16 +1,18 @@
 import { RegisterForm } from "@/components/Register/RegisterForm";
 import { Text, Container, Title } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 export function RegisterPage() { 
+    const { t } = useTranslation("user_forms");
     return (
         <Container size="sm">
             <Title ta="center" mx='auto'>
-                Register
+                {t("register.title")}
             </Title>
             <RegisterForm />
             <Text ta="center" mt="xl">
-                Already registered? <Link to="/login">Log in here.</Link>
+                {t("register.login_redirect_text")} <Link to="/login">{t('register.login_redirect_link')}</Link>
             </Text>
         </Container>
     );

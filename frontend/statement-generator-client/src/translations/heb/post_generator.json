@@ -1,0 +1,47 @@
+{
+    "post_generator": {
+        "title": "צור פוסט",
+        "public_official_error": "אנא בחר איש ציבור",
+        "public_official_placeholder": "בחר איש ציבור",
+        "social_media_error": "אנא בחר פלטפורמת מדיה חברתית",
+        "social_media_placeholder": "בחר פלטפורמת מדיה חברתית",
+        "language_error": "אנא בחר שפת פוסט",
+        "language_placeholder": "בחר שפת פוסט",
+        "prompt_error": "פרומפט לא יכול להיות ריק",
+        "prompt_placeholder": "הכנס את הפרומפט שלך כאן",
+        "generate_post_button": "צור פוסט",
+        "generation_loading": "מייצר...",
+        "nothing_found": "לא נמצא כלום..."
+    },
+    "post_history": {
+        "title": "היסטוריית פוסטים",
+        "post_history_title": "הפוסטים שלך",
+        "no_posts_text": "לא נמצאו פוסטים! עבור אל",
+        "no_posts_link": "יוצר הפוסטים",
+        "no_posts_suffix": "כדי להתחיל!"
+    },
+    "generated_post": {
+        "public_official": "איש ציבור",
+        "social_media": "פלטפורמת מדיה חברתית",
+        "language": "שפה",
+        "prompt": "פרומפט",
+        "post_title_placeholder": "כותרת הפוסט",
+        "post_text_placeholder": "תוכן הפוסט כאן",
+        "copy_button": "העתק ללוח",
+        "copy_button_copied": "הועתק!",
+        "created_for": "נוצר עבור: ",
+        "created_on": "נוצר ב: "
+    },
+    "social_media": {
+        "twitter": "טוויטר",
+        "facebook": "פייסבוק",
+        "instagram": "אינסטגרם",
+        "linkedin": "לינקדאין"
+    },
+    "languages": {
+        "english": "אנגלית",
+        "hebrew": "עברית",
+        "eng": "אנגלית",
+        "heb": "עברית"
+    }
+}

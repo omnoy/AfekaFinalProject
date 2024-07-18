@@ -2,6 +2,7 @@ from app.models.generatedpost import GeneratedPost
 from app.models.social_media import SocialMedia
 from typing import Optional
 from abc import ABC, abstractmethod
+from app.models.language import Language
 
 class GeneratedPostService(ABC):
 
@@ -12,7 +13,7 @@ class GeneratedPostService(ABC):
     
     @abstractmethod
     def generate_post(self, generation_prompt: str, public_official_id: str, 
-                      user_id: Optional[str] = None, social_media: Optional[SocialMedia] = None) -> GeneratedPost:
+                      user_id: str, language: Language, social_media: SocialMedia) -> GeneratedPost:
         "Create a Generated Post using a prompt"
         pass
     

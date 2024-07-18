@@ -1,0 +1,40 @@
+{
+    "login": {
+        "title": "Login",
+        "register_redirect_message": "Don't have an account?",
+        "register_redirect_link": "Register here.",
+        "invalid_email_or_password": "Invalid email or password"
+    },
+    "register": {
+        "title": "Register",
+        "login_redirect_text": "Already registered?",
+        "login_redirect_link": "Log in here."
+    },
+    "form":{
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "username": "Username",
+        "position": "Position",
+        "role": "Role",
+        "submit_button": "Submit",
+        "email_placeholder": "your@email.com",
+        "password_placeholder": "Your password here...",
+        "confirm_password_placeholder": "Confirm your password",
+        "username_placeholder": "Your username here...",
+        "position_placeholder": "Your position here...",
+        "email_error": "Invalid email",
+        "password_error_short": "Password is too short",
+        "password_error_non_alpha": "Password must contain only alphabet characters or numbers.",
+        "password_error_no_match": "Passwords do not match",
+        "username_error": "Username is required",
+        "position_error": "Position is required"
+    },
+    "profile": {
+        "title": "User Profile",
+        "update_success": "Profile updated successfully",
+        "edit_button": "Edit Profile",
+        "save_changes_button": "Save Changes",
+        "cancel_button": "Cancel"
+    }
+}

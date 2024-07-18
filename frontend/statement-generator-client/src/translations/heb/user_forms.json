@@ -1,0 +1,40 @@
+{
+    "login": {
+        "title": "התחברות למשתמש",
+        "register_redirect_message": "אין משתמש?",
+        "register_redirect_link": "צור משתמש כאן.",
+        "invalid_email_or_password": "דוא\"ל או סיסמא לא תקינים."
+    },
+    "register": {
+        "title": "צור משתמש",
+        "login_redirect_text": "כבר רשום?",
+        "login_redirect_link": "התחבר למשתמש כאן."
+    },
+    "form": {
+        "email": "דוא\"ל",
+        "password": "סיסמא",
+        "confirm_password": "אימות סיסמא",
+        "username": "שם משתמש",
+        "position": "תפקיד",
+        "role": "סוג משתמש",
+        "submit_button": "כניסה",
+        "email_placeholder": "your@email.com",
+        "password_placeholder": "סיסמא שלך כאן...",
+        "confirm_password_placeholder": "אמת את הסיסמא שלך כאן...",
+        "username_placeholder": "שם המשתמש שלך כאן...",
+        "position_placeholder": "התפקיד שלך כאן...",
+        "email_error": "דוא\"ל לא תקין",
+        "password_error_short": "סיסמא קצרה מדי",
+        "password_error_non_alpha": "סיסמא צריכה להכיל ספרות או אותיות באנגלית בלבד.",
+        "password_error_no_match": "הסיסמאות לא תואמות",
+        "username_error": "שם משתמש נדרש",
+        "position_error": "תפקיד נדרש"
+    },
+    "profile": {
+        "title": "פרופיל משתמש",
+        "update_success": "הפרופיל עודכן בהצלחה",
+        "edit_button": "ערוך פרופיל",
+        "save_changes_button": "שמור שינויים",
+        "cancel_button": "ביטול"
+    }
+}

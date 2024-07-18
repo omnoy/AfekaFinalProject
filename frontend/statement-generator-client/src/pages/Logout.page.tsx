@@ -1,14 +1,16 @@
 import { LogoutComponent } from "@/components/Logout/LogoutComponent";
 import { Container, Title, Text } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 
 export function LogoutPage() {
+    const { t } = useTranslation('logout');
     return (
         <Container size="sm">
             <Title ta="center" mx='auto'>
-                Logout
+                {t('title')}
             </Title>
             <Text ta="center" mt="xl">
-                Are you sure you want to log out?
+                {t('validation')}
             </Text>
             <LogoutComponent />
         </Container>

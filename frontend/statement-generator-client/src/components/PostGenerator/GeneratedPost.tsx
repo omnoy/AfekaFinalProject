@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Text, Textarea, Button, Group } from '@mantine/core';
 import { IconCopy, IconCheck } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 interface GeneratedPostProps {
   title: string | null;
@@ -10,6 +11,7 @@ interface GeneratedPostProps {
 
 export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post }) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation('post_generator');
 
   const handleCopy = () => {
     if (post) {
@@ -22,19 +24,17 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post }) => 
 
   return (
     <Box mt="xl">
-      <Text fw={700} mah={600} mb="md" dir='rtl'>{title  || 'Post Title'}</Text>
+      <Text fw={700} mah={600} mb="md">{title  || t('generated_post.post_title_placeholder')}</Text>
       <Textarea
         value={post || ''}
-        placeholder="Post output here"
+        placeholder={t('generated_post.post_text_placeholder')}
         minRows={6}
-        dir='rtl'
         readOnly
         autosize
         styles={(theme) => ({
           input: {
             backgroundColor: post ? theme.colors.gray[1] : theme.colors.dark[1],
-            color: post ? theme.colors.gray[9] : theme.colors.dark[0],
-            textAlign: 'right',
+            color: post ? theme.colors.gray[9] : theme.colors.dark[0]
           },
         })}
       />
@@ -45,7 +45,7 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post }) => 
           color={copied ? 'teal' : 'blue'}
           component="button"
         >
-          {copied ? 'Copied!' : 'Copy to Clipboard'}
+          {copied ? t('generated_post.copy_button_copied') : t('generated_post.copy_button')}
         </Button>
       </Group>
     </Box>

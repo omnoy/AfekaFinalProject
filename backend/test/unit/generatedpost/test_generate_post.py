@@ -36,7 +36,8 @@ def test_generate_post(client, auth, public_official_actions, httpx_mock: HTTPXM
     public_official_id = public_official_actions.create_public_official().get_id()
 
     prompt_dict = {"generation_prompt": "תכין לי פוסט לכבוד יום ההולדת של ג'ף.", 
-                "public_official_id": public_official_id, 
+                "public_official_id": public_official_id,
+                "language": "heb", 
                 "social_media": "facebook"}
 
     auth.create_basic_user()
@@ -85,7 +86,8 @@ def test_generate_post_generation_failed(client, auth, public_official_actions, 
     public_official_id = public_official_actions.create_public_official().get_id()
 
     prompt_dict = {"generation_prompt": "תכין לי פוסט לכבוד יום ההולדת של ג'ף.", 
-                "public_official_id": public_official_id, 
+                "public_official_id": public_official_id,
+                "language": "heb", 
                 "social_media": "facebook"}
 
     auth.create_basic_user()
@@ -125,6 +127,7 @@ def test_generate_post_no_stop_sequence(client, auth, public_official_actions, h
 
     prompt_dict = {"generation_prompt": "תכין לי פוסט לכבוד יום ההולדת של ג'ף.", 
                 "public_official_id": public_official_id, 
+                "language": "heb",
                 "social_media": "facebook"}
 
     auth.create_basic_user()
@@ -139,6 +142,7 @@ def test_generate_post_with_invalid_public_official_id(client, auth):
     # Test Post Generation with an invalid public_official_id
     prompt_dict = {"generation_prompt": "Make a post about Jeff.", 
                    "public_official_id": "666e3cdc77f6b009eab6d345", #invalid
+                   "language": "heb",
                    "social_media": "facebook"} 
              
     auth.create_basic_user()
@@ -152,6 +156,7 @@ def test_generate_post_with_empty_prompt(client, auth, public_official_actions):
 
     prompt_dict = {"generation_prompt": "", 
                    "public_official_id": public_official_id, 
+                   "language": "heb",
                    "social_media": "facebook"}
 
     auth.create_basic_user()
@@ -160,12 +165,13 @@ def test_generate_post_with_empty_prompt(client, auth, public_official_actions):
 
     assert response.status_code == 400
 
-def test_generate_post_with_invalid_social_media(client, auth, public_official_actions):
+def test_generate_post_with_invalid_language(client, auth, public_official_actions):
     public_official_id = public_official_actions.create_public_official().get_id()
 
     prompt_dict = {"generation_prompt": "Make a post about Jeff.", 
                    "public_official_id": public_official_id, 
-                   "social_media": "test"} #invalid
+                   "language": "french", #invalid
+                   "social_media": "facebook"}
 
     auth.create_basic_user()
 

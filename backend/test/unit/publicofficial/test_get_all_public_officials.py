@@ -56,10 +56,11 @@ def test_get_all_public_officials_empty(client, auth):
     response_po_list = response.json['public_officials']
 
     assert len(response_po_list) ==  0
+    
 
-def test_get_all_public_officials_unauthorized(client, auth):
+def test_get_all_public_officials_basic_user(client, auth):
     auth.create_basic_user()
-
+    
     response = client.get("/public-official/all", headers=auth.get_auth_header())
 
-    assert response.status_code == 401
+    assert response.status_code == 200

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Text } from '@mantine/core';
 
 export const useHttpError = () => {
   const [error, setError] = useState<string | null>(null);
@@ -57,5 +58,9 @@ export const useHttpError = () => {
     };
   }, [redirectTimer]);
 
-  return { error, setError, handleError, clearError };
+  const HTTPErrorComponent = () => (
+    error ? <Text c="red" mb="md">{error}</Text> : null
+  );
+
+  return { error, setError, handleError, clearError, HTTPErrorComponent };
 };

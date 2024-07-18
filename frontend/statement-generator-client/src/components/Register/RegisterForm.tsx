@@ -1,9 +1,10 @@
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Group, Box } from '@mantine/core';
+import { Text, TextInput, PasswordInput, Button, Group, Box } from '@mantine/core';
 import api from '../../services/api';
 import { useAuth } from '@/context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useHttpError } from '@/hooks/useHttpError';
+import { useTranslation } from 'react-i18next';
 
 interface RegisterFormValues {
     email: string;
@@ -16,8 +17,8 @@ interface RegisterFormValues {
 export const RegisterForm: React.FC = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const { error, setError, handleError } = useHttpError();
-
+    const { error, setError, handleError, HTTPErrorComponent } = useHttpError();
+    const { t } = useTranslation('user_forms');
 
     const form = useForm<RegisterFormValues>({
         mode: 'uncontrolled',
@@ -29,31 +30,36 @@ export const RegisterForm: React.FC = () => {
             position: '',
         },
         validate: {
-            email: (value: string) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+            email: (value: string) => {
+                if (!/^\S+@\S+$/.test(value)) {
+                    return t('form.email_error');
+                }
+                return null;
+            },
             password: (value: string) => {
                 if (value.length < 8) {
-                    return 'Password is too short';
+                    return t('form.password_error_short');
                 }
                 if (!/^[a-zA-Z0-9]+$/.test(value)) {
-                    return 'Password must contain only alphanumeric characters';
+                    return t('form.password_error_non_alpha');
                 }
                 return null;
             },
             confirmPassword: (value: string, values: { password: string }) => {
                 if (value !== values.password) {
-                    return 'Passwords do not match';
+                    return t('form.password_error_no_match');
                 }
                 return null;
             },
             username: (value: string) => {
                 if (value.trim() === '') {
-                    return 'Username is required';
+                    return t('form.username_error');
                 }
                 return null;
             },
             position: (value: string) => {
                 if (value.trim() === '') {
-                    return 'Position is required';
+                    return t('form.position_error');
                 }
                 return null;
             },
@@ -89,45 +95,46 @@ export const RegisterForm: React.FC = () => {
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <TextInput
                     withAsterisk
-                    label='Email | דוא"ל'
-                    placeholder="your@email.com"
+                    label={t('form.email')}
+                    placeholder={t('form.email_placeholder')}
                     key={form.key('email')}
                     {...form.getInputProps('email')}
                 />
                 <PasswordInput
                     withAsterisk
-                    label="Password | סיסמא"
-                    placeholder="Your password"
+                    label={t('form.password')}
+                    placeholder={t('form.password_placeholder')}
                     type="password"
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />
                 <PasswordInput
                     withAsterisk
-                    label="Confirm Password | אשר סיסמא"
-                    placeholder="Confirm your password"
+                    label={t('form.confirm_password')}
+                    placeholder={t('form.confirm_password_placeholder')}
                     type="password"
                     key={form.key('confirmPassword')}
                     {...form.getInputProps('confirmPassword')}
                 />
                 <TextInput
                     withAsterisk
-                    label="Username | שם משתמש"
-                    placeholder="Your username"
+                    label={t('form.username')}
+                    placeholder={t('form.username_placeholder')}
                     key={form.key('username')}
                     {...form.getInputProps('username')}
                 />
                 <TextInput
                     withAsterisk
-                    label="Position | תפקיד"
-                    placeholder="Your position"
+                    label={t('form.position')}
+                    placeholder={t('form.position_placeholder')}
                     key={form.key('position')}
                     {...form.getInputProps('position')}
                 />
                 <Group justify="flex-end" mt="md">
-                    <Button type="submit">Submit</Button>
+                    <Button type="submit">{t('form.submit_button')}</Button>
                 </Group>
             </form>
+            <HTTPErrorComponent />
         </Box>
     );
 }

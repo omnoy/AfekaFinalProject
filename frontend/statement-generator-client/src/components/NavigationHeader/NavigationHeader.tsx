@@ -1,5 +1,8 @@
 import { Text, Group } from "@mantine/core";
+import { use } from "chai";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ChangeLanguageToggle } from "../ChangeLanguageFooter/ChangeLanguageFooter";
 interface NavLinkProps {
   href: string;
   label: string;
@@ -16,13 +19,13 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, currentRoute }) => (
 );
 
 export function NavigationHeader({route}: {route: string}) {
-
+    const { t, i18n } = useTranslation("navigation_header");
     return (
-        <Group justify="center" mt="xl" mb="md">
-      <NavLink href="/generate" label="Generate Post" currentRoute={route} />
-      <NavLink href="/history" label="Post History" currentRoute={route} />
-      <NavLink href="/profile" label="User Profile" currentRoute={route} />
-      <NavLink href="/logout" label="Logout" currentRoute={route} />
-    </Group>
+      <Group justify="center" mt="xl" mb="md">
+        <NavLink href="/generate" label={t("generate_page")} currentRoute={route} />
+        <NavLink href="/history" label={t("history_page")} currentRoute={route} />
+        <NavLink href="/profile" label={t("profile_page")} currentRoute={route} />
+        <NavLink href="/logout" label={t("logout_page")} currentRoute={route} />
+      </Group>
     );
 }

@@ -8,15 +8,19 @@ from app.models.social_media import SocialMedia
 from app.logic.generatedpost_service import GeneratedPostService
 from app.logic.mongo.database import get_public_official_collection, get_generated_post_collection
 from app.extensions import logger
+from app.models.language import Language
 
 class GeneratedPostDataManagerMongoDB(GeneratedPostService):
     def __init__(self) -> None:
         pass
 
     def generate_post(self, generation_prompt: str, public_official_id: str, 
-                      user_id: str, social_media: Optional[SocialMedia] = None) -> GeneratedPost:
+                      user_id: str, language: Language, social_media: SocialMedia) -> GeneratedPost:
         if len(generation_prompt) == 0 or generation_prompt.isspace():
             raise ValueError("Generation prompt cannot be empty")
+        if language is not None and language not in Language:
+            raise ValueError("Invalid post language")
+        
         if social_media is not None and social_media not in SocialMedia:
             raise ValueError("Invalid social media type")
 
@@ -25,8 +29,9 @@ class GeneratedPostDataManagerMongoDB(GeneratedPostService):
             raise KeyError(f"Public Official with ID {public_official_id} not found")
         
         generated_title, generated_text = generation_model.generate_post(generation_prompt=generation_prompt,
-                                                                              public_official=PublicOfficial(**public_official),
-                                                                              social_media=social_media)
+                                                                            public_official=PublicOfficial(**public_official),
+                                                                            language=Language(language),
+                                                                            social_media=SocialMedia(social_media))
         
         if not generated_title:
             generated_title = "Untitled"
@@ -37,6 +42,7 @@ class GeneratedPostDataManagerMongoDB(GeneratedPostService):
                                        title=generated_title,
                                        text=generated_text,
                                        prompt=generation_prompt,
+                                       language=language,
                                        social_media=social_media)
 
         inserted_obj = get_generated_post_collection().insert_one(generated_post.model_dump(exclude='id'))

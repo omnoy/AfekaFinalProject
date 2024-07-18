@@ -6,48 +6,64 @@ import { createAuthApi } from '@/services/api';
 import { useAuth } from '@/context/AuthProvider';
 import { useHttpError } from '@/hooks/useHttpError';
 import { usePublicOfficials } from '@/hooks/usePublicOfficials';
+import { useTranslation } from 'react-i18next';
+import { useForceUpdate } from '@mantine/hooks';
 
 interface SocialMediaPostFormValues {
   public_official: string;
   prompt: string;
   social_media: string;
+  language: string;
 }
-
-const socialMediaPlatforms = [
-  { value: 'twitter', label: 'Twitter' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'linkedin', label: 'LinkedIn' },
-];
 
 export const PostGenerator: React.FC = () => {
     const [generatedPostTitle, setGeneratedPostTitle] = useState<string | null>(null);
     const [generatedPost, setGeneratedPost] = useState<string | null>(null);
     const { accessToken } = useAuth();
     const authApi = createAuthApi(accessToken);
-    const {error, setError, handleError, clearError} = useHttpError();
+    const {error, setError, handleError, clearError, HTTPErrorComponent} = useHttpError();
     const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
     const [postLoading, setPostLoading] = useState<boolean>(false);
+    const { t, i18n } = useTranslation('post_generator');
+    const forceUpdate = useForceUpdate();
+
+    const socialMediaPlatforms = [
+        { value: 'twitter', label: t('social_media.twitter')},
+        { value: 'facebook', label: t('social_media.facebook')},
+        { value: 'instagram', label: t('social_media.instagram')},
+        { value: 'linkedin', label: t('social_media.linkedin')},
+      ];
+
+    const languageDropdown = [
+        { value: 'eng', label: t('languages.english')},
+        { value: 'heb', label: t('languages.hebrew')},
+    ];
     
     const poDropDown = publicOfficials.map((official: any) => ({
         value: official.id,
         label: official.name_eng,
     }));
-    
+
     const form = useForm<SocialMediaPostFormValues>({
-    mode: 'uncontrolled',
-    initialValues: {
-        public_official: '',
-        prompt: '',
-        social_media: '',
-    },
-    validate: {
-        public_official: (value) => (value ? null : 'Please select a public official'),
-        prompt: (value) => (value ? null : 'Prompt cannot be empty'),
-        social_media: (value) => (value ? null : 'Please select a social media platform'),
-    },
+        mode: 'uncontrolled',
+        initialValues: {
+            public_official: '',
+            prompt: '',
+            social_media: '',
+            language: i18n.language
+        },
+        validate: {
+            public_official: (value) => (value ? null : t('post_generator.public_official_error')),
+            prompt: (value) => (value ? null : t('post_generator.prompt_error')),
+            social_media: (value) => (value ? null : t('post_generator.social_media_error')),
+            language: (value) => (value ? null : t('post_generator.language_error')),
+        },
     });
 
+    // useEffect(() => {
+    //     form.setFieldValue('language', i18n.language);
+    //   }, [i18n.language]);
+    
     const handleSubmit = async (values: SocialMediaPostFormValues) => {
         setPostLoading(true);
         console.log('Form values:', values);
@@ -56,6 +72,7 @@ export const PostGenerator: React.FC = () => {
             public_official_id: public_official?.id,
             generation_prompt: values.prompt,
             social_media: values.social_media,
+            language: values.language,
         };
 
         try {
@@ -80,26 +97,33 @@ export const PostGenerator: React.FC = () => {
     };
 
     return (
-    <Box maw={600} mx="auto">
-        
+    <Box maw={800} mx="auto">
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Group mt="md" justify='center'>
+            <Group gap="sm" mt="md" justify='space-between'>
                 <Select
-                    label="Public Official"
-                    placeholder="Select a public official"
+                    label={t('generated_post.public_official')}
+                    placeholder={t('post_generator.public_official_placeholder')}
                     data={poDropDown}
+                    searchable
+                    nothingFoundMessage={t('post_generator.nothing_found')}
                     {...form.getInputProps('public_official')}
                 />
                 <Select
-                    label="Social Media Platform"
-                    placeholder="Select a social media platform"
+                    label={t('generated_post.social_media')}
+                    placeholder={t('post_generator.social_media_placeholder')}
                     data={socialMediaPlatforms}
                     {...form.getInputProps('social_media')}
                 />
+                <Select
+                    label={t('generated_post.language')}
+                    placeholder={t('post_generator.language_placeholder')}
+                    data={languageDropdown}
+                    {...form.getInputProps('language')}
+                />
             </Group>
             <Textarea
-                label="Prompt"
-                placeholder="Enter your prompt here"
+                label={t('generated_post.prompt')}
+                placeholder={t('post_generator.prompt_placeholder')}
                 mt='md'
                 minRows={4}
                 autosize
@@ -107,17 +131,17 @@ export const PostGenerator: React.FC = () => {
             />
             
             <Button type="submit" mt="md">
-                Generate Post
+                {t('post_generator.generate_post_button')}
             </Button>
         </form>
         {postLoading ? 
         <Stack align='center' gap='md' justify='center'>
-            <Text mt="md">Generating...</Text>
+            <Text mt="md">{t('post_generator.generation_loading')}.</Text>
             <Loader mt="md" c='blue' type='bars'/>
         </Stack>
         : <GeneratedPost title={generatedPostTitle} post={generatedPost} />
         }
-        {error && <Box mt="md" c="red">{error}</Box>}
+        <HTTPErrorComponent />
     </Box>
     );
 };

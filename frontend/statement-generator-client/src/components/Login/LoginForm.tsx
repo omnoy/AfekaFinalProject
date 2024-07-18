@@ -1,10 +1,10 @@
 import { useForm } from '@mantine/form';
 import { Text, TextInput, PasswordInput, Button, Group } from '@mantine/core';
 import api from '../../services/api';
-import { useState} from 'react';
 import { useAuth } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useHttpError } from '@/hooks/useHttpError';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormValues {
     email: string;
@@ -15,7 +15,8 @@ interface LoginFormValues {
 function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const {error, setError, handleError} = useHttpError(); 
+  const {error, setError, handleError, HTTPErrorComponent} = useHttpError(); 
+  const {t, i18n} = useTranslation('user_forms');
   
   const form = useForm<LoginFormValues>({
     mode: 'uncontrolled',
@@ -24,13 +25,18 @@ function LoginForm() {
       password: '',
     },
     validate: {
-      email: (value: string) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      email: (value: string) => {
+        if (!/^\S+@\S+$/.test(value)) {
+          return t('form.email_error');
+        }
+        return null;
+      },
       password: (value: string) => {
         if (value.length < 8) {
-          return 'Password is too short';
+          return t('form.password_error_short');
         }
         if (!/^[a-zA-Z0-9]+$/.test(value)) {
-          return 'Password must contain only alphanumeric characters';
+          return t('form.password_error_non_alpha');
         }
         return null;
       },
@@ -52,7 +58,7 @@ function LoginForm() {
         }
     } catch (error: any) {
       if (error.response?.status === 401) {
-        setError('Invalid Username or Password');
+        setError(t('login.invalid_email_or_password'));
       }
       else {
         handleError(error);
@@ -61,28 +67,28 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
-      <TextInput
+    <form onSubmit={form.onSubmit(handleSubmit) }>
+      <TextInput 
+        dir={i18n.language === 'eng' ? 'ltr' : 'rtl'}
         withAsterisk
-        label='Email | דוא"ל'
-        placeholder="your@email.com"
+        label={t('form.email')}
+        placeholder={t('form.email_placeholder')}
         key={form.key('email')}
         {...form.getInputProps('email')}
       />
-      <PasswordInput
+      <PasswordInput 
+        dir={i18n.language === 'eng' ? 'ltr' : 'rtl'}
         withAsterisk
-        label="Password | סיסמא"
-        placeholder="Your password"
+        label={t('form.password')}
+        placeholder={t('form.password_placeholder')}
         type="password"
         key={form.key('password')}
         {...form.getInputProps('password')}
       />
       <Group justify="flex-end" mt="md">
-        <Button type="submit">Submit</Button>
+        <Button type="submit">{t('form.submit_button')}</Button>
       </Group>
-      <Text ta='center' mt='md' c='red'>
-        {error}
-      </Text>
+      <HTTPErrorComponent />
     </form>
   );
 }
