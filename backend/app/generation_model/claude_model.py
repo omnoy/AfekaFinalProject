@@ -8,7 +8,7 @@ from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.generation_model.generation_model import GenerationModel
 from app.models.language import Language
-
+import logging
 
 class ClaudeModel(GenerationModel):
     @staticmethod    
@@ -27,11 +27,13 @@ class ClaudeModel(GenerationModel):
             social_media = "social media"
 
         response = ClaudeModel._get_api_response(chain, generation_prompt, public_official, language, social_media)
-
+        
+        logging.info(f"Anthropic API response: {response}")
+        
         if response.response_metadata["stop_reason"] != "stop_sequence":
             raise PostGenerationFailureException("No Stop Sequence Found in Response")
         elif response.response_metadata["stop_sequence"] != "[GENERATION_SUCCESSFUL]":
-            raise PostGenerationFailureException("Generation Failed (Unknown)")
+            raise PostGenerationFailureException("Generation Failed: Invalid Prompt")
             
 
         post_title, post_text = ClaudeModel._process_response(response.content)

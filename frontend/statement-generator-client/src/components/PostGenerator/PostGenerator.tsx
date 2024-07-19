@@ -18,14 +18,15 @@ interface SocialMediaPostFormValues {
 
 export const PostGenerator: React.FC = () => {
     const [generatedPostTitle, setGeneratedPostTitle] = useState<string | null>(null);
-    const [generatedPost, setGeneratedPost] = useState<string | null>(null);
+    const [generatedPostText, setGeneratedPostText] = useState<string | null>(null);
+    const [generatedPostLanguage, setGeneratedPostLanguage] = useState<string | null>(null);
+    const [generatedPostID, setGeneratedPostID] = useState<string>('');
     const { accessToken } = useAuth();
     const authApi = createAuthApi(accessToken);
     const {error, setError, handleError, clearError, HTTPErrorComponent} = useHttpError();
     const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
     const [postLoading, setPostLoading] = useState<boolean>(false);
     const { t, i18n } = useTranslation('post_generator');
-    const forceUpdate = useForceUpdate();
 
     const socialMediaPlatforms = [
         { value: 'twitter', label: t('social_media.twitter')},
@@ -65,7 +66,11 @@ export const PostGenerator: React.FC = () => {
     //   }, [i18n.language]);
     
     const handleSubmit = async (values: SocialMediaPostFormValues) => {
+        clearError();
         setPostLoading(true);
+        setGeneratedPostTitle(null);
+        setGeneratedPostText(null);
+        setGeneratedPostLanguage(null);
         console.log('Form values:', values);
         const public_official = publicOfficials.find((official) => official.id === values.public_official);
         const post_generation_data = {
@@ -79,9 +84,10 @@ export const PostGenerator: React.FC = () => {
             const response = await authApi.post('/post-generation/generate', post_generation_data);
             if (response.status === 200) {
                 console.log('Post Generated: ', response.data);
-                clearError();
                 setGeneratedPostTitle(response.data.generated_post.title);
-                setGeneratedPost(response.data.generated_post.text);
+                setGeneratedPostText(response.data.generated_post.text);
+                setGeneratedPostLanguage(response.data.generated_post.language);
+                setGeneratedPostID(response.data.generated_post.id);
             }
             else {
                 handleError(new Error('Unknown Error'));
@@ -130,18 +136,19 @@ export const PostGenerator: React.FC = () => {
                 {...form.getInputProps('prompt')}
             />
             
-            <Button type="submit" mt="md">
+            <Button type="submit" mt="md" mb="md">
                 {t('post_generator.generate_post_button')}
             </Button>
         </form>
+        <HTTPErrorComponent />
         {postLoading ? 
         <Stack align='center' gap='md' justify='center'>
             <Text mt="md">{t('post_generator.generation_loading')}.</Text>
             <Loader mt="md" c='blue' type='bars'/>
         </Stack>
-        : <GeneratedPost title={generatedPostTitle} post={generatedPost} />
+        : <GeneratedPost title={generatedPostTitle} post={generatedPostText} language={generatedPostLanguage} id={generatedPostID}/>
         }
-        <HTTPErrorComponent />
+        
     </Box>
     );
 };

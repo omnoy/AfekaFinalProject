@@ -7,7 +7,7 @@ from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.logic.generatedpost_service import GeneratedPostService
 from app.logic.mongo.database import get_public_official_collection, get_generated_post_collection
-from app.extensions import logger
+import logging
 from app.models.language import Language
 
 class GeneratedPostDataManagerMongoDB(GeneratedPostService):
@@ -36,7 +36,7 @@ class GeneratedPostDataManagerMongoDB(GeneratedPostService):
         if not generated_title:
             generated_title = "Untitled"
 
-        logger.info(f"Generated Post Title: {generated_title}, Text: {generated_text}")
+        logging.info(f"Generated Post Title: {generated_title}, Text: {generated_text}")
         generated_post = GeneratedPost(user_id=ObjectId(user_id), 
                                        public_official_id=ObjectId(public_official_id),
                                        title=generated_title,

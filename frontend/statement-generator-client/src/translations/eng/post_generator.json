@@ -18,10 +18,12 @@
     "post_history":
     {
         "title": "Post History",
-        "post_history_title": "Your Generated Posts",
+        "all_history": "All",
+        "favorite_history": "Favorites",
         "no_posts_text": "No posts found! Go to",
         "no_posts_link": "the post generator",
-        "no_posts_suffix": "to get started!"
+        "no_posts_suffix": "to get started!",
+        "no_favorites_text": "No favorites found! Add some to save your favorite posts."
     },
     "generated_post":
     {
@@ -34,7 +36,9 @@
         "copy_button": "Copy to Clipboard",
         "copy_button_copied": "Copied!",
         "created_for": "Created for: ",
-        "created_on": "Created on: "
+        "created_on": "Created on: ",
+        "add_favorite_button": "Add to Favorites",
+        "remove_favorite_button": "Remove from Favorites"
     },
     "social_media": {
         "twitter": "Twitter",

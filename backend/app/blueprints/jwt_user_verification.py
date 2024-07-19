@@ -1,7 +1,8 @@
 from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import get_current_user, verify_jwt_in_request, get_jwt
-from app.extensions import logger, jwt
+import logging 
+from app.extensions import jwt
 from app.models.token_blocked import TokenBlocked
 from app.models.user import User
 from app.blueprints.auth import user_service, token_blocklist_service
@@ -12,7 +13,7 @@ def user_identity_lookup(user: User):
 
 @jwt.user_lookup_loader
 def user_loader_callback(_jwt_header, jwt_data):
-    logger.info(f'{jwt_data=}{_jwt_header=}')
+    logging.info(f'{jwt_data=}{_jwt_header=}')
     user_id = jwt_data['sub']
     user = user_service.get_user_by_id(user_id)
     if not user:
@@ -38,7 +39,7 @@ def jwt_user_required():
             if current_user:
                 return fn(*args, **kwargs)
             else:
-                logger.error('Unauthorized request: User not found.')
+                logging.error('Unauthorized request: User not found.')
                 return jsonify(msg="Unauthorized request: User not found."), 404
 
         return decorator
@@ -55,7 +56,7 @@ def jwt_admin_required():
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
             else:
-                logger.error('Unauthorized request: Must be Admin')
+                logging.error('Unauthorized request: Must be Admin')
                 return jsonify(msg="Unauthorized request: Must be Admin"), 401
 
         return decorator
