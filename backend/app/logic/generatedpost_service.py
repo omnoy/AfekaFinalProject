@@ -1,8 +1,9 @@
 from app.models.generatedpost import GeneratedPost
 from app.models.social_media import SocialMedia
-from typing import Optional
 from abc import ABC, abstractmethod
 from app.models.language import Language
+from app.models.publicofficial import PublicOfficial
+from app.models.user import User
 
 class GeneratedPostService(ABC):
 
@@ -12,14 +13,19 @@ class GeneratedPostService(ABC):
         pass   
     
     @abstractmethod
-    def generate_post(self, generation_prompt: str, public_official_id: str, 
-                      user_id: str, language: Language, social_media: SocialMedia) -> GeneratedPost:
+    def generate_post(self, user: User, public_official: PublicOfficial, generation_prompt: str, 
+                      language: Language, social_media: SocialMedia) -> GeneratedPost:
         "Create a Generated Post using a prompt"
         pass
     
     @abstractmethod
     def get_generated_post_by_id(self, post_id: str) -> GeneratedPost:
         "Get a specific generated post by its ObjectID"
+        pass
+    
+    @abstractmethod
+    def get_generated_post_by_id_list(self, post_id_list: list[str]) -> list[GeneratedPost]:
+        "Get a list of generated posts by their ObjectIDs"
         pass
 
     @abstractmethod

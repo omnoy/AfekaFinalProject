@@ -1,10 +1,12 @@
 from flask import Response, jsonify
 from flask_jwt_extended import get_current_user, jwt_required
-from app.blueprints.generatedposts import bp, generated_post_service
+from app.blueprints.generatedposts import bp, generated_post_service, public_offical_service
 from flask import request
 import logging
 from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
 from app.models.exceptions.post_generation_failure_exception import PostGenerationFailureException
+from app.models.language import Language
+from app.models.social_media import SocialMedia
 
 @bp.route('/generate', methods=['POST'])
 @jwt_user_required()
@@ -14,8 +16,18 @@ def generate_post():
         user = get_current_user()
         
         prompt_data = request.get_json(silent=True)
-        prompt_data['user_id'] = user.get_id()
-        generated_post = generated_post_service.generate_post(**prompt_data)
+        
+        public_official = public_offical_service.get_public_official_by_id(prompt_data['public_official_id'])
+        
+        if not public_official:
+            logging.error(f'Public Official with ID {prompt_data["public_official_id"]} not found')
+            return jsonify(error=f"Public Official with ID {prompt_data['public_official_id']} not found"), 404
+        
+        generated_post = generated_post_service.generate_post(user=user, 
+                                                              public_official=public_official, 
+                                                              generation_prompt=prompt_data['generation_prompt'], 
+                                                              language=Language(prompt_data['language']), 
+                                                              social_media=SocialMedia(prompt_data['social_media']))
 
         return jsonify(generated_post=generated_post.model_dump()), 200
     except KeyError as e:

@@ -51,12 +51,13 @@ class ClaudeModel(GenerationModel):
                 (
                     "system",
                     '''
-                    As a {SOCIAL_MEDIA} post generator for posts in the {LANGUAGE} language, your task is to write a {SOCIAL_MEDIA} post in {LANGUAGE} for {PUBLIC_OFFICIAL_ROLE} {PUBLIC_OFFICIAL}’s {SOCIAL_MEDIA}, according to the prompt passed to you, contained within the following tags: <prompt> </prompt>.
+                    As a {SOCIAL_MEDIA} post generator for posts in the {LANGUAGE} language, your task is to write a {SOCIAL_MEDIA} post in {LANGUAGE} for {PUBLIC_OFFICIAL_ROLE} {PUBLIC_OFFICIAL_NAME}’s {SOCIAL_MEDIA}, according to the prompt passed to you, contained within the following tags: <prompt> </prompt>.
 
-                    {PUBLIC_OFFICIAL} is a/the {PUBLIC_OFFICIAL_ROLE}.
+                    {PUBLIC_OFFICIAL_NAME} is a/the {PUBLIC_OFFICIAL_ROLE}.
+                    
                     {PUBLIC_OFFICIAL_INFORMATION} 
 
-                    Generate the {SOCIAL_MEDIA} post according to {PUBLIC_OFFICIAL}’s opinions and role. The social media post should feel natural and fluent according to the information. 
+                    Generate the {SOCIAL_MEDIA} post according to {PUBLIC_OFFICIAL_NAME}’s opinions and role. The social media post should feel natural and fluent according to the information. 
                     
                     Contain the content of the post between the following tags: <content> </content>. 
 
@@ -73,12 +74,19 @@ class ClaudeModel(GenerationModel):
     
     @staticmethod
     def _get_api_response(chain, generation_prompt: str, public_official: PublicOfficial, language: Language, social_media: Optional[SocialMedia]) -> str:
+        public_official_name = public_official.full_name[str(language)]
+        public_official_information = ""
+        if public_official.age is not None:
+            public_official_information += f"{public_official_name} is {public_official.age} years old."
+        if public_official.political_party is not None:
+            public_official_information += f"{public_official_name} belongs to the {public_official.political_party[str(language)]} political party."
+        
         response = chain.invoke(
             {
                 "SOCIAL_MEDIA": str(social_media),
-                "PUBLIC_OFFICIAL_ROLE": public_official.position,
-                "PUBLIC_OFFICIAL": public_official.name_eng,
-                "PUBLIC_OFFICIAL_INFORMATION": f"{public_official.name_eng} is a member of the {public_official.political_party}.",
+                "PUBLIC_OFFICIAL_NAME": public_official_name,
+                "PUBLIC_OFFICIAL_ROLE": public_official.position[str(language)],
+                "PUBLIC_OFFICIAL_INFORMATION": public_official_information,
                 "LANGUAGE": language.get_full_name(),
                 "input": generation_prompt
             }

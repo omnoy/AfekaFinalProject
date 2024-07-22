@@ -19,6 +19,11 @@ class PublicOfficialService(ABC):
         pass
 
     @abstractmethod
+    def get_public_official_by_id_list(self, public_official_id_list: list[str]) -> list[PublicOfficial]:
+        "Get a list of POs by their IDs"
+        pass
+
+    @abstractmethod
     def update_public_official(self, public_official_id: str, public_official: PublicOfficial) -> PublicOfficial:
         "Update a PublicOfficial according to the parameters"
         pass

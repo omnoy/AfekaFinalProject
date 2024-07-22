@@ -42,7 +42,7 @@ export const PostGenerator: React.FC = () => {
     
     const poDropDown = publicOfficials.map((official: any) => ({
         value: official.id,
-        label: official.name_eng,
+        label: i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb,
     }));
 
     const form = useForm<SocialMediaPostFormValues>({

@@ -135,7 +135,7 @@ def test_generate_post_no_stop_sequence(client, auth, public_official_actions, h
     response = client.post("/post-generation/generate", json=prompt_dict, headers=auth.get_auth_header())    
     
     assert response.status_code == 422
-    assert response.json["error"].endswith("Generation Failed (Unknown)")
+    assert response.json["error"].endswith("Generation Failed: Invalid Prompt")
         
     
 def test_generate_post_with_invalid_public_official_id(client, auth):
@@ -172,6 +172,20 @@ def test_generate_post_with_invalid_language(client, auth, public_official_actio
                    "public_official_id": public_official_id, 
                    "language": "french", #invalid
                    "social_media": "facebook"}
+
+    auth.create_basic_user()
+
+    response = client.post("/post-generation/generate", json=prompt_dict, headers=auth.get_auth_header())
+
+    assert response.status_code == 400
+
+def test_generate_post_with_invalid_social_media(client, auth, public_official_actions):
+    public_official_id = public_official_actions.create_public_official().get_id()
+
+    prompt_dict = {"generation_prompt": "Make a post about Jeff.", 
+                   "public_official_id": public_official_id, 
+                   "language": "eng", 
+                   "social_media": "fakebook"} #invalid
 
     auth.create_basic_user()
 

@@ -1,6 +1,6 @@
 from flask import Response, request, jsonify
 from pydantic import ValidationError
-from app.blueprints.users import bp, user_service
+from app.blueprints.users import bp, user_service, public_official_service, generated_post_service
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
 from app.models.user import User
 from flask_jwt_extended import get_current_user
@@ -13,9 +13,6 @@ def get_user():
     logging.info('Getting user')
     try:
         user = get_current_user()
-        if user is None:
-            logging.error('No user found')
-            return jsonify(msg="No user found"), 404
         
         return jsonify(user=user.model_dump(exclude='password')), 200
     except Exception as e:
@@ -29,9 +26,6 @@ def update_user():
     logging.info('Updating user')
     try:
         user = get_current_user()
-        if user is None:
-            logging.error('No user found')
-            return jsonify(msg="No user found"), 404
         
         user_update_data = request.get_json(silent=True)
         logging.info(f'{user_update_data=}')
@@ -68,17 +62,23 @@ def get_user_favorites(favorite_type: str):
     logging.info('Add user')
     try:
         user = get_current_user()
-        if user is None:
-            logging.error('No user found')
-            return jsonify(msg="No user found"), 404
         
-        if favorite_type not in ['public_official', 'generated_post']:
+        service_retrieval_function = None
+        if favorite_type == 'public_official': 
+            service_retrieval_function = public_official_service.get_public_official_by_id_list
+        elif favorite_type == 'generated_post':
+            service_retrieval_function = generated_post_service.get_generated_post_by_id_list
+        else:
             logging.error('Invalid favorite type')
             return jsonify(error="Invalid favorite type"), 404
         
-        favorites = [favorite.model_dump() for favorite in user_service.get_favorites(favorite_type, user.get_id())]
+        favorite_ids = user_service.get_favorite_ids(favorite_type, user.get_id())
         
-        return jsonify(favorites=favorites), 200
+        favorites = service_retrieval_function(favorite_ids)
+        
+        favorite_dicts = [favorite.model_dump() for favorite in favorites]
+        
+        return jsonify(favorites=favorite_dicts), 200
     except ObjectIDNotFoundException as e:
         logging.exception(e)
         return jsonify(error=str(e)), 404
@@ -95,13 +95,25 @@ def add_to_favorites(favorite_type: str, object_id: str):
     logging.info('Add favorite to user')
     try:
         user = get_current_user()
-        if user is None:
-            logging.error('No user found')
-            return jsonify(msg="No user found"), 404
-        
-        if favorite_type not in ['public_official', 'generated_post']:
+
+        service_retrieval_function = None
+        if favorite_type == 'public_official': 
+            service_retrieval_function = public_official_service.get_public_official_by_id
+        elif favorite_type == 'generated_post':
+            service_retrieval_function = generated_post_service.get_generated_post_by_id
+        else:
             logging.error('Invalid favorite type')
             return jsonify(error="Invalid favorite type"), 404
+
+        retrieved_object = service_retrieval_function(object_id)
+
+        if not retrieved_object:
+            logging.error(f'Favorite {favorite_type} with ID {object_id} not found')
+            return jsonify(error=f"Favorite {favorite_type} with ID {object_id} not found"), 404
+
+        if favorite_type == 'generated_post' and str(retrieved_object.user_id) != user.get_id():
+            logging.error(f'User with ID {user.get_id()} does not have permission to favorite this post')
+            return jsonify(error=f"User with ID {user.get_id()} does not have permission to favorite this post"), 403
 
         user_service.add_favorite(favorite_type, user.get_id(), object_id)
         
@@ -125,13 +137,19 @@ def remove_from_favorites(favorite_type: str, object_id: str):
     logging.info('Removing favorite from user')
     try:
         user = get_current_user()
-        if user is None:
-            logging.error('No user found')
-            return jsonify(msg="No user found"), 404
         
-        if favorite_type not in ['public_official', 'generated_post']:
+        service_retrieval_function = None
+        if favorite_type == 'public_official': 
+            service_retrieval_function = public_official_service.get_public_official_by_id
+        elif favorite_type == 'generated_post':
+            service_retrieval_function = generated_post_service.get_generated_post_by_id
+        else:
             logging.error('Invalid favorite type')
             return jsonify(error="Invalid favorite type"), 404
+
+        if not service_retrieval_function(object_id):
+            logging.error(f'Favorite {favorite_type} with ID {object_id} not found')
+            return jsonify(error=f"Favorite {favorite_type} with ID {object_id} not found"), 404
 
         user_service.remove_favorite(favorite_type, user.get_id(), object_id)
         

@@ -4,7 +4,7 @@ from app.models.generatedpost import GeneratedPost
 from app.models.publicofficial import PublicOfficial
 from app.models.user import User
 from app.logic.user_service import UserService
-from app.logic.mongo.database import get_user_collection, get_public_official_collection, get_generated_post_collection
+from app.logic.mongo.database import get_user_collection
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
 
@@ -51,50 +51,19 @@ class UserDataManagerMongoDB(UserService):
         
         return user
     
-    def get_favorites(self, favorite_type: str, user_id: str) -> List[PublicOfficial] | List[GeneratedPost]:
-        if favorite_type == 'public_official':
-            collection = get_public_official_collection()
-            obj_class = PublicOfficial
-        elif favorite_type == 'generated_post':
-            collection = get_generated_post_collection()
-            obj_class = GeneratedPost
-        else:
-            raise KeyError("Invalid favorite type")
-        
+    def get_favorite_ids(self, favorite_type: str, user_id: str) -> List[str]:
         user_dict = get_user_collection().find_one({"_id":ObjectId(user_id)})
         if not user_dict:
             raise ObjectIDNotFoundException(f"User {user_id} not found")
         
-        favorites = user_dict["favorites"][favorite_type]
+        if favorite_type not in user_dict["favorites"].keys():
+            return []
         
-        favorite_objs = []
-        
-        for favorite in favorites:
-            favorite_obj = collection.find_one({"_id":ObjectId(favorite)})
-            if favorite_obj is None:
-                raise ObjectIDNotFoundException(f"Favorite {favorite_type} id not found")
-            
-            favorite_objs.append(obj_class(**favorite_obj))
-        
-        return favorite_objs
+        return sorted(user_dict["favorites"][favorite_type], reverse=True) #sort favorites by creation date embedded into the id
     
     def add_favorite(self, favorite_type: str, user_id: str, object_id: str) -> None:
-        if favorite_type == 'public_official':
-            collection = get_public_official_collection()
-        elif favorite_type == 'generated_post':
-            collection = get_generated_post_collection()
-        else:
+        if favorite_type not in ['public_official', 'generated_post']:
             raise KeyError("Invalid favorite type")
-        
-        favorite_obj = collection.find_one({"_id":ObjectId(object_id)})
-
-        if not favorite_obj:
-            raise ObjectIDNotFoundException(f"Invalid {favorite_type} id: Not found")
-
-        user = get_user_collection().find_one({"_id":ObjectId(user_id)})
-
-        if favorite_type == 'generated_post' and favorite_obj["user_id"] != user_id:
-            raise ValueError("User does not have permission to favorite this post")
         
         favorites = get_user_collection().find_one({"_id":ObjectId(user_id)})["favorites"]
 
@@ -106,18 +75,9 @@ class UserDataManagerMongoDB(UserService):
 
 
     def remove_favorite(self, favorite_type: str, user_id: str, object_id: str) -> None:
-        if favorite_type == 'public_official':
-            collection = get_public_official_collection()
-        elif favorite_type == 'generated_post':
-            collection = get_generated_post_collection()
-        else:
+        if favorite_type not in ['public_official', 'generated_post']:
             raise KeyError("Invalid favorite type")
         
-        favorite_obj = collection.find_one({"_id":ObjectId(object_id)})
-
-        if not favorite_obj:
-            raise ObjectIDNotFoundException(f"Invalid {favorite_type} id: Not found")
-
         favorites = get_user_collection().find_one({"_id":ObjectId(user_id)})["favorites"]
 
         if favorite_type in favorites.keys() and object_id in favorites[favorite_type]:
@@ -127,8 +87,6 @@ class UserDataManagerMongoDB(UserService):
                 raise Exception(f"Removing favorite {object_id} to {user_id} failed") #should not be here
         else:
             raise ObjectIDNotFoundException(f"Favorite {favorite_type} id not in user favorites")
-
-    
     
     def get_all_users(self) -> list[User]:
         user_dicts = get_user_collection().find()

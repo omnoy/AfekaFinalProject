@@ -6,10 +6,10 @@ import { useAuth } from '@/context/AuthProvider';
 
 interface PublicOfficial {
     id: string,
-    name_eng: string,
-    name_heb: string,
-    position: string,
-    political_party: string,
+    full_name: {eng: string, heb: string},
+    position: {eng: string, heb: string},
+    age: number | null,
+    political_party: {eng: string, heb: string} | null,
     social_media_handles: {social_media: string, handle: string}[]
 }
 

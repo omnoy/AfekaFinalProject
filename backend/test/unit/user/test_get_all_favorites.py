@@ -8,9 +8,9 @@ def test_get_favorite_public_official(client, auth, public_official_actions):
     
     po_1 = public_official_actions.create_public_official()
     
-    po_2 = public_official_actions.create_public_official(name_eng="Ben Gvir")
+    po_2 = public_official_actions.create_public_official(full_name={"eng":"Ben Gvir", "heb":"בן גביר"})
     
-    po_3 = public_official_actions.create_public_official(name_eng="Bennett")
+    po_3 = public_official_actions.create_public_official(full_name={"eng":"Bibi", "heb":"ביבי"})
     
     client.put(f'user/favorites/public_official/{po_1.get_id()}', headers=auth.get_auth_header())
     client.put(f'user/favorites/public_official/{po_2.get_id()}', headers=auth.get_auth_header())

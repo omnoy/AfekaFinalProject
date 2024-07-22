@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 from app.models.user import User
 
 class UserService(ABC):
@@ -21,6 +22,11 @@ class UserService(ABC):
     @abstractmethod
     def update_user(self, user_id: str, user: User) -> User:
         "Update a User according to the parameters"
+        pass
+
+    @abstractmethod
+    def get_favorite_ids(self, favorite_type: str, user_id: str) -> List[str]:
+        "Get a list of favorite public_officials or generated_posts from a User"
         pass
 
     @abstractmethod

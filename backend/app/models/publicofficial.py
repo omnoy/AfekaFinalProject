@@ -1,33 +1,28 @@
 from bson import ObjectId
-from typing import Optional, Annotated
-from pydantic import Field, field_validator, ValidationError
+from typing import Dict, Optional, Annotated
+from pydantic import Field, ValidationInfo, field_validator, ValidationError
 from app.models.base_class import BaseClass
 from app.models.social_media import SocialMedia
+from app.models.language import Language, string_language_validator
 
 class PublicOfficial(BaseClass):
-    name_eng: str = Field(min_length=3)
-    name_heb: str = Field(min_length=3)
-    position: str = Field(min_length=3)
-    political_party: Optional[str] = Field(default = None)
+    full_name: Dict[str, str] 
+    position: Dict[str, str]
+    age: Optional[int] = Field(default = None, ge=18, le=120)
+    political_party: Optional[Dict[str, str]] = Field(default = None)
     social_media_handles: Optional[dict[SocialMedia, str]] = Field(default = {social_media:None for social_media in SocialMedia})
 
-    @field_validator('name_eng')
+    @field_validator('full_name', 'position', 'political_party')
     @classmethod
-    def name_eng_validator(cls, s):
-        assert all(c.isalpha() or c.isspace() for c in s), 'Name must contain only English letters and spaces'
-        return s
-    
-    @field_validator('name_heb')
-    @classmethod
-    def name_heb_validator(cls, s):
-        assert all("\u0590" <= c <= "\u05EA" or c.isspace() or c == "\"" for c in s), 'Name must be in Hebrew (hebrew characters, spaces and quotes only)'
-        return s
-    
-    @field_validator('position')
-    @classmethod
-    def position_validator(cls, s):
-        assert all("\u0590" <= c <= "\u05EA" or c.isspace() or c == "\"" or c.isnumeric() for c in s), 'Position must be in Hebrew (hebrew characters, spaces, quotes and numbers only)'
-        return s
+    def string_dict_validator(cls, d: Dict[str, str], info: ValidationInfo):
+        assert list(d.keys()) == [l.value for l in Language], f'{info.field_name} must be in English and Hebrew'
+        
+        allow_numbers = (info.field_name != 'full_name')
+        for k, v in d.items():
+            assert len(v) >= 3, f'{info.field_name} must be at least 3 characters long'
+            assert string_language_validator(v, Language(k), allow_numbers=allow_numbers, allowed_symbols="\'\-\.\" "), f'{info.field_name} must be in {Language(k).get_full_name()} and contain only the following charaters: \'-.\"'
+   
+        return d
     
     @field_validator('social_media_handles')
     @classmethod
@@ -35,6 +30,6 @@ class PublicOfficial(BaseClass):
         assert all(social_media_name in SocialMedia for social_media_name in d.keys()), 'Social media handle must be one of the following: ' + ', '.join(SocialMedia)
         for v in d.values():
             assert len(v) > 3, 'Social media handle must be at least 3 characters long'
-            assert all(c.isalnum() or c == '_' for c in v), 'Social media handle must contain only alphanumeric characters and underscores'
+            assert string_language_validator(v, Language.ENGLISH, allow_numbers=True, allowed_symbols="_\."), 'Social media handle must contain only alphanumeric characters, underscores and periods'
 
         return d

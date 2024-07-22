@@ -5,13 +5,17 @@ class PublicOfficialActions():
     def __init__(self, client):
         self.client = client
 
-    def create_public_official(self, name_eng="testman", name_heb="טסטמן", position="ראש הטסטים", political_party="טסט פארטי", social_media_handles={"twitter": "testman", "facebook": "testman"}):
-
+    def create_public_official(self, 
+                               full_name={"eng": "testman", "heb": "טסטמן"}, 
+                               age=30,
+                               position= {"eng": "Lead Tester", "heb": "ראש הטסטים"}, 
+                               political_party={"eng": "Test Party", "heb": "טסט פארטי"}, 
+                               social_media_handles={"twitter": "testman", "facebook": "testman"}):
         po_dict = {
-            "name_eng": name_eng, 
-            "name_heb": name_heb, 
-            "position": position, 
-            "political_party": political_party, 
+            "full_name": full_name,
+            "age": age,
+            "position": position,
+            "political_party": political_party,
             "social_media_handles": social_media_handles
         }
 

@@ -36,7 +36,7 @@ export const PostHistory: React.FC = () => {
   const [arePostsLoaded, setArePostsLoaded] = useState<boolean>(false);
   const [postsEmpty, setPostsEmpty] = useState<boolean>(false);
   const [favoritePostIDs, setFavoritePostIDs] = useState<string[]>([]);
-  const { t } = useTranslation('post_generator');
+  const { t, i18n } = useTranslation('post_generator');
 
   const getFavoritePostIDs = async () => {
     setLoadingPosts(true);
@@ -92,7 +92,7 @@ export const PostHistory: React.FC = () => {
             text: generated_post.text,
             publicOfficial: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
             language: generated_post.language,
-            socialMedia: generated_post.social_media,
+            socialMedia:t('social_media.' + generated_post.social_media),
             createdAt: getDateFromObjectId(generated_post.id)
           } as Post));
           return post_data;
@@ -148,17 +148,20 @@ export const PostHistory: React.FC = () => {
 
   useEffect(() => {
     if (publicOfficials.length > 0) {
-      const names = publicOfficials.map((official: any) => ({id: official.id, name: official.name_eng}));
+      const names = publicOfficials.map((official: any) => ({
+        id: official.id, 
+        name: i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb 
+      }));
       setPONames(names);
       setIsPONamesLoaded(true);
     }
-  }, [publicOfficials]);
+  }, [publicOfficials, i18n.language]);
 
   const fetchPostHistory = async () => {
     if (isPONamesLoaded) {
       const posts = await getPostHistoryByType(postsDisplayedType);
-      if (sortDirection === 'desc'){
-         posts.reverse(); //default sort by descending order
+      if (sortDirection === 'asc'){
+         posts.reverse(); //default sort by asc order
       }
       setPosts(posts);
       setArePostsLoaded(true);
@@ -167,7 +170,7 @@ export const PostHistory: React.FC = () => {
 
   useEffect(() => {
     fetchPostHistory();
-}, [isPONamesLoaded, postsDisplayedType]);
+}, [isPONamesLoaded, postsDisplayedType, i18n.language]);
 
 useEffect(()=> {
   const sortPosts = () => {
