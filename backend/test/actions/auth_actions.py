@@ -6,7 +6,7 @@ class AuthActions():
         self.client = client
 
     def create_admin_user(self, username="admin", password='admin123', email="admin@test.com"):
-        user_data = {"username": username, "password": password, "email": email, "position": "admin", "role": "admin_user"}
+        user_data = {"username": username, "password": password, "email": email, "role": "admin_user"}
         user = User(**user_data)
         inserted_obj = get_user_collection().insert_one(user.model_dump(exclude={'id'}))
         self.user_id = inserted_obj.inserted_id
@@ -22,10 +22,10 @@ class AuthActions():
 
         return result_dict
 
-    def create_basic_user(self, username='testman', password='testtest', email="test@test.com", position="tester"):
+    def create_basic_user(self, username='testman', password='testtest', email="test@test.com"):
         response = self.client.post(
             'auth/register',
-            json={'username':username, 'password':password, 'email':email, 'position':position}
+            json={'username':username, 'password':password, 'email':email}
         )
         if response.status_code != 200:
             raise Exception("Failed to create user: Email Already Exists")

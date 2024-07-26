@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextInput, Button, Title, Text, Group, MantineTheme, useMantineTheme } from '@mantine/core';
+import { Box, TextInput, Button, Title, Text, Group, MantineTheme, useMantineTheme, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../../context/AuthProvider';
 import api, { createAuthApi } from '@/services/api';
@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 interface UserProfile {
   email: string;
   username: string;
-  position: string;
   role: string;
 }
 
@@ -25,7 +24,6 @@ export const UserProfileComponent: React.FC = () => {
     return {
       email: user_data?.email || '',
       username: user_data?.username || '',
-      position: user_data?.position || '',
       role: user_data?.role || '',
     };
   }
@@ -33,8 +31,15 @@ export const UserProfileComponent: React.FC = () => {
   const form = useForm<UserProfile>({
     initialValues: loadUserProfile(user),
     validate: {
-      username: (value) => (value.length < 3 ? 'Username must have at least 3 characters' : null),
-      position: (value) => (value.length < 2 ? 'Position must have at least 2 characters' : null),
+      username: (value: string) => {
+        if (value.length < 4) {
+          return t('form.username_error_short');
+        }
+        else if (!/^[a-zA-Z0-9]+$/.test(value)) {
+          return t('form.username_error_non_alpha');
+        }
+          return null;
+        }
     },
   });
 
@@ -69,40 +74,32 @@ export const UserProfileComponent: React.FC = () => {
   return (
     <Box maw={400} mx="auto">
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Group mt="md">
-            <TextInput
-            label={t('form.email')}
-            {...form.getInputProps('email')}
-            readOnly
-            mb="md"
-            styles={getInputStyles(theme, false)}
-            />
-            <TextInput
-            label={t('form.role')}
-            {...form.getInputProps('role')}
-            readOnly
-            mb="md"
-            styles={getInputStyles(theme, false)}
-            />
+        <Stack mt="md">
+          <TextInput
+          label={t('form.email')}
+          {...form.getInputProps('email')}
+          readOnly
+          mb="md"
+          styles={getInputStyles(theme, false)}
+          />
+          
+          <TextInput
+          label={t('form.role')}
+          {...form.getInputProps('role')}
+          readOnly
+          mb="md"
+          styles={getInputStyles(theme, false)}
+          />
             
-        </Group>
-        <Group mt="md">
-            <TextInput
-            label={t('form.username')}
-            {...form.getInputProps('username')}
-            readOnly={!isEditing}
-            mb="md"
-            styles={getInputStyles(theme, isEditing)}
-            />
-            <TextInput
-            label={t('form.position')}
-            {...form.getInputProps('position')}
-            readOnly={!isEditing}
-            mb="md"
-            styles={getInputStyles(theme, isEditing)}
-            />
+          <TextInput
+          label={t('form.username')}
+          {...form.getInputProps('username')}
+          readOnly={!isEditing}
+          mb="md"
+          styles={getInputStyles(theme, isEditing)}
+          />
             
-        </Group>
+        </Stack>
 
         {successMessage && (<Text c="teal" mb="md">{successMessage}</Text>)} 
         <HTTPErrorComponent />

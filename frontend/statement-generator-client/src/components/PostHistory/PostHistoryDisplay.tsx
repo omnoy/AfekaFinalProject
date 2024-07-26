@@ -9,21 +9,11 @@ import { usePublicOfficials } from '@/hooks/usePublicOfficials';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconStarFilled } from '@tabler/icons-react';
-
-interface Post {
-  id: string;
-  title: string;
-  text: string;
-  publicOfficial: string;
-  language: string;
-  socialMedia: string;
-  favorite: boolean;
-  createdAt: Date;
-}
+import { GeneratedPost } from '@/types/GeneratedPost';
 
 export const PostHistory: React.FC = () => {
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<GeneratedPost[]>([]);
   const [postsDisplayedType, setPostsDisplayedType] = useState<'all' | 'favorites'>('all');
   const { accessToken } = useAuth();
   const authApi = createAuthApi(accessToken); 
@@ -94,7 +84,7 @@ export const PostHistory: React.FC = () => {
             language: generated_post.language,
             socialMedia:t('social_media.' + generated_post.social_media),
             createdAt: getDateFromObjectId(generated_post.id)
-          } as Post));
+          } as GeneratedPost));
           return post_data;
       } else {
         console.log('Error' + generated_posts_response.data.error);
@@ -202,7 +192,7 @@ useEffect(() => {
     <Box p="md">
       <Group justify="space-between" mb='md'>
         <Button onClick={() => {setPostsDisplayedType('all'); fetchPostHistory();}} variant='subtle'>
-          <Title order={4} c={postsDisplayedType === 'all' ? 'blue' : 'dimmed'}>{t('post_history.all_history')}</Title>
+          <Title order={4} c={postsDisplayedType === 'all' ? 'blue' : 'dimmed'}>{t('post_history.user_history')}</Title>
         </Button>
         
         <Button onClick={() => {setPostsDisplayedType('favorites'); fetchPostHistory();}} variant='subtle'>

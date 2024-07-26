@@ -9,6 +9,7 @@ import { NavigationHeader } from './components/NavigationHeader/NavigationHeader
 import { ErrorPage } from './pages/Error.page';
 import RequireAuth from './components/RequireAuth/RequireAuth';
 import { LogoutPage } from './pages/Logout.page';
+import { PublicOfficialsPage } from './pages/PublicOfficials.page';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,16 @@ const router = createBrowserRouter([
       <RequireAuth>
         <NavigationHeader route='/profile'/>
         <UserProfilePage />
+      </RequireAuth>
+    )
+  },
+  {
+    path: '/public-officials',
+    element: 
+    (
+      <RequireAuth>
+        <NavigationHeader route='/public-officials'/>
+        <PublicOfficialsPage />
       </RequireAuth>
     )
   },

@@ -11,7 +11,6 @@ interface RegisterFormValues {
     password: string;
     confirmPassword: string;
     username: string;
-    position: string;
 }
 
 export const RegisterForm: React.FC = () => {
@@ -27,7 +26,6 @@ export const RegisterForm: React.FC = () => {
             password: '',
             confirmPassword: '',
             username: '',
-            position: '',
         },
         validate: {
             email: (value: string) => {
@@ -52,14 +50,11 @@ export const RegisterForm: React.FC = () => {
                 return null;
             },
             username: (value: string) => {
-                if (value.trim() === '') {
-                    return t('form.username_error');
+                if (value.length < 4) {
+                    return t('form.username_error_short');
                 }
-                return null;
-            },
-            position: (value: string) => {
-                if (value.trim() === '') {
-                    return t('form.position_error');
+                else if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    return t('form.username_error_non_alpha');
                 }
                 return null;
             },
@@ -71,8 +66,7 @@ export const RegisterForm: React.FC = () => {
             const register_values = {
                 email: values.email,
                 password: values.password,
-                username: values.username,
-                position: values.position
+                username: values.username
             }
 
             const response = await api.post('auth/register', register_values);
@@ -122,13 +116,6 @@ export const RegisterForm: React.FC = () => {
                     placeholder={t('form.username_placeholder')}
                     key={form.key('username')}
                     {...form.getInputProps('username')}
-                />
-                <TextInput
-                    withAsterisk
-                    label={t('form.position')}
-                    placeholder={t('form.position_placeholder')}
-                    key={form.key('position')}
-                    {...form.getInputProps('position')}
                 />
                 <Group justify="flex-end" mt="md">
                     <Button type="submit">{t('form.submit_button')}</Button>

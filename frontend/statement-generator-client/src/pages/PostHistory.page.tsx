@@ -1,5 +1,5 @@
-import { PostHistory } from "@/components/PostHistory/PostHistory";
-import { Container, ScrollArea, Title } from "@mantine/core";
+import { PostHistory } from "@/components/PostHistory/PostHistoryDisplay";
+import { Container, Title } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
 export function PostHistoryPage() {

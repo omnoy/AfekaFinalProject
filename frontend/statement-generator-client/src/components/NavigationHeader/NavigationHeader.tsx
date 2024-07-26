@@ -25,6 +25,7 @@ export function NavigationHeader({route}: {route: string}) {
         <NavLink href="/generate" label={t("generate_page")} currentRoute={route} />
         <NavLink href="/history" label={t("history_page")} currentRoute={route} />
         <NavLink href="/profile" label={t("profile_page")} currentRoute={route} />
+        <NavLink href="/public-officials" label={t("public_officials_page")} currentRoute={route} />
         <NavLink href="/logout" label={t("logout_page")} currentRoute={route} />
       </Group>
     );

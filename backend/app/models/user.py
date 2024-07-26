@@ -1,15 +1,15 @@
 from typing import Dict, List, Optional, Annotated
-from pydantic import BaseModel, EmailStr, Field, AfterValidator, field_validator
+from pydantic import BaseModel, EmailStr, Field, AfterValidator, StringConstraints, field_validator
 from app.models.user_role import UserRole
 from app.models.base_class import BaseClass
 from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 class User(BaseClass):
     email: EmailStr
-    password: str = Field(min_length=8, description='Password must be at least 8 characters long.')
-    username: str = Field(min_length=5)
-    position: Optional[str] = Field(default = None, min_length=5)
+    password: Annotated[str, StringConstraints(min_length=8)]
+    username: Annotated[str, StringConstraints(min_length=4, pattern=r'^[a-zA-Z0-9]*$')]
     role: UserRole | str = Field(default = UserRole.BASIC_USER)
     favorites: Optional[Dict[str, List[str]]] = Field(default = {'public_official': [], 'generated_post': []})
 
@@ -27,16 +27,9 @@ class User(BaseClass):
             return password_plaintext #password is already hashed
         
         assert password_plaintext.isalnum(), 'must be alphanumeric' #validate that password is alphanumeric
-
+        assert re.match(r'^[a-zA-Z0-9]*$', password_plaintext), 'must be alphanumeric' #validate that password is alphanumeric
         return '__hash__' + generate_password_hash(password_plaintext)
 
-    @field_validator('position')
-    @classmethod
-    def position_must_be_alpha(cls, v: str):
-        if isinstance(v, str):
-            assert all(c.isalnum() or c.isspace() for c in v), 'must be alphabetic'
-        return v
-    
     @field_validator('role')
     @classmethod
     def role_must_be_enum(cls, v):

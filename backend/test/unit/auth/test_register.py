@@ -2,9 +2,12 @@ from app.models.user import User
 from app.logic.mongo.database import get_user_collection
 import json
 
+user_dict_template = {"username": "testman", "password": "testtest", "email": "test@test.com"}
+
 def test_register_user(client):
     # Test case: register a user with valid data
-    user_dict = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "test master"}
+    user_dict = user_dict_template.copy()
+    
     response = client.post("/auth/register", json=user_dict)
     
     assert response.status_code == 200
@@ -17,29 +20,51 @@ def test_register_user(client):
 
 def test_register_user_invalid_email(client):
     # Test case: Attempt to register a user with an invalid email
-    user_dict = {"username": "testman", "password": "testtest", "email": "invalidemailaddress", "position": "test master"}
-    response = client.post("/auth/register", json=user_dict)
+    user_dict = user_dict_template.copy()
+    for invalid_emails in ["invalidemail", "invalidemail@", "invalidemail@com", "invalidemail.com"]:
+        user_dict["email"] = invalid_emails
+        response = client.post("/auth/register", json=user_dict)
+        assert response.status_code == 400
+        
+def test_register_user_invalid_password(client):
+    # Test case: Attempt to register a user with an invalid password
+    user_dict = user_dict_template.copy()
+    for invalid_password in ["לאתקין", "short", ""]:
+        user_dict["password"] = invalid_password
+        response = client.post("/auth/register", json=user_dict)
+        assert response.status_code == 400
 
-    assert response.status_code == 400 
+def test_register_user_invalid_username(client):
+    # Test case: Attempt to register a user with an invalid username
+    user_dict = user_dict_template.copy()
+    for invalid_username in ["", "a", "ab", "abc", "אבגד", " "]:
+        user_dict["username"] = invalid_username
+        response = client.post("/auth/register", json=user_dict)
+        assert response.status_code == 400
 
 def test_register_user_admin_role(client):
     # Test case: Attempt to register a user with an admin role
-    user_dict = {"username": "testman", "password": "testtest", "email": "invalidemailaddress", "position": "test master", "role": "admin_user"}
+    user_dict = user_dict_template.copy()
+    
+    user_dict["role"] = "admin_user"
     response = client.post("/auth/register", json=user_dict)
 
     assert response.status_code == 403 # Forbidden
 
 def test_register_user_missing_field(client):
     # Test case: Attempt to register a user with a missing username, email address or password
-    user_dict = {"username": "testman", "password": "testtest", "position": "test master"}
-    response = client.post("/auth/register", json=user_dict)
-
-    assert response.status_code == 400
+    for field in ["username", "email", "password"]:
+        user_dict = user_dict_template.copy()
+        user_dict.pop(field)
+        response = client.post("/auth/register", json=user_dict)
+        assert response.status_code == 400
 
 def test_register_user_existing_email(client, auth):
     # Test case: Attempt to register a user with an existing email
     existing_email = "existing@test.com"
     auth.create_basic_user(email=existing_email)
-    user_dict = {"username": "newuser", "password": "newpassword", "email": existing_email, "position": "test position"}
+    
+    user_dict = user_dict_template.copy()
+    user_dict["email"] = existing_email
     response = client.post("/auth/register", json=user_dict)
     assert response.status_code == 409  # Conflict

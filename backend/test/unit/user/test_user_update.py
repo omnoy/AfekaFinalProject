@@ -3,15 +3,14 @@ from json import loads
 
 from app.models.user import User
 
+user_dict_template = {"username": "testman", "password": "testtest", "email": "test@test.com"}
+
 def test_update_username(client, auth):
     # Test updating the username of a user
-    email = "test@test.com"
 
     new_username = "newname"
 
-    user_data = {"username": "testman", "password": "testtest", "email": email, "position": "tester"}
-
-    auth.create_basic_user(**user_data)
+    auth.create_basic_user(**user_dict_template)
 
     user_update_data = {"username": new_username}
 
@@ -21,44 +20,30 @@ def test_update_username(client, auth):
 
     assert response.json['user']['username'] == new_username
 
-    db_user_dict = get_user_collection().find_one({"email":email})
+    db_user_dict = get_user_collection().find_one({"email": user_dict_template['email']})
 
     assert db_user_dict['username'] == new_username
 
-def test_update_position(client, auth):
-    # Test updating the position of a user
-    email = "test@test.com"
-    new_position = "newposition"
-
-    user_data = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "tester"}
-    auth.create_basic_user(**user_data)
-
-    user_update_data = {"position": new_position}
-    
-    response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
-
-    assert response.status_code == 200
-    assert response.json['user']['position'] == new_position
-    db_user_dict = get_user_collection().find_one({"email": email})
-
-    assert db_user_dict['position'] == new_position
-
 def test_update_user_with_same_data(client, auth):
     # Test updating a user with the same data
-    user_data = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "tester"}
-    auth.create_basic_user(**user_data)
     
-    user_data.pop("password")
+    user_dict = auth.create_basic_user(**user_dict_template)["response"].json['user']
     
-    response = client.put("/user/update", json=user_data, headers=auth.get_auth_header())
+    response = client.put("/user/update", json=user_dict, headers=auth.get_auth_header())
 
     assert response.status_code == 200
+    
+    db_user_dict = get_user_collection().find_one({"email": user_dict_template['email']})
+    db_user_dict['id'] = str(db_user_dict['_id'])
+    db_user_dict.pop('_id')
+    db_user_dict.pop('password')
+    
+    assert db_user_dict == user_dict
+    
 
 def test_update_user_invalid_fields(client, auth):
-    # Test updating a user with missing fields
-    email = "test@test.com"
-    user_data = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "tester"}
-    auth.create_basic_user(**user_data)
+    # Test updating a user with invalid fields
+    auth.create_basic_user(**user_dict_template)
     user_update_data = {"address": "1234 Main St."}
     
     response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
@@ -67,46 +52,28 @@ def test_update_user_invalid_fields(client, auth):
 
 def test_update_user_invalid_username(client, auth):
     # Test updating a user with an invalid username
-    user_data = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "tester"}
-    auth.create_basic_user(**user_data)
+    auth.create_basic_user(**user_dict_template)
     
-    invalid_username_list = ["", "a", "ab", "abc", "אבגד", " "]
-    for username in invalid_username_list:
+    for username in ["", "a", "ab", "abc", "אבגד", "אאאאאא", " "]:
         user_update_data = {"username": username}  # Username invalid
         response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
         assert response.status_code == 400
 
-def test_update_user_invalid_position(client, auth):
-    # Test updating a user with an invalid position
-    user_data = {"username": "testman", "password": "testtest", "email": "test@test.com", "position": "tester"}
-    auth.create_basic_user(**user_data)
-    
-    invalid_position_list = ["", "a", "ab", "abc", "אבגד", " "]
-    for position in invalid_position_list:
-        user_update_data = {"position" : position}  # Position invalid
-        response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
-
-        assert response.status_code == 400
-
 def test_update_user_email_not_changeable(client, auth):
-    email = "test@test.com"
-    user_data = {"username": "testman", "password": "testtest", "email": email, "position": "tester"}
-    auth.create_basic_user(**user_data)
+    auth.create_basic_user(**user_dict_template)
     new_email = "new@test.com"
     user_update_data ={"email":new_email}
     response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
 
     assert response.status_code == 400
-    db_user_dict = get_user_collection().find_one({"email": email})
-    assert db_user_dict['email'] == email
+    db_user_dict = get_user_collection().find_one({"email": user_dict_template['email']})
+    assert db_user_dict['email'] == user_dict_template['email']
 
 def test_update_user_role_not_changeable(client, auth):
-    email = "test@test.com"
-    user_data = {"username": "testman", "password": "testtest", "email": email, "position": "tester"}
-    auth.create_basic_user(**user_data)
+    auth.create_basic_user(**user_dict_template)
     user_update_data = {"role" : "admin_user"}
-    response = client.put("/user/update", json=user_data, headers=auth.get_auth_header())
+    response = client.put("/user/update", json=user_update_data, headers=auth.get_auth_header())
 
     assert response.status_code == 400
-    db_user_dict = get_user_collection().find_one({"email": email})
+    db_user_dict = get_user_collection().find_one({"email": user_dict_template['email']})
     assert db_user_dict['role'] == 'basic_user'

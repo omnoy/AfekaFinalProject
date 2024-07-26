@@ -27,8 +27,8 @@
         "password_error_short": "Password is too short",
         "password_error_non_alpha": "Password must contain only alphabet characters or numbers.",
         "password_error_no_match": "Passwords do not match",
-        "username_error": "Username is required",
-        "position_error": "Position is required"
+        "username_error_short": "Username must be at least 4 characters long",
+        "username_error_non_alpha": "Username must contain only alphabet characters or numbers."
     },
     "profile": {
         "title": "User Profile",

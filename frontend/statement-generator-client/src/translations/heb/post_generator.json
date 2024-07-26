@@ -15,8 +15,7 @@
     },
     "post_history": {
         "title": "היסטוריית פוסטים",
-        "post_history_title": "הפוסטים שלך",
-        "all_history": "היסטוריית פוסטים",
+        "user_history": "הפוסטים שלך",
         "favorite_history": "מועדפים",
         "no_posts_text": "לא נמצאו פוסטים! עבור אל",
         "no_posts_link": "יוצר הפוסטים",

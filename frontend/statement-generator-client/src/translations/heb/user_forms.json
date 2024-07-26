@@ -24,11 +24,11 @@
         "username_placeholder": "שם המשתמש שלך כאן...",
         "position_placeholder": "התפקיד שלך כאן...",
         "email_error": "דוא\"ל לא תקין",
-        "password_error_short": "סיסמא קצרה מדי",
-        "password_error_non_alpha": "סיסמא צריכה להכיל ספרות או אותיות באנגלית בלבד.",
+        "password_error_short": "סיסמא צריכה להכיל לפחות 8 תווים.",
+        "password_error_non_alpha": "סיסמא צריכה להכיל אותיות באנגלית או ספרות בלבד.",
         "password_error_no_match": "הסיסמאות לא תואמות",
-        "username_error": "שם משתמש נדרש",
-        "position_error": "תפקיד נדרש"
+        "username_error_short": "שם משתמש צריך להכיל לפחות 4 תווים.",
+        "username_error_non_alpha": "שם משתמש צריך להכיל אותיות באנגלית או ספרות בלבד."
     },
     "profile": {
         "title": "פרופיל משתמש",
