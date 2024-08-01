@@ -27,7 +27,7 @@ export const PublicOfficialsDisplay: React.FC = () => {
   const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
   const { t, i18n } = useTranslation('public_officials');
 
-  const getFavoriteOfficialIDs = async () => {
+  const getFavoriteOfficials = async () => {
     try {
       const response = await authApi.get('/user/favorites/public_official');
       if (response.status === 200) {
@@ -68,13 +68,13 @@ export const PublicOfficialsDisplay: React.FC = () => {
   };
 
   useEffect(() => {
-    getFavoriteOfficialIDs();
+    getFavoriteOfficials();
     refetch();
   }, []);
 
   return (
     <Box p="md">
-      <Title order={2} mb="xl">{t('title')}</Title>
+      <Title order={2} mb="xl">{t('all_officials_title')}</Title>
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
         {loading ? (
@@ -86,7 +86,7 @@ export const PublicOfficialsDisplay: React.FC = () => {
                 <Card.Section withBorder inheritPadding py="xs">
                   <Group justify="space-between">
                     <Text fw={500}>
-                      {i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb}
+                      {i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb} ({i18n.language === 'eng' ? official.full_name.heb : official.full_name.eng})
                     </Text>
                     <Button
                       onClick={() => favoriteOfficialIDs.includes(official.id) 
@@ -111,11 +111,12 @@ export const PublicOfficialsDisplay: React.FC = () => {
                   </Text>
                 )}
 
+                {official.political_party !== null && (
                 <Text mb="xs">
                   <Text span fw={700}>{t('political_party')}: </Text>
                   {i18n.language === 'eng' ? official.political_party?.eng : official.political_party?.heb}
                 </Text>
-
+                )}
                 {/* <Group gap="xs" mb="xs">
                   <Text fw={700}>{t('social_media')}:</Text>
                   {official.social_media_handles.map((handle, index) => (

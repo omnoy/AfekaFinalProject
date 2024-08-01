@@ -1,8 +1,8 @@
 import  { useTranslation, } from 'react-i18next';
 import  { US, IL } from 'country-flag-icons/react/3x2'
-import { Group, useDirection } from '@mantine/core'
+import { Button, Group, useDirection } from '@mantine/core'
 export const ChangeLanguageToggle = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation("global");
     const { toggleDirection } = useDirection();
     const lang = i18n.language;
 
@@ -14,11 +14,14 @@ export const ChangeLanguageToggle = () => {
     return (
         <>
             <Group justify='center' mt='xl'>
-                {lang === 'eng' ?
-                    <US onClick={() => handleChangeLanguage('heb')} height={40}/>
-                :
-                    <IL onClick={() => handleChangeLanguage('eng')} height={40}/>
-                }
+                <Button 
+                    onClick={() => handleChangeLanguage(lang === 'eng' ? 'heb' : 'eng')}
+                    leftSection={lang === 'eng' ? <US height={20} /> : <IL height={20} />} 
+                    variant="outline"
+                    color="gray"
+                    data-testid='toggle-language-button'>
+                    {lang === 'eng' ? t('language.english') : t('language.hebrew')}
+                </Button>
             </Group>
         </>
     );

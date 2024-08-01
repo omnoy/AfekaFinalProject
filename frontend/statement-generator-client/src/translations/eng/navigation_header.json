@@ -1,6 +1,7 @@
 {
     "generate_page": "Generate Post",
     "history_page": "Post History",
+    "public_officials_page": "Public Officials",
     "profile_page": "User Profile",
     "logout_page": "Log Out"
 }

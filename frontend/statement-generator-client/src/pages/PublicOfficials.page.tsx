@@ -7,7 +7,7 @@ export function PublicOfficialsPage() {
     return (
         <Container size="sm">
             <Title ta="center" mx='auto'>
-                {t('title')}
+                {t('page_title')}
             </Title>
             <PublicOfficialsDisplay />
         </Container>

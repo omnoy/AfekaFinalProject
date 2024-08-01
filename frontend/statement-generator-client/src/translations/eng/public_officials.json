@@ -1,3 +1,10 @@
 {
-    
+    "page_title": "Public Officials",
+    "loading": "Loading...",
+    "all_officials_title": "All",
+    "favorite_officials_title": "Favorites",
+    "position": "Position",
+    "age": "Age",
+    "political_party": "Political Party",
+    "social_media": "Social Media Handles"
 }

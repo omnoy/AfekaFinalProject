@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 interface LoginFormValues {
     email: string;
@@ -17,6 +18,7 @@ function LoginForm() {
   const navigate = useNavigate();
   const {error, setError, handleError, HTTPErrorComponent} = useHttpError(); 
   const {t, i18n} = useTranslation('user_forms');
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
   
   const form = useForm<LoginFormValues>({
     mode: 'uncontrolled',
@@ -44,6 +46,7 @@ function LoginForm() {
   });
 
   const handleSubmit = async (values: LoginFormValues) => {
+    setLoginLoading(true);
     try {
         const response = await api.post('/auth/login', values);
         if (response.status === 200) {
@@ -63,6 +66,9 @@ function LoginForm() {
       else {
         handleError(error);
       }
+    }
+    finally {
+      setLoginLoading(false);
     }
   };
 
@@ -86,7 +92,7 @@ function LoginForm() {
         {...form.getInputProps('password')}
       />
       <Group justify="flex-end" mt="md">
-        <Button type="submit">{t('form.submit_button')}</Button>
+        <Button type="submit" loading={loginLoading}>{t('form.submit_button')}</Button>
       </Group>
       <HTTPErrorComponent />
     </form>
