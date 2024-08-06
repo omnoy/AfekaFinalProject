@@ -46,19 +46,23 @@ function LoginForm() {
   });
 
   const handleSubmit = async (values: LoginFormValues) => {
-    setLoginLoading(true);
+    let timeoutId;
     try {
-        const response = await api.post('/auth/login', values);
-        if (response.status === 200) {
-            login(response.data.user, 
-                  response.data.user.role, 
-                  response.data.access_token);
-            console.log('Login successful:', response.data);
-            navigate('/generate');
-        }
-        else{
-          handleError(new Error('Unknown Error'))
-        }
+      timeoutId = setTimeout(() => {
+        setLoginLoading(true);
+      }, 200);
+
+      const response = await api.post('/auth/login', values);
+      if (response.status === 200) {
+          login(response.data.user, 
+                response.data.user.role, 
+                response.data.access_token);
+          console.log('Login successful:', response.data);
+          navigate('/generate');
+      }
+      else{
+        handleError(new Error('Unknown Error'))
+      }
     } catch (error: any) {
       if (error.response?.status === 401) {
         setError(t('login.invalid_email_or_password'));
@@ -68,6 +72,7 @@ function LoginForm() {
       }
     }
     finally {
+      clearTimeout(timeoutId);
       setLoginLoading(false);
     }
   };

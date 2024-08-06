@@ -25,7 +25,7 @@ class PublicOfficialDataManagerMongoDB(PublicOfficialService):
         return public_official
     
     def get_public_official_by_id_list(self, public_official_id_list: list[str]) -> list[PublicOfficial]:
-        po_dicts = get_public_official_collection().find({"_id": {"$in": [ObjectId(po_id) for po_id in public_official_id_list]}})
+        po_dicts = get_public_official_collection().find({"_id": {"$in": [ObjectId(po_id) for po_id in public_official_id_list]}}).sort([['_id', -1]])
         po_list = list()
         
         for po_dict in po_dicts:

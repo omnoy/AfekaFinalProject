@@ -5,9 +5,10 @@ import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { createAuthApi } from '@/services/api';
 import { useTranslation } from 'react-i18next';
-import { SocialMediaHandle } from '@/types/SocialMediaHandle';
 import { PublicOfficial } from '@/types/PublicOfficial';
 import { usePublicOfficials } from '@/hooks/usePublicOfficials';
+import { getDateFromObjectId } from '@/services/getDateFromObjectId';
+import { useFavoriteObjects } from '@/hooks/useFavorites';
 
 const SocialMediaIcon: React.FC<{ platform: string }> = ({ platform }) => {
   switch (platform.toLowerCase()) {
@@ -20,64 +21,34 @@ const SocialMediaIcon: React.FC<{ platform: string }> = ({ platform }) => {
 };
 
 export const PublicOfficialsDisplay: React.FC = () => {
-  const { publicOfficials, loading, refetch } = usePublicOfficials();
-  const [favoriteOfficialIDs, setFavoriteOfficialIDs] = useState<string[]>([]);
+  const { publicOfficials, loadingPublicOfficials, fetchPublicOfficials } = usePublicOfficials();
   const { accessToken } = useAuth();
   const authApi = createAuthApi(accessToken);
   const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
   const { t, i18n } = useTranslation('public_officials');
-
-  const getFavoriteOfficials = async () => {
-    try {
-      const response = await authApi.get('/user/favorites/public_official');
-      if (response.status === 200) {
-        const favoriteOfficials = Array.from(response.data.favorites);
-        setFavoriteOfficialIDs(favoriteOfficials.map((official: any) => official.id));
-      } else {
-        handleError(new Error('Error: Unknown Error Loading Favorite Officials'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-  };
-
-  const handleAddFavorite = async (officialId: string) => {
-    try {
-      const response = await authApi.put(`/user/favorites/public_official/${officialId}`);
-      if (response.status === 200) {
-        setFavoriteOfficialIDs(prevIDs => [...prevIDs, officialId]);
-      } else {
-        handleError(new Error('Error: Unknown Error Adding Favorite Official'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-  };
-
-  const handleRemoveFavorite = async (officialId: string) => {
-    try {
-      const response = await authApi.delete(`/user/favorites/public_official/${officialId}`);
-      if (response.status === 200) {
-        setFavoriteOfficialIDs(prevIDs => prevIDs.filter(id => id !== officialId));
-      } else {
-        handleError(new Error('Error: Unknown Error Removing Favorite Official'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-  };
+  const [publicOfficialsDisplayedType, setPublicOfficialsDisplayedType] = useState<'all' | 'favorites'>('all');
+  const { getFavoriteObjectIDs, favoriteObjectIDs, handleAddFavorite, handleRemoveFavorite } = useFavoriteObjects();
 
   useEffect(() => {
-    getFavoriteOfficials();
-    refetch();
+    getFavoriteObjectIDs({type: 'public_official'});
+    console.log(publicOfficials)
+    fetchPublicOfficials();
   }, []);
 
   return (
     <Box p="md">
-      <Title order={2} mb="xl">{t('all_officials_title')}</Title>
+      <Group justify="space-between" mb='md'>
+      <Button onClick={() => {setPublicOfficialsDisplayedType('all');}} variant='subtle'>
+          <Title order={4} c={publicOfficialsDisplayedType === 'all' ? 'blue' : 'dimmed'}>{t('all_officials_title')}</Title>
+        </Button>
+        
+        <Button onClick={() => {setPublicOfficialsDisplayedType('favorites');}} variant='subtle'>
+          <Title order={4} c={publicOfficialsDisplayedType === 'favorites' ? 'blue' : 'dimmed'}>{t('favorite_officials_title')}</Title>
+        </Button>
+      </Group>
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
-        {loading ? (
+        {loadingPublicOfficials ? (
           <Text>{t('loading')}</Text>
         ) : (
           <Stack gap="lg">
@@ -89,12 +60,12 @@ export const PublicOfficialsDisplay: React.FC = () => {
                       {i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb} ({i18n.language === 'eng' ? official.full_name.heb : official.full_name.eng})
                     </Text>
                     <Button
-                      onClick={() => favoriteOfficialIDs.includes(official.id) 
-                        ? handleRemoveFavorite(official.id) 
-                        : handleAddFavorite(official.id)
+                      onClick={() => favoriteObjectIDs.includes(official.id) 
+                        ? handleRemoveFavorite({type: "public_official"},official.id) 
+                        : handleAddFavorite({type: "public_official"}, official.id)
                       }
                     >
-                      {favoriteOfficialIDs.includes(official.id) ? <IconStarFilled /> : <IconStar />}
+                      {favoriteObjectIDs.includes(official.id) ? <IconStarFilled /> : <IconStar />}
                     </Button>
                   </Group>
                 </Card.Section>
@@ -117,18 +88,23 @@ export const PublicOfficialsDisplay: React.FC = () => {
                   {i18n.language === 'eng' ? official.political_party?.eng : official.political_party?.heb}
                 </Text>
                 )}
-                {/* <Group gap="xs" mb="xs">
+                { <Group gap="xs" mb="xs">
                   <Text fw={700}>{t('social_media')}:</Text>
-                  {official.social_media_handles.map((handle, index) => (
+                  {Object.entries(official.social_media_handles).map(([platform, handle], index) => (
+                    handle === null ? null :
                     <Badge
                       key={index}
-                      leftSection={<SocialMediaIcon platform={handle.social_media} />}
+                      leftSection={<SocialMediaIcon platform={platform} />}
                       variant="outline"
                     >
-                      {handle.handle}
+                      {handle}
                     </Badge>
+                    
                   ))}
-                </Group> */}
+                </Group> }
+                <Text mt="md" size="xs" c="dimmed">
+                  {t('added_date')} {getDateFromObjectId(official.id).toLocaleDateString()}
+                </Text>
               </Card>
             ))}
           </Stack>

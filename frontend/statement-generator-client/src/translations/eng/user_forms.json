@@ -8,7 +8,8 @@
     "register": {
         "title": "Register",
         "login_redirect_text": "Already registered?",
-        "login_redirect_link": "Log in here."
+        "login_redirect_link": "Log in here.",
+        "email_already_exists": "Email is already registered, please log in or use another email."
     },
     "form":{
         "email": "Email",

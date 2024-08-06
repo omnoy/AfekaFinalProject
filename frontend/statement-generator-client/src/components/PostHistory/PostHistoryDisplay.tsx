@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconStarFilled } from '@tabler/icons-react';
 import { GeneratedPost } from '@/types/GeneratedPost';
+import { useFavoriteObjects } from '@/hooks/useFavorites';
 
 export const PostHistory: React.FC = () => {
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
@@ -18,38 +19,17 @@ export const PostHistory: React.FC = () => {
   const { accessToken } = useAuth();
   const authApi = createAuthApi(accessToken); 
   const {error, handleError, clearError, HTTPErrorComponent} = useHttpError();
-  const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
-  const [poNames, setPONames] = useState<{id: string, name: string}[]>([]);
+  const { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials } = usePublicOfficials();
+  const { getFavoriteObjectIDs, favoriteObjectIDs, handleAddFavorite, handleRemoveFavorite } = useFavoriteObjects();
+  const [poNames, setPONames] = useState<{id: string, name: {eng: string, heb: string}}[]>([]);
   const [isPONamesLoaded, setIsPONamesLoaded] = useState(false);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [loadingPosts, setLoadingPosts] = useState<boolean>(false);
-  const [arePostsLoaded, setArePostsLoaded] = useState<boolean>(false);
   const [postsEmpty, setPostsEmpty] = useState<boolean>(false);
-  const [favoritePostIDs, setFavoritePostIDs] = useState<string[]>([]);
+
   const { t, i18n } = useTranslation('post_generator');
 
-  const getFavoritePostIDs = async () => {
-    setLoadingPosts(true);
-    try {
-      const favorite_posts_response = await authApi.get('/user/favorites/generated_post');
-      if (favorite_posts_response.status === 200) {
-        console.log('Favorite posts:', favorite_posts_response);
-        const favorite_posts = Array.from(favorite_posts_response.data.favorites);
-         setFavoritePostIDs(favorite_posts.map((favorite_post: any) => favorite_post.id));
-      } else {
-        console.log('Error' + favorite_posts_response.data.error);
-        handleError(new Error('Error: Unknown Error Loading Favorite Posts'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-    finally {
-      setLoadingPosts(false);
-    }
-  }
-
   const getPostHistoryByType = async (type : string) => {
-    setLoadingPosts(true);
     try {
       var url = '';
       if (type === 'all') {
@@ -80,7 +60,7 @@ export const PostHistory: React.FC = () => {
             id: generated_post.id,
             title: generated_post.title,
             text: generated_post.text,
-            publicOfficial: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
+            publicOfficialName: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
             language: generated_post.language,
             socialMedia:t('social_media.' + generated_post.social_media),
             createdAt: getDateFromObjectId(generated_post.id)
@@ -93,55 +73,18 @@ export const PostHistory: React.FC = () => {
     } catch (error: any) {
       handleError(error);
     }
-    finally {
-      setLoadingPosts(false);
-    }
     return [];
   }
-
-  const handleAddFavorite = async (postId: string) => {
-    console.log("Adding favorite post with id: " + postId);
-    try {
-      const response = await authApi.put('/user/favorites/generated_post/' + postId);
-      if (response.status === 200) {
-        console.log('Post favorited:', response.data);
-        setFavoritePostIDs(prevIDs => [...prevIDs, postId]);
-      } else {
-        console.log('Error' + response.data.error);
-        handleError(new Error('Error: Unknown Error Adding Favorite Post'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-  }
-
-  const handleRemoveFavorite = async (postId: string) => {
-    console.log("Remove favorite post with id: " + postId);
-    try {
-      const response = await authApi.delete('/user/favorites/generated_post/' + postId);
-      if (response.status === 200) {
-        console.log('Post favorited:', response.data);
-        setFavoritePostIDs(prevIDs => prevIDs.filter(id => id !== postId));
-      } else {
-        console.log('Error' + response.data.error);
-        handleError(new Error('Error: Unknown Error Removing Favorite Post'));
-      }
-    } catch (error: any) {
-      handleError(error);
-    }
-  }
-
-  useEffect(() => {
-    getFavoritePostIDs();
-    getPostHistoryByType(postsDisplayedType);
-  }, [postsDisplayedType]);
 
   useEffect(() => {
     if (publicOfficials.length > 0) {
       const names = publicOfficials.map((official: any) => ({
         id: official.id, 
-        name: i18n.language === 'eng' ? official.full_name.eng : official.full_name.heb 
-      }));
+        name: {
+          eng: official.full_name.eng, 
+          heb: official.full_name.heb 
+        }
+      }));  
       setPONames(names);
       setIsPONamesLoaded(true);
     }
@@ -149,18 +92,24 @@ export const PostHistory: React.FC = () => {
 
   const fetchPostHistory = async () => {
     if (isPONamesLoaded) {
+      getFavoriteObjectIDs({type: 'generated_post'});
       const posts = await getPostHistoryByType(postsDisplayedType);
       if (sortDirection === 'asc'){
          posts.reverse(); //default sort by asc order
       }
       setPosts(posts);
-      setArePostsLoaded(true);
     }
-};
+  };
 
   useEffect(() => {
-    fetchPostHistory();
-}, [isPONamesLoaded, postsDisplayedType, i18n.language]);
+    try {
+      setLoadingPosts(true);
+      fetchPostHistory();
+    }
+    finally {
+      setLoadingPosts(false);
+    }
+  }, [isPONamesLoaded, postsDisplayedType]);
 
 useEffect(()=> {
   const sortPosts = () => {
@@ -191,11 +140,11 @@ useEffect(() => {
   return (
     <Box p="md">
       <Group justify="space-between" mb='md'>
-        <Button onClick={() => {setPostsDisplayedType('all'); fetchPostHistory();}} variant='subtle'>
+        <Button onClick={() => {setPostsDisplayedType('all');}} variant='subtle'>
           <Title order={4} c={postsDisplayedType === 'all' ? 'blue' : 'dimmed'}>{t('post_history.user_history')}</Title>
         </Button>
         
-        <Button onClick={() => {setPostsDisplayedType('favorites'); fetchPostHistory();}} variant='subtle'>
+        <Button onClick={() => {setPostsDisplayedType('favorites');}} variant='subtle'>
           <Title order={4} c={postsDisplayedType === 'favorites' ? 'blue' : 'dimmed'}>{t('post_history.favorite_history')}</Title>
         </Button>
 
@@ -208,11 +157,11 @@ useEffect(() => {
       </Group>
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
-      {loadingPosts || loading || !arePostsLoaded ? 
+      {loadingPosts || loadingPublicOfficials ?
       null
       :
       <Stack gap="lg">
-        {postsEmpty && !loadingPosts && !loading && arePostsLoaded ? 
+        {!loadingPosts && postsEmpty ? 
           postsDisplayedType === 'all' ?
           <Text>{t('post_history.no_posts_text')} <Link to='/generate'>{t('post_history.no_posts_link')}</Link> {t('post_history.no_posts_suffix')}</Text>
           :
@@ -224,12 +173,12 @@ useEffect(() => {
               <Group justify="space-between">
                 <Badge color="blue">{post.socialMedia}</Badge>
                 <Text fw={500} dir={post.language === 'eng' ? 'ltr' : 'rtl'}>{post.title}</Text>
-                { favoritePostIDs.includes(post.id) ? 
-                <Button onClick={() => handleRemoveFavorite(post.id)}>
+                { favoriteObjectIDs.includes(post.id) ? 
+                <Button onClick={() => handleRemoveFavorite({type: "generated_post"}, post.id)}>
                   <IconStarFilled /> 
                 </Button>
                 : 
-                <Button onClick={() => handleAddFavorite(post.id)}>
+                <Button onClick={() => handleAddFavorite({type: "generated_post"}, post.id)}>
                   <IconStar />
                 </Button>
                 }
@@ -237,7 +186,7 @@ useEffect(() => {
             </Card.Section>
             <Group justify="space-between">
               <Text mt="md" mb="xs" size="sm" c="dimmed">
-                {t('generated_post.created_for')} {post.publicOfficial}
+                {t('generated_post.created_for')} {i18n.language === 'eng' ? post.publicOfficialName?.eng : post.publicOfficialName?.heb}
               </Text>
               <Text mt="md" mb="xs" size="sm" c="dimmed">
                 {t('generated_post.language')}: {t('languages.' + post.language)}

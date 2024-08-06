@@ -57,7 +57,7 @@ class GeneratedPostDataManagerMongoDB(GeneratedPostService):
         return generated_post
 
     def get_generated_post_by_id_list(self, post_id_list: list[str]) -> list[GeneratedPost]:
-        post_dicts = get_generated_post_collection().find({"_id": {"$in": [ObjectId(post_id) for post_id in post_id_list]}})
+        post_dicts = get_generated_post_collection().find({"_id": {"$in": [ObjectId(post_id) for post_id in post_id_list]}}).sort([['_id', -1]])
         post_list = list()
         if post_dicts is None:
             return post_list

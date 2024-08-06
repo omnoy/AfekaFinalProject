@@ -8,7 +8,8 @@
     "register": {
         "title": "צור משתמש",
         "login_redirect_text": "כבר רשום?",
-        "login_redirect_link": "התחבר למשתמש כאן."
+        "login_redirect_link": "התחבר למשתמש כאן.",
+        "email_already_exists": "דוא\"ל כבר רשום למערכת, התחבר למשתמש או צור משתמש עם דוא\"ל אחר."
     },
     "form": {
         "email": "דוא\"ל",

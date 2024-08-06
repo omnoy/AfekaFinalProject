@@ -9,12 +9,12 @@ export const usePublicOfficials = () => {
     const { accessToken } = useAuth();
     const authApi = createAuthApi(accessToken);
     const [publicOfficials, setPublicOfficials] = useState<PublicOfficial[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loadingPublicOfficials, setLoadingPublicOfficials] = useState(false);
     const { error, handleError, clearError } = useHttpError();
     const [poError, setPoError] = useState<string | null>('');
 
     const fetchPublicOfficials = async () => {
-        setLoading(true);
+        setLoadingPublicOfficials(true);
         try {
             const response = await authApi.get('/public-official/all');
             if (response.status === 200) {
@@ -27,7 +27,7 @@ export const usePublicOfficials = () => {
         } catch (error: any) {
             handleError(error);
         } finally {
-            setLoading(false);
+            setLoadingPublicOfficials(false);
         }
         setPoError(error);
     };
@@ -36,5 +36,5 @@ export const usePublicOfficials = () => {
         fetchPublicOfficials();
     }, [accessToken]);
 
-    return { publicOfficials, loading, poError, refetch: fetchPublicOfficials };
+    return { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials };
     };

@@ -6,5 +6,6 @@
     "position": "Position",
     "age": "Age",
     "political_party": "Political Party",
-    "social_media": "Social Media Handles"
+    "social_media": "Social Media Handles",
+    "added_date": "Added on:"
 }

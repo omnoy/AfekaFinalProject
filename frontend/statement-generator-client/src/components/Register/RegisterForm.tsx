@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 interface RegisterFormValues {
     email: string;
@@ -18,6 +19,7 @@ export const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
     const { error, setError, handleError, HTTPErrorComponent } = useHttpError();
     const { t } = useTranslation('user_forms');
+    const [registerLoading, setRegisterLoading] = useState<boolean>(false);
 
     const form = useForm<RegisterFormValues>({
         mode: 'uncontrolled',
@@ -62,7 +64,13 @@ export const RegisterForm: React.FC = () => {
     });
 
     const handleSubmit = async (values: RegisterFormValues) => {
+        let timeoutId;
         try {
+
+            timeoutId = setTimeout(() => {
+                setRegisterLoading(true);
+            }, 200);
+
             const register_values = {
                 email: values.email,
                 password: values.password,
@@ -79,8 +87,16 @@ export const RegisterForm: React.FC = () => {
             else {
                 handleError(new Error('Unknown Error'));
             }
-        } catch (error) {
-            handleError(new Error('Unknown Error'));
+        } catch (error: any) {
+            if (error.response?.status === 409) {
+                setError(t('register.email_already_exists'));
+            }
+            else {
+                handleError(new Error('Unknown Error'));
+            }
+        } finally {
+            clearTimeout(timeoutId);
+            setRegisterLoading(false);
         }
     };
 
@@ -118,7 +134,7 @@ export const RegisterForm: React.FC = () => {
                     {...form.getInputProps('username')}
                 />
                 <Group justify="flex-end" mt="md">
-                    <Button type="submit">{t('form.submit_button')}</Button>
+                    <Button type="submit" loading={registerLoading}>{t('form.submit_button')}</Button>
                 </Group>
             </form>
             <HTTPErrorComponent />

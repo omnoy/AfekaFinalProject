@@ -2,9 +2,8 @@ export interface GeneratedPost {
     id: string;
     title: string;
     text: string;
-    publicOfficial: string;
+    publicOfficialName: {eng: string, heb: string};
     language: string;
     socialMedia: string;
-    favorite: boolean;
     createdAt: Date;
 }
