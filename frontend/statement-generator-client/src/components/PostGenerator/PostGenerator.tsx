@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Text, Loader, Select, Textarea, Button, Box, Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { GeneratedPost } from './GeneratedPost';
+import { GeneratedPostDisplay } from './GeneratedPostDisplay';
 import { createAuthApi } from '@/services/api';
 import { useAuth } from '@/context/AuthProvider';
 import { useHttpError } from '@/hooks/useHttpError';
 import { usePublicOfficials } from '@/hooks/usePublicOfficials';
 import { useTranslation } from 'react-i18next';
 import { useForceUpdate } from '@mantine/hooks';
+import { getDateFromObjectId } from '@/services/getDateFromObjectId';
+import { GeneratedPost } from '@/types/GeneratedPost';
 
 interface SocialMediaPostFormValues {
   public_official: string;
@@ -17,14 +19,11 @@ interface SocialMediaPostFormValues {
 }
 
 export const PostGenerator: React.FC = () => {
-    const [generatedPostTitle, setGeneratedPostTitle] = useState<string | null>(null);
-    const [generatedPostText, setGeneratedPostText] = useState<string | null>(null);
-    const [generatedPostLanguage, setGeneratedPostLanguage] = useState<string | null>(null);
-    const [generatedPostID, setGeneratedPostID] = useState<string>('');
+    const [generatedPost, setGeneratedPost] = useState<GeneratedPost | undefined>(undefined);
     const { accessToken } = useAuth();
     const authApi = createAuthApi(accessToken);
     const {error, setError, handleError, clearError, HTTPErrorComponent} = useHttpError();
-    const { publicOfficials, loading, poError, refetch } = usePublicOfficials();
+    const { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials } = usePublicOfficials();
     const [postLoading, setPostLoading] = useState<boolean>(false);
     const { t, i18n } = useTranslation('post_generator');
 
@@ -60,21 +59,25 @@ export const PostGenerator: React.FC = () => {
             language: (value) => (value ? null : t('post_generator.language_error')),
         },
     });
-
-    // useEffect(() => {
-    //     form.setFieldValue('language', i18n.language);
-    //   }, [i18n.language]);
     
+    useEffect(() => {
+        fetchPublicOfficials('all');
+    }, []);
+
     const handleSubmit = async (values: SocialMediaPostFormValues) => {
         clearError();
         setPostLoading(true);
-        setGeneratedPostTitle(null);
-        setGeneratedPostText(null);
-        setGeneratedPostLanguage(null);
+        setGeneratedPost(undefined);
         console.log('Form values:', values);
         const public_official = publicOfficials.find((official) => official.id === values.public_official);
+        if (!public_official) {
+            handleError(new Error('Public Official not found'));
+            setPostLoading(false);
+            return;
+        }
+        
         const post_generation_data = {
-            public_official_id: public_official?.id,
+            public_official_id: public_official.id,
             generation_prompt: values.prompt,
             social_media: values.social_media,
             language: values.language,
@@ -84,10 +87,16 @@ export const PostGenerator: React.FC = () => {
             const response = await authApi.post('/post-generation/generate', post_generation_data);
             if (response.status === 200) {
                 console.log('Post Generated: ', response.data);
-                setGeneratedPostTitle(response.data.generated_post.title);
-                setGeneratedPostText(response.data.generated_post.text);
-                setGeneratedPostLanguage(response.data.generated_post.language);
-                setGeneratedPostID(response.data.generated_post.id);
+
+                setGeneratedPost({
+                    id: response.data.generated_post.id,
+                    title: response.data.generated_post.title,
+                    text: response.data.generated_post.text,
+                    publicOfficialName: {eng: public_official?.full_name.eng, heb: public_official?.full_name.heb},
+                    language: values.language,
+                    socialMedia: values.social_media,
+                    createdAt: getDateFromObjectId(response.data.generated_post.id),
+                })
             }
             else {
                 handleError(new Error('Unknown Error'));
@@ -146,7 +155,7 @@ export const PostGenerator: React.FC = () => {
             <Text mt="md">{t('post_generator.generation_loading')}.</Text>
             <Loader mt="md" c='blue' type='bars'/>
         </Stack>
-        : <GeneratedPost title={generatedPostTitle} post={generatedPostText} language={generatedPostLanguage} id={generatedPostID}/>
+        : <GeneratedPostDisplay post={generatedPost}/>
         }
         
     </Box>

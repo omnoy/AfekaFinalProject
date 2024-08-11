@@ -2,5 +2,15 @@
     "language": {
         "english": "English",
         "hebrew": "Hebrew"
+    },
+    "error": {
+        "404_error_text": "Page Not Found.",
+        "return_home": "Go To Home."
+    },
+    "object_display_container":{
+        "all": "All",
+        "favorites": "Favorites",
+        "sort_desc": "Newest First",
+        "sort_asc": "Oldest First"
     }
 }

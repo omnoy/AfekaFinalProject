@@ -6,15 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthProvider';
 import { createAuthApi } from '@/services/api';
 import { useHttpError } from '@/hooks/useHttpError';
+import { GeneratedPost } from '@/types/GeneratedPost';
 
-interface GeneratedPostProps {
-  title: string | null;
-  post: string | null;
-  language: string | null;
-  id: string;
+interface GeneratedPostDisplayProps {
+  post: GeneratedPost | undefined;
 }
 
-export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post, language, id }) => {
+export const GeneratedPostDisplay: React.FC<GeneratedPostDisplayProps> = ({ post }) => {
   const [copied, setCopied] = useState(false);
   const { accessToken } = useAuth();
   const authApi = createAuthApi(accessToken);
@@ -24,7 +22,7 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post, langu
 
   const handleCopy = () => {
     if (post) {
-      navigator.clipboard.writeText(post).then(() => {
+      navigator.clipboard.writeText(post.text).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 5000);
       });
@@ -66,27 +64,27 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post, langu
 
   return (
     <Box mt="xl">
-      <Text fw={700} mah={600} mb="md" dir={language ? 
-                                            language === 'eng' ? 'ltr' : 'rtl'
+      <Text fw={700} mah={600} mb="md" dir={post?.language ? 
+                                            post.language === 'eng' ? 'ltr' : 'rtl'
                                             : i18n.language === 'eng' ? 'ltr' : 'rtl' 
                                             }>
-        {title  || t('generated_post.post_title_placeholder')}
+        {post?.title  || t('generated_post.post_title_placeholder')}
       </Text>
       <Textarea
-        value={post || ''}
+        value={post?.text || ''}
         placeholder={t('generated_post.post_text_placeholder')}
         minRows={6}
         readOnly
         autosize
-        dir={language ? 
-          language === 'eng' ? 'ltr' : 'rtl'
-          : i18n.language === 'eng' ? 'ltr' : 'rtl' 
-          }
+        dir={ post === undefined ?
+          i18n.language === 'eng' ? 'ltr' : 'rtl' 
+          : post?.language === 'eng' ? 'ltr' : 'rtl'
+        }
         styles={(theme) => ({
           input: {
             backgroundColor: post ? theme.colors.gray[1] : theme.colors.dark[1],
             color: post ? theme.colors.gray[9] : theme.colors.dark[0],
-            textAlign: language === 'eng' ? 'left' : 'right',
+            textAlign: post === undefined ? i18n.language === 'eng' ? 'left' : 'right' : post?.language === 'eng' ? 'left' : 'right'
           },
         })}
       />
@@ -101,11 +99,11 @@ export const GeneratedPost: React.FC<GeneratedPostProps> = ({ title, post, langu
             {copied ? t('generated_post.copy_button_copied') : t('generated_post.copy_button')}
           </Button>
           { isFavorite ?
-            <Button onClick={() => handleRemoveFavorite(id)}>
+            <Button onClick={() => handleRemoveFavorite(post.id)}>
               <IconStarFilled /> 
             </Button>
             : 
-            <Button onClick={() => handleAddFavorite(id)}>
+            <Button onClick={() => handleAddFavorite(post.id)}>
               <IconStar />
             </Button>
           }

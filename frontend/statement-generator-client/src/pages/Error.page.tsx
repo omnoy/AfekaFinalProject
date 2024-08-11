@@ -1,12 +1,14 @@
 import { Title, Text, Anchor } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 
-export function ErrorPage({ errorCode, errorMessage }: { errorCode: number, errorMessage: string }) {
+export function ErrorPage({ errorCode }: { errorCode: number }) {
+    const { t } = useTranslation('global');
     return (
         <div>
-            <Title ta='center'>{errorCode}</Title>
-            <Text ta='center' mt='md'>{errorMessage}</Text>
+            <Title ta='center' mt={100}>{errorCode}</Title>
+            <Text ta='center' mt='md'>{t(`error.${errorCode}_error_text`)}</Text>
             <Anchor href="/">
-                <Text ta='center' mt='md'>Go back to home
+                <Text ta='center' mt='md'>{t('error.return_home')}
                 </Text>
             </Anchor>
         </div>

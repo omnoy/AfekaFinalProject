@@ -1,9 +1,10 @@
 // usePublicOfficials.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SetStateAction } from 'react';
 import { createAuthApi } from '@/services/api'; 
 import { useHttpError } from './useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { PublicOfficial } from '@/types/PublicOfficial';
+import { t } from 'i18next';
 
 export const usePublicOfficials = () => {
     const { accessToken } = useAuth();
@@ -13,13 +14,26 @@ export const usePublicOfficials = () => {
     const { error, handleError, clearError } = useHttpError();
     const [poError, setPoError] = useState<string | null>('');
 
-    const fetchPublicOfficials = async () => {
+    const fetchPublicOfficials = async (type: 'all' | 'favorites') => {
         setLoadingPublicOfficials(true);
         try {
-            const response = await authApi.get('/public-official/all');
+            var url = '';
+            if (type === 'all') {
+                url = '/public-official/all';
+            }
+            else if(type === 'favorites') {
+                url = '/user/favorites/public_official';
+            }
+            const response = await authApi.get(url);
             if (response.status === 200) {
                 console.log('Public Officials:', response.data);
-                const officials = Array.from(response.data.public_officials) as PublicOfficial[];
+                var officials: PublicOfficial[] = [];
+                if (type === 'all') {
+                    officials = Array.from(response.data.public_officials) as PublicOfficial[];
+                }
+                else if(type === 'favorites') {
+                    officials = Array.from(response.data.favorites) as PublicOfficial[];
+                }
                 setPublicOfficials(officials);
             } else {
                 handleError(new Error('Unknown Error loading Public Officials'));
@@ -32,9 +46,5 @@ export const usePublicOfficials = () => {
         setPoError(error);
     };
 
-    useEffect(() => {
-        fetchPublicOfficials();
-    }, [accessToken]);
-
-    return { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials };
+    return { publicOfficials, setPublicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials };
     };

@@ -2,5 +2,15 @@
     "language": {
         "english": "אנגלית",
         "hebrew": "עברית"
+    },
+    "error": {
+        "404_error_text": "דף לא נמצא.",
+        "return_home": "חזור לדף הבית."
+    },
+    "object_display_container":{
+        "all": "הכל",
+        "favorites": "מועדפים",
+        "sort_desc": "חדשים קודם",
+        "sort_asc": "ישנים קודם"
     }
 }

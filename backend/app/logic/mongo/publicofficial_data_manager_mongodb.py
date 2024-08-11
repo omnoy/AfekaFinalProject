@@ -44,7 +44,7 @@ class PublicOfficialDataManagerMongoDB(PublicOfficialService):
         return public_official
 
     def get_all_public_officials(self) -> list[PublicOfficial]:
-        po_dicts = get_public_official_collection().find({})
+        po_dicts = get_public_official_collection().find({}).sort([['_id', -1]])
         po_list = list()
         
         for po_dict in po_dicts:

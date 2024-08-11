@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea } from '@mantine/core';
-import { IconCheck, IconCopy, IconArrowUp , IconArrowDown, IconStar  } from '@tabler/icons-react';
+import { IconArrowUp , IconArrowDown  } from '@tabler/icons-react';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { createAuthApi } from '@/services/api';
@@ -8,12 +8,12 @@ import { getDateFromObjectId } from '@/services/getDateFromObjectId';
 import { usePublicOfficials } from '@/hooks/usePublicOfficials';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconStarFilled } from '@tabler/icons-react';
 import { GeneratedPost } from '@/types/GeneratedPost';
 import { useFavoriteObjects } from '@/hooks/useFavorites';
+import { GeneratedPostCard } from './GeneratedPostCard';
+import { ObjectDisplayContainer } from '../ObjectDisplayContainer/ObjectDisplayContainer';
 
 export const PostHistory: React.FC = () => {
-  const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
   const [postsDisplayedType, setPostsDisplayedType] = useState<'all' | 'favorites'>('all');
   const { accessToken } = useAuth();
@@ -24,12 +24,12 @@ export const PostHistory: React.FC = () => {
   const [poNames, setPONames] = useState<{id: string, name: {eng: string, heb: string}}[]>([]);
   const [isPONamesLoaded, setIsPONamesLoaded] = useState(false);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [loadingPosts, setLoadingPosts] = useState<boolean>(false);
+  const [arePostsLoaded, setArePostsLoaded] = useState<boolean>(false);
   const [postsEmpty, setPostsEmpty] = useState<boolean>(false);
 
-  const { t, i18n } = useTranslation('post_generator');
+  const { t } = useTranslation('post_generator');
 
-  const getPostHistoryByType = async (type : string) => {
+  const getPostHistoryByType = async (type : 'all' | 'favorites') => {
     try {
       var url = '';
       if (type === 'all') {
@@ -45,7 +45,7 @@ export const PostHistory: React.FC = () => {
 
       if (generated_posts_response.status === 200) {
         console.log(type + 'Post History:', generated_posts_response.data);
-        var generated_posts: any[] = [];
+        var generated_posts: GeneratedPost[] = [];
         if (type === 'all') {
           generated_posts = Array.from(generated_posts_response.data.generated_posts);
         }
@@ -77,6 +77,10 @@ export const PostHistory: React.FC = () => {
   }
 
   useEffect(() => {
+    fetchPublicOfficials('all');
+  }, []);
+
+  useEffect(() => {
     if (publicOfficials.length > 0) {
       const names = publicOfficials.map((official: any) => ({
         id: official.id, 
@@ -88,7 +92,7 @@ export const PostHistory: React.FC = () => {
       setPONames(names);
       setIsPONamesLoaded(true);
     }
-  }, [publicOfficials, i18n.language]);
+  }, [publicOfficials]);
 
   const fetchPostHistory = async () => {
     if (isPONamesLoaded) {
@@ -102,13 +106,12 @@ export const PostHistory: React.FC = () => {
   };
 
   useEffect(() => {
-    try {
-      setLoadingPosts(true);
+    const loadPosts = () => {
       fetchPostHistory();
+      setArePostsLoaded(true);
     }
-    finally {
-      setLoadingPosts(false);
-    }
+  
+    loadPosts();
   }, [isPONamesLoaded, postsDisplayedType]);
 
 useEffect(()=> {
@@ -121,94 +124,30 @@ useEffect(()=> {
 
 useEffect(() => {
   const checkPostsEmpty = () => {
-    const postsEmpty = posts.length === 0;
-    setPostsEmpty(postsEmpty);
+    if (arePostsLoaded) {
+      setPostsEmpty(posts.length === 0);
+    }
   }
   checkPostsEmpty();
 }, [posts]);
-
-
-  const handleCopy = (postId: string, text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedStates(prev => ({ ...prev, [postId]: true }));
-      setTimeout(() => {
-        setCopiedStates(prev => ({ ...prev, [postId]: false }));
-      }, 5000);
-    });
-  };
   
   return (
     <Box p="md">
-      <Group justify="space-between" mb='md'>
-        <Button onClick={() => {setPostsDisplayedType('all');}} variant='subtle'>
-          <Title order={4} c={postsDisplayedType === 'all' ? 'blue' : 'dimmed'}>{t('post_history.user_history')}</Title>
-        </Button>
-        
-        <Button onClick={() => {setPostsDisplayedType('favorites');}} variant='subtle'>
-          <Title order={4} c={postsDisplayedType === 'favorites' ? 'blue' : 'dimmed'}>{t('post_history.favorite_history')}</Title>
-        </Button>
-
-        <Button onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')} variant='subtle'>
-          {sortDirection === 'asc' ? 
-            <IconArrowUp stroke={2}/>
-            : 
-            <IconArrowDown stroke={2}/>}
-        </Button>
-      </Group>
+      <ObjectDisplayContainer objectsDisplayedType={postsDisplayedType} setObjectsDisplayedType={setPostsDisplayedType} sortDirection={sortDirection} setSortDirection={setSortDirection} />
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
-      {loadingPosts || loadingPublicOfficials ?
+      {!arePostsLoaded || loadingPublicOfficials ?
       null
       :
       <Stack gap="lg">
-        {!loadingPosts && postsEmpty ? 
+        {arePostsLoaded && postsEmpty ? 
           postsDisplayedType === 'all' ?
           <Text>{t('post_history.no_posts_text')} <Link to='/generate'>{t('post_history.no_posts_link')}</Link> {t('post_history.no_posts_suffix')}</Text>
           :
           <Text>{t('post_history.no_favorites_text')}</Text>
         :
         posts.map((post) => (
-          <Card key={post.id} shadow="sm" padding="lg" radius="md" withBorder>
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <Badge color="blue">{post.socialMedia}</Badge>
-                <Text fw={500} dir={post.language === 'eng' ? 'ltr' : 'rtl'}>{post.title}</Text>
-                { favoriteObjectIDs.includes(post.id) ? 
-                <Button onClick={() => handleRemoveFavorite({type: "generated_post"}, post.id)}>
-                  <IconStarFilled /> 
-                </Button>
-                : 
-                <Button onClick={() => handleAddFavorite({type: "generated_post"}, post.id)}>
-                  <IconStar />
-                </Button>
-                }
-              </Group>
-            </Card.Section>
-            <Group justify="space-between">
-              <Text mt="md" mb="xs" size="sm" c="dimmed">
-                {t('generated_post.created_for')} {i18n.language === 'eng' ? post.publicOfficialName?.eng : post.publicOfficialName?.heb}
-              </Text>
-              <Text mt="md" mb="xs" size="sm" c="dimmed">
-                {t('generated_post.language')}: {t('languages.' + post.language)}
-              </Text>
-            </Group>
-            <Text size="sm" dir={post.language === 'eng' ? 'ltr' : 'rtl'} ta={post.language === 'eng' ? 'left' : 'right'}>
-              {post.text}
-            </Text>
-            
-            <Group mt="md" justify="space-between">
-              <Text mt="md" size="xs" c="dimmed">
-                {t('generated_post.created_on')} {post.createdAt.toLocaleString()}
-              </Text>
-              <Button
-                onClick={() => handleCopy(post.id, post.text)}
-                leftSection={copiedStates[post.id] ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                color={copiedStates[post.id] ? 'teal' : 'blue'}
-              >
-                {copiedStates[post.id] ? t('generated_post.copy_button_copied') : t('generated_post.copy_button')}
-              </Button>
-            </Group>
-          </Card>
+          <GeneratedPostCard key={post.id} post={post} favoriteObjectIDs={favoriteObjectIDs} handleAddFavorite={handleAddFavorite} handleRemoveFavorite={handleRemoveFavorite} />
         ))
       }
       </Stack>

@@ -3,7 +3,7 @@ import { createAuthApi } from "@/services/api";
 import { useHttpError } from "./useHttpError";
 import { useState } from "react";
 
-interface favoriteObjectType {
+export interface favoriteObjectType {
     type: 'generated_post' | 'public_official';
 }
 
@@ -13,6 +13,8 @@ export const useFavoriteObjects = () => {
     const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
     const [favoriteObjectIDs, setFavoriteObjectIDs] = useState<string[]>([]);[]
     
+    
+
     const getFavoriteObjectIDs = async (type: favoriteObjectType) => {
         try {
           const favorite_objects_response = await authApi.get(`user/favorites/${type.type}`);

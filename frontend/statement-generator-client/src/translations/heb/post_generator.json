@@ -20,9 +20,10 @@
         "no_posts_text": "לא נמצאו פוסטים! עבור אל",
         "no_posts_link": "יוצר הפוסטים",
         "no_posts_suffix": "כדי להתחיל!",
-        "no_favorites_text": "אין מועדפים! הוסף פוסטים כדי לשמור את המועדפים עלייך."
+        "no_favorites_text": "אין מועדפים! הוסף כמה כדי לשמור את הפוסטים המועדפים עלייך."
     },
     "generated_post": {
+        "title": "כותרת",
         "public_official": "איש ציבור",
         "social_media": "פלטפורמת מדיה חברתית",
         "language": "שפה",

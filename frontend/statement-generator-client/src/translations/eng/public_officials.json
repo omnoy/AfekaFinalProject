@@ -7,5 +7,7 @@
     "age": "Age",
     "political_party": "Political Party",
     "social_media": "Social Media Handles",
-    "added_date": "Added on:"
+    "added_date": "Added on:",
+    "no_public_officials_text": "No public officials found.",
+    "no_favorites_text": "No favorites found! Add some to save your favorite public officials."
 }

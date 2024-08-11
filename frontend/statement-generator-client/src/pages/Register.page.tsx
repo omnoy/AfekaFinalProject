@@ -7,7 +7,7 @@ export function RegisterPage() {
     const { t } = useTranslation("user_forms");
     return (
         <Container size="sm">
-            <Title ta="center" mx='auto'>
+            <Title ta="center" mt={100} mx='auto'>
                 {t("register.title")}
             </Title>
             <RegisterForm />

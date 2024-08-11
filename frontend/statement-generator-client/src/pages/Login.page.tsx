@@ -8,7 +8,7 @@ export function LoginPage() {
   return (
     <>
         <Container size="sm">
-            <Title ta="center" mx='auto'>
+            <Title ta="center" mt={100} mx='auto'>
                 {t('login.title')}
             </Title>
             <LoginForm />
