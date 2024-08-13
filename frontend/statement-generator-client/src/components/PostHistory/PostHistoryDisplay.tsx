@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea } from '@mantine/core';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea, Center } from '@mantine/core';
 import { IconArrowUp , IconArrowDown  } from '@tabler/icons-react';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
@@ -106,9 +106,16 @@ export const PostHistory: React.FC = () => {
   };
 
   useEffect(() => {
-    const loadPosts = () => {
-      fetchPostHistory();
-      setArePostsLoaded(true);
+    const loadPosts = async () => {
+      try {
+        if (isPONamesLoaded) {
+          setArePostsLoaded(false);
+          await fetchPostHistory();
+          setArePostsLoaded(true);
+        }
+      } catch (error: any) {
+        setArePostsLoaded(false);
+      }
     }
   
     loadPosts();
@@ -137,7 +144,9 @@ useEffect(() => {
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
       {!arePostsLoaded || loadingPublicOfficials ?
-      null
+      <Center>
+        <Loader />
+      </Center>
       :
       <Stack gap="lg">
         {arePostsLoaded && postsEmpty ? 

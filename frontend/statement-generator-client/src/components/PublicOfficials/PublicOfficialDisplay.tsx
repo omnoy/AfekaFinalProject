@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, Card, Stack, Group, Badge, Title, Button, ScrollArea } from '@mantine/core';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, ScrollArea, Center, Loader } from '@mantine/core';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { createAuthApi } from '@/services/api';
@@ -67,7 +67,9 @@ export const PublicOfficialsDisplay: React.FC = () => {
       <HTTPErrorComponent />
       <ScrollArea h={600} type='always'>
         {loadingPublicOfficials ? (
-          <Text>{t('loading')}</Text>
+          <Center>
+            <Loader />
+          </Center>
 
         ) : (
           <Stack gap="lg">

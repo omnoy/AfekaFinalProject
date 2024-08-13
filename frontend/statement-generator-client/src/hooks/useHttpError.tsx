@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Text } from '@mantine/core';
+import { useAuth } from '@/context/AuthProvider';
 
 export const useHttpError = () => {
   const [error, setError] = useState<string | null>(null);
   const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleError = (error: any) => {
+  const handleError = async (error: any) => {
 
     if (error.response) {
       switch (error.response.status) {
@@ -19,10 +21,11 @@ export const useHttpError = () => {
             setError('Error: Timed out. Please log in again.')
           :
             setError('Error: Unauthorized access');
-
+          
           const timer = setTimeout(() => {
+            logout();
             navigate('/login');
-          }, 3000);
+          }, 1000);
 
           setRedirectTimer(timer);
           break;

@@ -8,7 +8,8 @@ interface AuthContextType {
   login: (user: User, role: string, accessToken: string) => void;
   logout: () => void;
   getAccessToken: () => string | undefined;
-  updateUser: (user: User | undefined) => void;
+  setUser: (user: User | undefined) => void;
+  setRole: (role: string | undefined) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,14 +43,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     Cookies.remove('accessToken');
   };
 
-  const updateUser = (updatedUser: User | undefined) => {
-    if (!updatedUser) {
-      setUser(undefined);
-      return;
-    }
-    setUser(updatedUser);
-  }
-
   const getAccessToken = () => {
     return Cookies.get('accessToken');
   }
@@ -60,7 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     getAccessToken,
     login,
     logout,
-    updateUser,
+    setUser,
+    setRole
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

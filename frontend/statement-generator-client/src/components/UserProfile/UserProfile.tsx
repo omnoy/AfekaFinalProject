@@ -16,40 +16,19 @@ interface UserProfileForm {
 export const UserProfileComponent: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const { user, updateUser, getAccessToken } = useAuth();
+  const { user, setUser, getAccessToken } = useAuth();
   const authApi = createAuthApi(getAccessToken());
   const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
   const { t } = useTranslation('user_forms');
   const theme = useMantineTheme();
 
-  const userToUserProfileForm = (user: User | undefined): UserProfileForm => {
-    if (!user) {
-      return { email: '', username: '', role: '' };
-    }
+  const userToUserProfileForm = (user: User): UserProfileForm => {
     return {
       email: user.email,
       username: user.username,
       role: user.role,
     };
   }
-
-  const loadUserProfile = async () => {
-    const response = await authApi.get("user/get");
-    if (response.status === 200) {
-      console.log('Public Officials:', response.data);
-
-      return response.data.user as User;
-    } else {
-      handleError(new Error('Unknown Error loading Public Officials'));
-    }
-  }
-
-  useEffect(() => {
-    loadUserProfile().then((user_response) => {
-      updateUser(user_response);
-      form.setValues(userToUserProfileForm(user_response));
-    });
-  }, []);
 
   const form = useForm<UserProfileForm>({
     initialValues: user ? userToUserProfileForm(user) : { email: '', username: '', role: '' },
@@ -71,7 +50,7 @@ export const UserProfileComponent: React.FC = () => {
       const response = await authApi.put('/user/update', values);
       if (response.status === 200) {
           console.log('Updated Profile:', response.data);
-          updateUser(response.data.user);
+          setUser(response.data.user);
           form.setValues(userToUserProfileForm(response.data.user as User));
 
           setIsEditing(false);

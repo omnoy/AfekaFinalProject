@@ -7,22 +7,32 @@ import { PostHistoryPage } from './pages/PostHistory.page';
 import { UserProfilePage } from './pages/UserProfile.page';
 import { NavigationHeader } from './components/NavigationHeader/NavigationHeader';
 import { ErrorPage } from './pages/Error.page';
-import RequireAuth from './components/RequireAuth/RequireAuth';
+import RequireAuth from './components/AuthComponents/RequireAuth';
 import { LogoutPage } from './pages/Logout.page';
 import { PublicOfficialsPage } from './pages/PublicOfficials.page';
+import AuthRedirector from './components/AuthComponents/AuthRedirect';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: 
+    <AuthRedirector>
+      <HomePage />
+    </AuthRedirector>
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    element: 
+    <AuthRedirector>
+      <LoginPage />
+    </AuthRedirector>
   },
   {
     path: '/register',
-    element: <RegisterPage />,
+    element: 
+    <AuthRedirector>
+      <RegisterPage />
+    </AuthRedirector>
   },
   {
     path: '/generate',

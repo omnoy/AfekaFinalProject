@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
