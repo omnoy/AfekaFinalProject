@@ -3,15 +3,14 @@ from flask_cors import CORS
 from app.extensions import jwt
 from app.config import Config
 from app.logic.mongo.database import init_db
+from app.config import get_config
 import logging
 
-def create_app(config_class=Config):
+def create_app():
     logging.info('Starting app...')
     app = Flask(__name__)
     CORS(app)
-    app.config.from_object(config_class)
-    if app.config['TESTING']:
-        app.config['MONGO_URI'] = app.config['MONGO_URI_TEST']
+    app.config.from_object(get_config())
     logging.info('App started')
 
     # Initialize MongoDB extension

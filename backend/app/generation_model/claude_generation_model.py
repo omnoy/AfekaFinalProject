@@ -1,54 +1,64 @@
-import json
-from typing import Optional, Tuple
-from langchain_anthropic import ChatAnthropic
-from langchain_core.prompts import ChatPromptTemplate
+from typing import Tuple
 import re
-from os import getenv
 from app.models.exceptions.post_generation_failure_exception import PostGenerationFailureException
 from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.models.language import Language
 import logging
+from app.generation_model.base_claude_model import BaseClaudeModel
 
-class ClaudeGenerationModel():
+class ClaudeGenerationModel(BaseClaudeModel):
     @staticmethod    
     def generate_post(generation_prompt: str, public_official: PublicOfficial, language: Language,
                         social_media: SocialMedia) -> str:
-        llm = ChatAnthropic(model=getenv("CLAUDE_MODEL_NAME"),
-                            max_tokens=4096, 
-                            max_retries=3,
-                            stop_sequences=["[GENERATION_SUCCESSFUL]", "[GENERATION_FAILED]"])
         
-        prompt_template = ClaudeGenerationModel._get_prompt_template()
+        prompt_template = ClaudeGenerationModel._get_prompt_template("generation_prompt")
+        # prompt template for the llm, where the variables will be inserted when invoked
+        
+        llm = ClaudeGenerationModel.get_claude_model(stop_sequences=["[GENERATION_SUCCESSFUL]", "[GENERATION_FAILED]"])
+        # claude llm model that generates the response  
+        
+        chain = (
+            prompt_template # prompt template for llm
+            | llm # llm model that generates a response
+            | ClaudeGenerationModel._validate_response #validates that response was successful
+            | ClaudeGenerationModel._extract_from_response #extracts title and text from response
+        )
         
         prompt_info_dict = ClaudeGenerationModel._create_prompt_info_dict(generation_prompt, public_official, language, social_media)
         
-        chain = prompt_template | llm
-        
         response = chain.invoke(prompt_info_dict)
         
-        logging.info(f"Anthropic API response: {response}")
-
-        post_title, post_text = ClaudeGenerationModel._process_response(response)
-
-        return post_title, post_text
+        return response["title"], response["text"]
     
     @staticmethod
-    def _get_prompt_template() -> ChatPromptTemplate:
-        prompt_template_dict = json.load(open("./app/generation_model/prompts/generation_prompt.json", "r"))
+    def _validate_response(response) -> Tuple[str]:
         
-        return ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    prompt_template_dict["system"]
-                ),
-                (
-                    "human", 
-                    prompt_template_dict["user"]
-                )
-            ]
-        )
+        logging.info(f"Generation Model Anthropic API response: {response}")
+        
+        if response.response_metadata["stop_reason"] != "stop_sequence":
+            raise PostGenerationFailureException("No Stop Sequence Found in Generation Response")
+        elif response.response_metadata["stop_sequence"] != "[GENERATION_SUCCESSFUL]":
+            raise PostGenerationFailureException("Invalid Prompt")
+
+        return response
+
+    @staticmethod
+    def _extract_from_response(response):
+        post_title = ClaudeGenerationModel._extract_from_annotation(response.content, "title")
+
+        post_text = ClaudeGenerationModel._extract_from_annotation(response.content, "content")
+
+        return {"title": post_title, "text": post_text}
+
+    @staticmethod
+    def _extract_from_annotation(text: str, annotation: str=""):
+        pattern = r"<" + re.escape(annotation) + r">(.*?)</" + re.escape(annotation) + r">"
+        match = re.search(pattern, text, re.MULTILINE | re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
     
     @staticmethod
     def _create_prompt_info_dict(generation_prompt: str, public_official: PublicOfficial, language: Language, social_media: SocialMedia) -> str:
@@ -67,28 +77,5 @@ class ClaudeGenerationModel():
                 "LANGUAGE": language.get_full_name(),
                 "input": generation_prompt
         }
-            
 
         return prompt_info_dict
-    
-    @staticmethod
-    def _process_response(response) -> Tuple[str]:
-        if response.response_metadata["stop_reason"] != "stop_sequence":
-            raise PostGenerationFailureException("No Stop Sequence Found in Response")
-        elif response.response_metadata["stop_sequence"] != "[GENERATION_SUCCESSFUL]":
-            raise PostGenerationFailureException("Generation Failed: Invalid Prompt")
-        
-        post_title = ClaudeGenerationModel._extract_from_annotation(response.content, "title")
-
-        post_text = ClaudeGenerationModel._extract_from_annotation(response.content, "content")
-
-        return post_title, post_text
-
-    @staticmethod
-    def _extract_from_annotation(text: str, annotation: str=""):
-        pattern = r"<" + re.escape(annotation) + r">(.*?)</" + re.escape(annotation) + r">"
-        match = re.search(pattern, text, re.MULTILINE | re.DOTALL)
-        if match:
-            return match.group(1)
-        else:
-            return None
