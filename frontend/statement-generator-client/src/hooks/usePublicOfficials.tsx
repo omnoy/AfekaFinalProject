@@ -7,8 +7,8 @@ import { PublicOfficial } from '@/types/PublicOfficial';
 import { t } from 'i18next';
 
 export const usePublicOfficials = () => {
-    const { accessToken } = useAuth();
-    const authApi = createAuthApi(accessToken);
+    const { getAccessToken  } = useAuth();
+    const authApi = createAuthApi(getAccessToken());
     const [publicOfficials, setPublicOfficials] = useState<PublicOfficial[]>([]);
     const [loadingPublicOfficials, setLoadingPublicOfficials] = useState(false);
     const { error, handleError, clearError } = useHttpError();

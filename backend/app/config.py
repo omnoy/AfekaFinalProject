@@ -9,3 +9,4 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES=datetime.timedelta(minutes=30)
     SECRET_KEY = 'flasksecret'
     TESTING=False
+    MONGO_URI=os.getenv("MONGO_URI")

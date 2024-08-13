@@ -12,7 +12,11 @@ const api = axios.create({
 });
 
 //api for authenticated routes
-export const createAuthApi = (accessToken: string | null) => {
+export const createAuthApi = (accessToken: string | undefined) => {
+  if (!accessToken) {
+    throw new Error('Access token is not set');
+  }
+  
   const authApi = axios.create({
     baseURL: API_BASE_URL,
     headers: {

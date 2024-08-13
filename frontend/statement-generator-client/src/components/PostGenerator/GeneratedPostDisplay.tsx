@@ -14,8 +14,8 @@ interface GeneratedPostDisplayProps {
 
 export const GeneratedPostDisplay: React.FC<GeneratedPostDisplayProps> = ({ post }) => {
   const [copied, setCopied] = useState(false);
-  const { accessToken } = useAuth();
-  const authApi = createAuthApi(accessToken);
+  const { getAccessToken } = useAuth();
+  const authApi = createAuthApi(getAccessToken());
   const { t, i18n } = useTranslation('post_generator');
   const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
   const [ isFavorite, setIsFavorite ] = useState(false);

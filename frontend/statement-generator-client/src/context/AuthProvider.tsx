@@ -1,20 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  position: string;
-  role: string;
-}
+import { User } from '../types/User';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
-  user: User | null;
-  role: string | null;
-  accessToken: string | null;
+  user: User | undefined;
+  role: string | undefined;
   login: (user: User, role: string, accessToken: string) => void;
   logout: () => void;
-  updateUser: (user: User) => void;
+  getAccessToken: () => string | undefined;
+  updateUser: (user: User | undefined) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,32 +26,38 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | undefined>(undefined);
+  const [role, setRole] = useState<string | undefined>(undefined);
 
   const login = (user: User, role: string, accessToken: string) => {
     console.log('Login successful:', user, role, accessToken);
     setUser(user);
     setRole(role);
-    setAccessToken(accessToken);
+    Cookies.set('accessToken', accessToken, { expires: 1, secure: true });
   };
 
   const logout = () => {
-    setUser(null);
-    setRole(null);
-    setAccessToken(null);
+    setUser(undefined);
+    setRole(undefined);
+    Cookies.remove('accessToken');
   };
 
-  const updateUser = (updatedUser: User) => {
+  const updateUser = (updatedUser: User | undefined) => {
+    if (!updatedUser) {
+      setUser(undefined);
+      return;
+    }
     setUser(updatedUser);
-  
+  }
+
+  const getAccessToken = () => {
+    return Cookies.get('accessToken');
   }
 
   const value = {
     user,
     role,
-    accessToken,
+    getAccessToken,
     login,
     logout,
     updateUser,

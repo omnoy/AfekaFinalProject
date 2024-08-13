@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 
 export const LogoutComponent: React.FC = () => {
     const navigate = useNavigate();
-    const { accessToken, logout } = useAuth();
-    const authApi = createAuthApi(accessToken);
+    const { getAccessToken, logout } = useAuth();
+    const authApi = createAuthApi(getAccessToken());
     const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
     const { t } = useTranslation('logout');
 

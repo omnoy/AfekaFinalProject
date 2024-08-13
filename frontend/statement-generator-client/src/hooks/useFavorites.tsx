@@ -8,8 +8,8 @@ export interface favoriteObjectType {
 }
 
 export const useFavoriteObjects = () => {
-    const { accessToken } = useAuth();
-    const authApi = createAuthApi(accessToken);
+    const { getAccessToken  } = useAuth();
+    const authApi = createAuthApi(getAccessToken());
     const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
     const [favoriteObjectIDs, setFavoriteObjectIDs] = useState<string[]>([]);[]
     

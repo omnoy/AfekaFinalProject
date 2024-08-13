@@ -1,8 +1,8 @@
-from flask_pymongo import PyMongo
+import logging
+from pymongo import MongoClient
 from pymongo.collection import Collection
-from os import getenv
 
-mongo = PyMongo()
+mongo = None
 user_collection = None
 public_official_collection = None
 generated_post_collection = None
@@ -11,11 +11,8 @@ token_blocklist = None
 def init_db(app):
     global mongo, user_collection, public_official_collection, generated_post_collection, token_blocklist
 
-    mongo_uri = getenv("MONGO_URI")
-    if app.config["TESTING"]:
-        mongo_uri = getenv("MONGO_URI_TEST")
-    
-    mongo.init_app(app, mongo_uri)
+    logging.info(f"Connecting to MongoDB at {app.config['MONGO_URI']}")
+    mongo = MongoClient(app.config['MONGO_URI'])
     user_collection = mongo.db["users"]
     public_official_collection = mongo.db["public_officials"]
     generated_post_collection = mongo.db["generated_posts"]

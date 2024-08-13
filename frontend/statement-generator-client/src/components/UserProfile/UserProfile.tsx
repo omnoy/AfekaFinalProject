@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, TextInput, Button, Title, Text, Group, MantineTheme, useMantineTheme, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../../context/AuthProvider';
 import api, { createAuthApi } from '@/services/api';
 import { useHttpError } from '@/hooks/useHttpError';
 import { useTranslation } from 'react-i18next';
-interface UserProfile {
+import { User } from '@/types/User';
+import { use } from 'chai';
+interface UserProfileForm {
   email: string;
   username: string;
   role: string;
@@ -14,22 +16,43 @@ interface UserProfile {
 export const UserProfileComponent: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const { user, updateUser, accessToken } = useAuth();
-  const authApi = createAuthApi(accessToken);
+  const { user, updateUser, getAccessToken } = useAuth();
+  const authApi = createAuthApi(getAccessToken());
   const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
   const { t } = useTranslation('user_forms');
   const theme = useMantineTheme();
 
-  const loadUserProfile = (user_data: UserProfile | null) => {
+  const userToUserProfileForm = (user: User | undefined): UserProfileForm => {
+    if (!user) {
+      return { email: '', username: '', role: '' };
+    }
     return {
-      email: user_data?.email || '',
-      username: user_data?.username || '',
-      role: user_data?.role || '',
+      email: user.email,
+      username: user.username,
+      role: user.role,
     };
   }
 
-  const form = useForm<UserProfile>({
-    initialValues: loadUserProfile(user),
+  const loadUserProfile = async () => {
+    const response = await authApi.get("user/get");
+    if (response.status === 200) {
+      console.log('Public Officials:', response.data);
+
+      return response.data.user as User;
+    } else {
+      handleError(new Error('Unknown Error loading Public Officials'));
+    }
+  }
+
+  useEffect(() => {
+    loadUserProfile().then((user_response) => {
+      updateUser(user_response);
+      form.setValues(userToUserProfileForm(user_response));
+    });
+  }, []);
+
+  const form = useForm<UserProfileForm>({
+    initialValues: user ? userToUserProfileForm(user) : { email: '', username: '', role: '' },
     validate: {
       username: (value: string) => {
         if (value.length < 4) {
@@ -43,13 +66,13 @@ export const UserProfileComponent: React.FC = () => {
     },
   });
 
-  const handleSubmit = async (values: UserProfile) => {
+  const handleSubmit = async (values: UserProfileForm) => {
     try {
       const response = await authApi.put('/user/update', values);
       if (response.status === 200) {
           console.log('Updated Profile:', response.data);
           updateUser(response.data.user);
-          form.setValues(loadUserProfile(response.data.user));
+          form.setValues(userToUserProfileForm(response.data.user as User));
 
           setIsEditing(false);
           clearError();

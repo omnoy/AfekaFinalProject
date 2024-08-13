@@ -16,9 +16,7 @@ import { Link } from 'react-router-dom';
 export const PublicOfficialsDisplay: React.FC = () => {
   
   const { publicOfficials, setPublicOfficials, loadingPublicOfficials, fetchPublicOfficials } = usePublicOfficials();
-  const { accessToken } = useAuth();
-  const authApi = createAuthApi(accessToken);
-  const { error, handleError, clearError, HTTPErrorComponent } = useHttpError();
+  const { HTTPErrorComponent } = useHttpError();
   const { t, i18n } = useTranslation('public_officials');
   const [displayedPublicOfficials, setDisplayedPublicOfficials] = useState<PublicOfficial[]>([]);
   const [publicOfficialsDisplayedType, setPublicOfficialsDisplayedType] = useState<'all' | 'favorites'>('all');

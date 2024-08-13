@@ -16,8 +16,8 @@ import { ObjectDisplayContainer } from '../ObjectDisplayContainer/ObjectDisplayC
 export const PostHistory: React.FC = () => {
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
   const [postsDisplayedType, setPostsDisplayedType] = useState<'all' | 'favorites'>('all');
-  const { accessToken } = useAuth();
-  const authApi = createAuthApi(accessToken); 
+  const { getAccessToken  } = useAuth();
+  const authApi = createAuthApi(getAccessToken()); 
   const {error, handleError, clearError, HTTPErrorComponent} = useHttpError();
   const { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials } = usePublicOfficials();
   const { getFavoriteObjectIDs, favoriteObjectIDs, handleAddFavorite, handleRemoveFavorite } = useFavoriteObjects();
@@ -41,7 +41,7 @@ export const PostHistory: React.FC = () => {
       else {
         handleError(new Error('Error: Unknown Post Type'));
       }
-      const generated_posts_response = await authApi.get(url);
+      const generated_posts_response = await authApi?.get(url);
 
       if (generated_posts_response.status === 200) {
         console.log(type + 'Post History:', generated_posts_response.data);

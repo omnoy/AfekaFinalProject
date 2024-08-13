@@ -20,8 +20,8 @@ interface SocialMediaPostFormValues {
 
 export const PostGenerator: React.FC = () => {
     const [generatedPost, setGeneratedPost] = useState<GeneratedPost | undefined>(undefined);
-    const { accessToken } = useAuth();
-    const authApi = createAuthApi(accessToken);
+    const { getAccessToken } = useAuth();
+    const authApi = createAuthApi(getAccessToken());
     const {error, setError, handleError, clearError, HTTPErrorComponent} = useHttpError();
     const { publicOfficials, loadingPublicOfficials, poError, fetchPublicOfficials } = usePublicOfficials();
     const [postLoading, setPostLoading] = useState<boolean>(false);
