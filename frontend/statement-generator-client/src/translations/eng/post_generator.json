@@ -39,7 +39,9 @@
         "created_for": "Created for: ",
         "created_on": "Created on: ",
         "add_favorite_button": "Add to Favorites",
-        "remove_favorite_button": "Remove from Favorites"
+        "remove_favorite_button": "Remove from Favorites",
+        "show_prompt": "Show Prompt",
+        "hide_prompt": "Hide Prompt"
     },
     "social_media": {
         "twitter": "Twitter",

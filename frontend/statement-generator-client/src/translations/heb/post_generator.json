@@ -35,7 +35,9 @@
         "created_for": "נוצר עבור: ",
         "created_on": "נוצר ב: ",
         "add_favorite_button": "הוספה למועדפים",
-        "remove_favorite_button": "הסרה ממועדפים"
+        "remove_favorite_button": "הסרה ממועדפים",
+        "show_prompt": "הראה פרומפט",
+        "hide_prompt": "הסתר פרומפט"
     },
     "social_media": {
         "twitter": "טוויטר",

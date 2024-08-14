@@ -10,7 +10,7 @@ import { ErrorPage } from './pages/Error.page';
 import RequireAuth from './components/AuthComponents/RequireAuth';
 import { LogoutPage } from './pages/Logout.page';
 import { PublicOfficialsPage } from './pages/PublicOfficials.page';
-import AuthRedirector from './components/AuthComponents/AuthRedirect';
+import AuthRedirector from './components/AuthComponents/AuthRedirector';
 
 const router = createBrowserRouter([
   {

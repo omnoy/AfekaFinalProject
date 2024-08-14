@@ -92,7 +92,7 @@ export const RegisterForm: React.FC = () => {
                 setError(t('register.email_already_exists'));
             }
             else {
-                handleError(new Error('Unknown Error'));
+                handleError(error);
             }
         } finally {
             clearTimeout(timeoutId);

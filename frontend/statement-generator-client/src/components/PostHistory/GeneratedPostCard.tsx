@@ -1,6 +1,6 @@
 import { favoriteObjectType } from "@/hooks/useFavorites";
 import { GeneratedPost } from "@/types/GeneratedPost";
-import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea } from '@mantine/core';
+import { Box, Text, Card, Stack, Group, Badge, Title, Button, Anchor, NavLink, Loader, ScrollArea, Spoiler, Blockquote } from '@mantine/core';
 import { IconCheck, IconCopy, IconArrowUp , IconArrowDown, IconStar, IconStarFilled  } from '@tabler/icons-react';
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -50,10 +50,17 @@ export const GeneratedPostCard: React.FC<GeneratedPostCardProps> = ({post, favor
                 {t('generated_post.language')}: {t(`languages.${post.language}`)}
               </Text>
             </Group>
+            
             <Text size="sm" dir={post.language === 'eng' ? 'ltr' : 'rtl'} ta={post.language === 'eng' ? 'left' : 'right'}>
               {post.text}
             </Text>
-            
+
+            <Spoiler maxHeight={0} showLabel={t('generated_post.show_prompt')} hideLabel={t('generated_post.hide_prompt')} mt="md">
+              <Blockquote color="blue" radius="xl" dir={post.language === 'eng' ? 'ltr' : 'rtl'} ta={post.language === 'eng' ? 'left' : 'right'}>
+                {post.prompt}
+              </Blockquote>
+            </Spoiler>
+
             <Group mt="md" justify="space-between">
               <Text mt="md" size="xs" c="dimmed">
                 {t('generated_post.created_on')} {post.createdAt.toLocaleString()}

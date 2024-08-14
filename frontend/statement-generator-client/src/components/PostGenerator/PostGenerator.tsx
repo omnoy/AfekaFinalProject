@@ -54,7 +54,7 @@ export const PostGenerator: React.FC = () => {
         },
         validate: {
             public_official: (value) => (value ? null : t('post_generator.public_official_error')),
-            prompt: (value) => (value ? null : t('post_generator.prompt_error')),
+            prompt: (value) => (value.trim().length > 0 ? null : t('post_generator.prompt_error')),
             social_media: (value) => (value ? null : t('post_generator.social_media_error')),
             language: (value) => (value ? null : t('post_generator.language_error')),
         },
@@ -92,6 +92,7 @@ export const PostGenerator: React.FC = () => {
                     id: response.data.generated_post.id,
                     title: response.data.generated_post.title,
                     text: response.data.generated_post.text,
+                    prompt: response.data.generated_post.prompt,
                     publicOfficialName: {eng: public_official?.full_name.eng, heb: public_official?.full_name.heb},
                     language: values.language,
                     socialMedia: values.social_media,
@@ -150,12 +151,13 @@ export const PostGenerator: React.FC = () => {
             </Button>
         </form>
         <HTTPErrorComponent />
+        
         {postLoading ? 
         <Stack align='center' gap='md' justify='center'>
             <Text mt="md">{t('post_generator.generation_loading')}.</Text>
             <Loader mt="md" c='blue' type='bars'/>
         </Stack>
-        : <GeneratedPostDisplay post={generatedPost}/>
+        : generatedPost ? <GeneratedPostDisplay post={generatedPost}/> : null
         }
         
     </Box>

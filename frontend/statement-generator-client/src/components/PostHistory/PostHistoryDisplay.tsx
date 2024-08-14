@@ -60,6 +60,7 @@ export const PostHistory: React.FC = () => {
             id: generated_post.id,
             title: generated_post.title,
             text: generated_post.text,
+            prompt: generated_post.prompt,
             publicOfficialName: poNames.find((official) => official.id === generated_post.public_official_id)?.name,
             language: generated_post.language,
             socialMedia:t('social_media.' + generated_post.social_media),
