@@ -1,4 +1,3 @@
-import pymongo
 from bson import ObjectId
 from app.models.publicofficial import PublicOfficial
 from app.logic.publicofficial_service import PublicOfficialService

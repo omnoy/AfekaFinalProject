@@ -1,5 +1,5 @@
 from flask import Response, jsonify
-from flask_jwt_extended import get_current_user, jwt_required
+from flask_jwt_extended import get_current_user
 from app.blueprints.generatedposts import bp, generated_post_service, public_offical_service
 from flask import request
 import logging

@@ -1,5 +1,3 @@
-import json
-
 def test_get_public_official_by_id(client, auth, public_official_actions):
     # Find valid Public Official by ID
     auth.create_admin_user()

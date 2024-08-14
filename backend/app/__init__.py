@@ -36,4 +36,5 @@ def create_app():
     app.register_blueprint(generatedposts_bp, url_prefix="/post-generation")
     logging.info('Blueprints Registered')
     
+    logging.info('App started!')
     return app

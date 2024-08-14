@@ -1,6 +1,3 @@
 how to run:
-cd ./vite-project
-npm run dev
-
-https://tanstack.com/
-https://reactrouter.com/en/main
+cd ./frontend/statement-generator-client
+yarn run dev

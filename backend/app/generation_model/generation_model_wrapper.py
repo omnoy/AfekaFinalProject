@@ -19,5 +19,5 @@ class GenerationModelWrapper(PostGenerationModel):
         if validation_results["valid"] == "true":
             return post_title, post_text
         else:
-            raise PostGenerationFailureException(f"Post Validation Failed, Reason: {validation_results['reason']}")
+            raise PostGenerationFailureException(f"Reason: {validation_results['reason']}")
         

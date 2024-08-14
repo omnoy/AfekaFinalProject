@@ -1,7 +1,5 @@
-from typing import List, Optional
+from typing import List
 from bson import ObjectId
-from app.models.generatedpost import GeneratedPost
-from app.models.publicofficial import PublicOfficial
 from app.models.user import User
 from app.logic.user_service import UserService
 from app.logic.mongo.database import get_user_collection

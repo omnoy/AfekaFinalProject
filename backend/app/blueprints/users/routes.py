@@ -2,7 +2,6 @@ from flask import Response, request, jsonify
 from pydantic import ValidationError
 from app.blueprints.users import bp, user_service, public_official_service, generated_post_service
 from app.models.exceptions.object_id_not_found_exception import ObjectIDNotFoundException
-from app.models.user import User
 from flask_jwt_extended import get_current_user
 import logging
 from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required

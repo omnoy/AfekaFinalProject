@@ -1,12 +1,10 @@
 from bson import ObjectId
-from typing import Optional
 from app.extensions import generation_model
-from app.generation_model.post_generation_model import PostGenerationModel
 from app.models.generatedpost import GeneratedPost
 from app.models.publicofficial import PublicOfficial
 from app.models.social_media import SocialMedia
 from app.logic.generatedpost_service import GeneratedPostService
-from app.logic.mongo.database import get_public_official_collection, get_generated_post_collection
+from app.logic.mongo.database import get_generated_post_collection
 import logging
 from app.models.language import Language
 from app.models.user import User

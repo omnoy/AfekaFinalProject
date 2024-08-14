@@ -1,10 +1,7 @@
-from bson import json_util
 from flask import Response, jsonify, request
-from pydantic.json import pydantic_encoder
-from pydantic import TypeAdapter, ValidationError
+from pydantic import ValidationError
 from app.blueprints.publicofficials import bp, public_official_service
 from app.models.publicofficial import PublicOfficial
-from flask_jwt_extended import jwt_required, get_current_user
 import logging
 from app.models.exceptions.object_already_exists_exception import ObjectAlreadyExistsException
 from app.blueprints.jwt_user_verification import jwt_admin_required, jwt_user_required
