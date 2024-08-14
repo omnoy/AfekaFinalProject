@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthProvider";
 import { useHttpError } from "@/hooks/useHttpError";
 import { createAuthApi } from "@/services/api";
-import { Button, Group, Text } from "@mantine/core";
+import { Button, Center, Group, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -31,11 +31,15 @@ export const LogoutComponent: React.FC = () => {
     }
 
     return (
-        <Group justify="center" mt="xl">
-            <Button onClick={() => handleLogout()} color="blue" variant="light">
-                {t('logout_button')}
-            </Button>
-            <HTTPErrorComponent />
-        </Group>
+        <>
+            <Center>
+                <Button onClick={() => handleLogout()} color="blue" variant="light" mt="xl" mb="xl">
+                    {t('logout_button')}
+                </Button>
+            </Center>
+            <Center>
+                <HTTPErrorComponent />
+            </Center>
+        </>
     )
 }
