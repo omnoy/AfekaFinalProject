@@ -8,6 +8,7 @@ import logging
 from app.models.exceptions.post_generation_failure_exception import PostGenerationFailureException
 
 class GenerationModelWrapper(PostGenerationModel):
+    
     @staticmethod    
     def generate_post(generation_prompt: str, public_official: PublicOfficial, language: Language,
                         social_media: SocialMedia) -> str:
@@ -16,6 +17,7 @@ class GenerationModelWrapper(PostGenerationModel):
         
         validation_results = ClaudeValidationModel.validate_post(post_title, post_text)
         logging.info(f"Validation results: {validation_results}")
+        
         if validation_results["valid"] == "true":
             return post_title, post_text
         else:

@@ -1,7 +1,6 @@
 import { Title, Text, Button, Group } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChangeLanguageToggle } from '@/components/ChangeLanguageFooter/ChangeLanguageFooter';
 
 export function HomePage() {
   const { t, i18n } = useTranslation('home');

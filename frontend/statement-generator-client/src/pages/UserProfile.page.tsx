@@ -1,5 +1,5 @@
 import { UserProfileComponent } from "@/components/UserProfile/UserProfile";
-import { Container, Group, Title } from "@mantine/core";
+import { Container, Title } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
 export function UserProfilePage(){

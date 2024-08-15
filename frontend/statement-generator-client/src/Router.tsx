@@ -7,7 +7,6 @@ import { PostHistoryPage } from './pages/PostHistory.page';
 import { UserProfilePage } from './pages/UserProfile.page';
 import { NavigationHeader } from './components/NavigationHeader/NavigationHeader';
 import { ErrorPage } from './pages/Error.page';
-import RequireAuth from './components/AuthComponents/RequireAuth';
 import { LogoutPage } from './pages/Logout.page';
 import { PublicOfficialsPage } from './pages/PublicOfficials.page';
 import AuthRedirector from './components/AuthComponents/AuthRedirector';
@@ -16,21 +15,21 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: 
-    <AuthRedirector>
+    <AuthRedirector type='public'>
       <HomePage />
     </AuthRedirector>
   },
   {
     path: '/login',
     element: 
-    <AuthRedirector>
+    <AuthRedirector type='public'>
       <LoginPage />
     </AuthRedirector>
   },
   {
     path: '/register',
     element: 
-    <AuthRedirector>
+    <AuthRedirector type='public'>
       <RegisterPage />
     </AuthRedirector>
   },
@@ -38,50 +37,50 @@ const router = createBrowserRouter([
     path: '/generate',
     element: 
     (
-        <RequireAuth>
-            <NavigationHeader route='/generate'/>
-            <PostGeneratorPage />
-        </RequireAuth>
+      <AuthRedirector type='private'>
+        <NavigationHeader route='/generate'/>
+        <PostGeneratorPage />
+      </AuthRedirector>
     )
   },
   {
     path: '/history',
     element: 
     (
-        <RequireAuth>
-            <NavigationHeader route='/history'/>
-            <PostHistoryPage />
-        </RequireAuth>
+        <AuthRedirector type='private'>
+          <NavigationHeader route='/history'/>
+          <PostHistoryPage />
+        </AuthRedirector>
     )
   },
   {
     path: '/profile',
     element: 
     (
-      <RequireAuth>
+      <AuthRedirector type='private'>
         <NavigationHeader route='/profile'/>
         <UserProfilePage />
-      </RequireAuth>
+      </AuthRedirector>
     )
   },
   {
     path: '/public-officials',
     element: 
     (
-      <RequireAuth>
+      <AuthRedirector type='private'>
         <NavigationHeader route='/public-officials'/>
         <PublicOfficialsPage />
-      </RequireAuth>
+      </AuthRedirector>
     )
   },
   {
     path: '/logout',
     element: 
     (
-      <RequireAuth>
+      <AuthRedirector type='private'>
         <NavigationHeader route='/logout'/>
         <LogoutPage />
-      </RequireAuth>
+      </AuthRedirector>
     )
   },
   {

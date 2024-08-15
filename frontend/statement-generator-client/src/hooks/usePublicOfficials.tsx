@@ -1,10 +1,9 @@
 // usePublicOfficials.ts
-import { useState, useEffect, SetStateAction } from 'react';
+import { useState } from 'react';
 import { createAuthApi } from '@/services/api'; 
 import { useHttpError } from './useHttpError';
 import { useAuth } from '@/context/AuthProvider';
 import { PublicOfficial } from '@/types/PublicOfficial';
-import { t } from 'i18next';
 
 export const usePublicOfficials = () => {
     const { getAccessToken  } = useAuth();
